@@ -4,7 +4,7 @@ Tryna는 **React Native + Expo + TypeScript** 기반 모바일 애플리케이�
 
 | 항목 | 기술 및 도구 |
 | --- | --- |
-| Framework | React Native / Expo SDK 56 |
+| Framework | React Native / Expo SDK 57 |
 | Language | TypeScript |
 | Styling | React Native StyleSheet |
 | Routing | Expo Router |
