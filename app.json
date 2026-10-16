@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "frontend_v2",
+    "slug": "frontend_v2",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "frontendv2",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "icon": "./assets/expo.icon"
+    },
+    "android": {
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ugangg.frontend_v2"
+    },
+    "web": {
+      "output": "static",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#208AEF"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "02fe5682-dc13-4e31-9c96-7e4ecba55d31"
+      }
+    },
+    "owner": "tryna-app-front"
+  }
+}
