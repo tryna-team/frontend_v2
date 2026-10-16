@@ -1,56 +1,69 @@
-# Welcome to your Expo app 👋
+## 🛠️ 개발 환경
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Tryna는 **React Native + Expo + TypeScript** 기반 모바일 애플리케이션입니다.
 
-## Get started
+| 항목 | 기술 및 도구 |
+| --- | --- |
+| Framework | React Native / Expo SDK 56 |
+| Language | TypeScript |
+| Styling | React Native StyleSheet |
+| Routing | Expo Router |
+| Icons | lucide-react-native |
+| Package Manager | npm |
+| Development | Expo Go / Android Development Build |
+| Build | EAS Build (iOS 출시 예정) |
 
-1. Install dependencies
+> 정확한 라이브러리 버전은 `package.json`과 `package-lock.json`을 기준으로 관리합니다.
 
-   ```bash
-   npm install
-   ```
+### 1. 사전 준비
 
-2. Start the app
+- **Node.js**: 프로젝트에서 지정한 버전 설치
+- **npm**: Node.js와 함께 설치
+- **Git**: 저장소 관리
+- **VSCode**: 권장 개발 에디터
+- **Expo Go**: 모바일 기기에서 앱 실행 및 테스트
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+설치 확인:
 
 ```bash
-npm run reset-project
+node -v
+npm -v
+git --version
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. 프로젝트 설치
 
-### Other setup steps
+**최초 참여 시**
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+git clone https://github.com/tryna-team/frontend_v2.git
+cd frontend_v2
+npm ci
+```
 
-## Learn more
+**최신 코드를 받아올 경우**
 
-To learn more about developing your project with Expo, look at the following resources:
+현재 작업 중인 브랜치에서 최신 변경 사항을 가져옵니다.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+git pull origin <브랜치명>
+npm ci
+```
 
-## Join the community
+`npm ci`는 `package-lock.json`을 기준으로 의존성을 설치합니다.
 
-Join our community of developers creating universal apps.
+- 팀원 간 동일한 의존성 버전 유지
+- 기존 `node_modules`를 정리한 후 재설치
+- `package-lock.json`을 임의로 변경하지 않음
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 3. 개발 서버 실행
+
+```bash
+npx expo start --go
+```
+
+실행 후 모바일 기기의 Expo Go 앱에서 QR 코드를 스캔합니다.
+
+- PC와 모바일 기기는 동일한 네트워크 사용 권장
+- 코드 수정 시 Fast Refresh를 통해 변경 사항 반영
+- 네트워크 연결이 어려운 경우 npx expo start --tunnel 시도 가능
