@@ -3,12 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/assets/*": [
-        "./assets/*"
-      ]
+      "@/*": [ "./src/*" ],
+      "@/assets/*": [ "./assets/*" ],
+      "@features/*": ["./src/features/*"],
+      "@components/*": ["./src/components/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@theme/*": ["./src/theme/*"]
     }
   },
   "include": [
