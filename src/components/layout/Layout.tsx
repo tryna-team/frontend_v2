@@ -3,12 +3,12 @@ import { StyleSheet, View } from 'react-native';
 
 import { colors } from '@theme/colors';
 
-import { ScreenFooter } from './ScreenFooter';
-import { ScreenHeader } from './ScreenHeader';
+import { Footer } from './Footer';
+import { Header } from './Header';
 import type { ScreenInsets } from './types';
 import { useLayoutInsets } from './useLayoutInsets';
 
-type ScreenLayoutProps = {
+type LayoutProps = {
   /** 상단 Toolbar 영역. 없으면 Header 오버레이를 렌더링하지 않는다 */
   toolbar?: ReactNode;
   /** Toolbar 아래에서 Header 배경을 함께 쓰는 고정 영역 (예: 캘린더 월 타이틀 + 요일 줄) */
@@ -20,8 +20,8 @@ type ScreenLayoutProps = {
 };
 
 // 화면을 Main + Header 오버레이 + Footer 오버레이로 조립한다.
-// 수치 계산은 useLayoutInsets, 각 영역의 모양은 ScreenHeader/ScreenFooter가 담당한다.
-export function ScreenLayout({ toolbar, headerAccessory, footer, children }: ScreenLayoutProps) {
+// 수치 계산은 useLayoutInsets, 각 영역의 모양은 Header/Footer가 담당한다.
+export function Layout({ toolbar, headerAccessory, footer, children }: LayoutProps) {
   const hasHeader = toolbar !== undefined;
   const hasFooter = footer !== undefined;
   const { insets, safeAreaTop, safeAreaBottom, footerHeight, onHeaderLayout } = useLayoutInsets({
@@ -35,7 +35,7 @@ export function ScreenLayout({ toolbar, headerAccessory, footer, children }: Scr
       <View style={styles.main}>{children(insets)}</View>
 
       {hasHeader && (
-        <ScreenHeader
+        <Header
           safeAreaTop={safeAreaTop}
           toolbar={toolbar}
           accessory={headerAccessory}
@@ -44,9 +44,9 @@ export function ScreenLayout({ toolbar, headerAccessory, footer, children }: Scr
       )}
 
       {hasFooter && (
-        <ScreenFooter height={footerHeight} safeAreaBottom={safeAreaBottom}>
+        <Footer height={footerHeight} safeAreaBottom={safeAreaBottom}>
           {footer}
-        </ScreenFooter>
+        </Footer>
       )}
     </View>
   );

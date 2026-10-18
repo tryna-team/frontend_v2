@@ -3,7 +3,7 @@ import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
 import { TOOLBAR_HEIGHT } from './constants';
 
-type ScreenHeaderProps = {
+type HeaderProps = {
   /** 상태바 영역 높이. 이만큼 위를 비우고 Toolbar를 배치한다 */
   safeAreaTop: number;
   toolbar: ReactNode;
@@ -12,7 +12,7 @@ type ScreenHeaderProps = {
 };
 
 // Header 오버레이: 상태바 영역 + Toolbar + accessory를 배경 한 장으로 덮는다.
-export function ScreenHeader({ safeAreaTop, toolbar, accessory, onLayout }: ScreenHeaderProps) {
+export function Header({ safeAreaTop, toolbar, accessory, onLayout }: HeaderProps) {
   return (
     <View style={[styles.container, { paddingTop: safeAreaTop }]} onLayout={onLayout}>
       <View style={styles.toolbar}>{toolbar}</View>
