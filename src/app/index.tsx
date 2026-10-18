@@ -1,3 +1,9 @@
-const App = () => {};
+import { Text, View } from 'react-native';
 
-export default App;
+export default function SplashScreen() {
+  return (
+    <View>
+      <Text>Splash Screen</Text>
+    </View>
+  );
+}
