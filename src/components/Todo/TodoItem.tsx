@@ -1,4 +1,5 @@
-import { Pressable, View, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { Pressable, View, Text, TextInput, StyleSheet } from 'react-native';
 import type { TodoVariant, TodoStatus } from './TodoType';
 
 // # 타입 영역
@@ -106,11 +107,105 @@ function Leading(props: TodoItemProps) {
   );
 }
 
+// ## middle function
+// TODO: 실제 TDS Typography 토큰 값으로 교체
+function getMiddleTypo(variant: TodoVariant, status: TodoStatus) {
+  if (variant === 'daily') {
+    return styles.textSmall;
+  } else if (variant === 'eventCreate' && status === 'plus') {
+    return styles.textMedium;
+  } else {
+    return styles.textLarge;
+  }
+}
+
+// TODO: 실제 TDS 색상 토큰 값으로 교체
+function getMiddleColor(status: TodoStatus): string {
+  return status === 'unDone' || status === 'selected'
+    ? '#111111'
+    : '#B0B0B0';
+}
+
+function Middle(props: TodoItemProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const typo = getMiddleTypo(props.variant, props.status);
+  const color = getMiddleColor(props.status);
+
+  // TODO: 텍스트가 길어질 때 말줄임 처리 여부 결정
+
+  // eventCreate: selected + 편집 중
+  if(props.variant === 'eventCreate' && props.status === 'selected' && isEditing) {
+    return (
+      <TextInput
+        value={props.text}
+        autoFocus
+        onChangeText={props.onTextChange}
+        onBlur={() => setIsEditing(false)}
+        style={[styles.middleInput, typo, { color }]}
+      />
+    );
+  }
+
+  // eventCreate: selcted / unSelected
+  if(props.variant === 'eventCreate' && props.status !== 'plus') {
+    const isEmpty = !props.text;
+
+    return (
+      <Pressable
+        onPress={() => {
+          if(props.status === 'selected') {
+            setIsEditing(true);
+          }
+        }}
+        style={styles.middlePressable}
+      >
+        <Text style={[typo, { color: isEmpty ? '#B0B0B0' : color }]}>
+          {props.text || '할 일을 입력하세요'}
+        </Text>
+      </Pressable>
+    );
+  }
+
+  // daily / eventView / eventCreate (plus)
+  return (
+    <Text style={[typo, { color }]}>
+      {props.text}
+    </Text>
+  );
+}
+
+
+// # 스타일 영역
 const styles = StyleSheet.create({
+  // Leading
   leading: {
     flexShrink: 0,
   },
   iconPlaceholder: {
     borderRadius: 4,
+  },
+
+  // Middle
+  middleInput: {
+    flex: 1,
+    minWidth: 0,
+    padding: 0,
+  },
+  middlePressable: {
+    flexShrink: 1,
+    minWidth: 0,
+    alignItems: 'flex-start',
+  },
+
+  // TODO: 실제 TDS Typography 토큰 값으로 교체
+  textSmall: {
+    fontSize: 14,
+  },
+  textMedium: {
+    fontSize: 16,
+  },
+  textLarge: {
+    fontSize: 18,
   },
 });
