@@ -243,16 +243,39 @@ export default function TodoItem(props: TodoItemProps) {
   const verticalPadding = getVerticalPadding(props.variant);
   const leftGap = getLeftGap(props.variant);
 
-  return (
-    <View style={[styles.container, { paddingVertical: verticalPadding }]}>
+  const content = (
+    <>
       {/* Left: Leading + Middle */}
       <View style={[styles.left, { gap: leftGap }]}>
-        <Leading {...props} />
+        <Leading
+          {...props}
+          onLeadingClick={props.status === 'plus' ? undefined : props.onLeadingClick}
+        />
         <Middle {...props} />
       </View>
 
       {/* Right: Trailing */}
       <Trailing {...props} />
+    </>
+  );
+
+  // eventCreate (plus): 행 전체를 터치 영역으로 사용
+  if (props.variant === 'eventCreate' && props.status === 'plus') {
+    return (
+      <Pressable
+        onPress={props.onLeadingClick}
+        accessibilityRole="button"
+        accessibilityLabel="할 일 추가"
+        style={[styles.container, { paddingVertical: verticalPadding }]}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return (
+    <View style={[styles.container, { paddingVertical: verticalPadding }]}>
+      {content}
     </View>
   );
 }
