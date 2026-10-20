@@ -1,4 +1,3 @@
-// src/components/Todo/TodoItem.tsx
 import { useState } from 'react';
 import { Pressable, View, Text, TextInput, StyleSheet } from 'react-native';
 
