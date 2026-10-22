@@ -17,18 +17,20 @@ type BGProps = {
 // # main component
 export default function BG({ children, style }: BGProps) {
   return (
-    <View style={[styles.container, style]}>
-      <BlurView
-        intensity={BLUR_INTENSITY}
-        tint="light"
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={[styles.container]}>
+      <View style={[styles.inner, style]}>
+        <BlurView
+          intensity={BLUR_INTENSITY}
+          tint="light"
+          pointerEvents="none"
+          style={StyleSheet.absoluteFill}
+        />
 
-      <View pointerEvents="none" style={styles.background} />
-      <View pointerEvents="none" style={styles.overlay} />
+        <View pointerEvents="none" style={styles.background} />
+        <View pointerEvents="none" style={styles.overlay} />
 
-      {children}
+        {children}
+      </View>
     </View>
   );
 }
@@ -36,6 +38,10 @@ export default function BG({ children, style }: BGProps) {
 // # 스타일 영역
 const styles = StyleSheet.create({
   container: {
+    borderRadius: BORDER_RADIUS,
+    boxShadow: '0px 4px 20px 0px rgba(0, 0, 0, 0.08)',
+  },
+  inner: {
     borderRadius: BORDER_RADIUS,
     overflow: 'hidden',
   },
