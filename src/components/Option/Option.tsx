@@ -1,5 +1,3 @@
-
-// src/components/Option/Option.tsx
 import { View, Text, StyleSheet } from 'react-native';
 
 import BG from '@/components/Material/BG';
@@ -7,33 +5,16 @@ import Separator from '@/components/Material/Separator';
 import OptionItem from './OptionItem';
 import { colors } from '@/theme/colors';
 
+import type {
+  OptionsData,
+  SectionData,
+  OptionProps,
+} from './OptionType';
+
 // # 상수 영역
 const SECTION_PADDING = 8;
 const SECTION_GAP = 8;
 const CONTAINER_GAP = 12;
-
-// # 타입 영역
-type OptionItemData = {
-  id: string;
-  content: string;
-  selection?: boolean;
-  icon?: boolean;
-  iconColor?: string;
-  onPress?: () => void;
-};
-
-type OptionsData = {
-  items: OptionItemData[];
-};
-
-type SectionData = {
-  title?: string;
-  items: OptionItemData[];
-};
-
-type OptionProps = {
-  sections: SectionData[];
-};
 
 // # 함수 영역
 function Options({ items }: OptionsData) {

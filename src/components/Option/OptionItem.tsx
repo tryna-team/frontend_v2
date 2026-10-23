@@ -4,24 +4,14 @@ import { Check } from 'lucide-react-native';
 import DotIcon from '@/components/Icon/Dot';
 import { colors } from '@/theme/colors';
 
+import type {
+  LeadingProps,
+  MiddleProps,
+  OptionItemProps,
+} from './OptionType';
+
 // # 상수 영역
 const ICON_SIZE = 22;
-
-// # 타입 영역
-type LeadingProps = {
-  selection?: boolean;
-  icon?: boolean;
-  iconColor?: string;
-};
-
-type MiddleProps = {
-  content: string;
-};
-
-type OptionItemProps = LeadingProps &
-  MiddleProps & {
-    onPress?: () => void;
-  };
 
 // # 함수 영역
 function Leading({
