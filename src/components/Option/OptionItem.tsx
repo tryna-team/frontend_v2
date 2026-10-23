@@ -54,6 +54,10 @@ export default function OptionItem({
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{
+        selected: selection,
+      }}
       style={({ pressed }) => [
         styles.container,
         pressed && styles.pressed,
