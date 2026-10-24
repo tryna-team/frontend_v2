@@ -1,4 +1,5 @@
 import { Text, View, StyleSheet } from 'react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { Scan } from 'lucide-react-native';
 
 import SearchField from './SearchField';
@@ -9,10 +10,20 @@ type ToolbarVariant = 'default' | 'leading' | 'trailing' | 'search';
 
 type ToolbarProps = {
   variant?: ToolbarVariant;
+  leadingIcon?: LucideIcon;
+  trailingIcons?: LucideIcon[];
   searchValue?: string;
   onSearchChangeText?: (text: string) => void;
   searchPlaceholder?: string;
   onSearchSubmit?: () => void;
+};
+
+type LeadingProps = {
+  icon?: LucideIcon;
+};
+
+type TrailingProps = {
+  icons: LucideIcon[];
 };
 
 type SearchProps = {
@@ -23,11 +34,11 @@ type SearchProps = {
 };
 
 // # 함수 영역
-function Leading() {
+function Leading({ icon: Icon = Scan }: LeadingProps) {
   return (
     <View style={styles.leading}>
       {/* TODO: 공용 Button 컴포넌트 연결 */}
-      <Scan size={24} color={colors.icon.default} />
+      <Icon size={24} color={colors.icon.default} />
 
       {/* TODO: Label 디자인 토큰 적용 */}
       <Text>Label</Text>
@@ -35,19 +46,15 @@ function Leading() {
   );
 }
 
-function Trailing() {
+function Trailing({ icons }: TrailingProps) {
   return (
     <View style={styles.trailing}>
       {/* TODO: 공용 Button 컴포넌트 연결 및 버튼 Props 처리 */}
-      <View style={styles.buttonPlaceholder}>
-        <Scan size={24} color={colors.icon.default} />
-      </View>
-      <View style={styles.buttonPlaceholder}>
-        <Scan size={24} color={colors.icon.default} />
-      </View>
-      <View style={styles.buttonPlaceholder}>
-        <Scan size={24} color={colors.icon.default} />
-      </View>
+      {icons.map((Icon, index) => (
+        <View key={index} style={styles.buttonPlaceholder}>
+          <Icon size={24} color={colors.icon.default} />
+        </View>
+      ))}
     </View>
   );
 }
@@ -75,6 +82,8 @@ function Search({ value, onChangeText, placeholder, onSubmitEditing }: SearchPro
 // # main component
 export default function Toolbar({
   variant = 'default',
+  leadingIcon,
+  trailingIcons = [Scan, Scan, Scan],
   searchValue = '',
   onSearchChangeText,
   searchPlaceholder,
@@ -86,9 +95,9 @@ export default function Toolbar({
 
   return (
     <View style={[styles.container, isSearch && styles.searchLayout]}>
-      {showLeading && <Leading />}
+      {showLeading && <Leading icon={leadingIcon} />}
 
-      {showTrailing && <Trailing />}
+      {showTrailing && <Trailing icons={trailingIcons} />}
 
       {isSearch && (
         <Search
