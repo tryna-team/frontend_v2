@@ -19,10 +19,11 @@ type MiddleProps = {
   color: string;
 };
 
-type MenuItemProps = Omit<LeadingProps, 'color'> & Omit<MiddleProps, 'color'> & {
+type MenuItemProps = Omit<LeadingProps, 'color'> &
+  Omit<MiddleProps, 'color'> & {
     status?: 'default' | 'destructive';
     onPress?: () => void;
-};
+  };
 
 // # 함수 영역
 // ## leading function
@@ -54,22 +55,26 @@ export default function MenuItem({
   const textColor = isDestructive ? '#FF3E41' : colors.text.default;
 
   return (
-    <Pressable 
-    onPress={onPress}  
-    accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.container,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Leading icon={Icon} color={iconColor} />
-      <Middle content={content} color={textColor} />
-    </Pressable>
+    <View style={styles.wrapper}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+      >
+        <Leading icon={Icon} color={iconColor} />
+        <Middle content={content} color={textColor} />
+      </Pressable>
+    </View>
   );
 }
 
 // # 스타일 영역
 const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+    // TODO: 임시 레이아웃 지정 -> 피그마와 비교 필요
+    paddingHorizontal: 8,
+  },
   container: {
     width: '100%',
     height: 42,
