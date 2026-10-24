@@ -54,7 +54,14 @@ export default function MenuItem({
   const textColor = isDestructive ? '#FF3E41' : colors.text.default;
 
   return (
-    <Pressable onPress={onPress} style={styles.container} accessibilityRole="button">
+    <Pressable 
+    onPress={onPress}  
+    accessibilityRole="button"
+      style={({ pressed }) => [
+        styles.container,
+        pressed && styles.pressed,
+      ]}
+    >
       <Leading icon={Icon} color={iconColor} />
       <Middle content={content} color={textColor} />
     </Pressable>
@@ -70,6 +77,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
+  },
+  pressed: {
+    borderRadius: 999,
+    backgroundColor: 'rgba(28, 22, 48, 0.05)',
   },
   // TODO: TDS Typo로 교체
   text: {
