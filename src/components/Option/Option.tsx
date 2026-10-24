@@ -12,6 +12,7 @@ import type {
 } from './OptionType';
 
 // # 상수 영역
+// TODO: Option 좌우 패딩이 8로 고정되면 Section paading -> container에 포함
 const SECTION_PADDING = 8;
 const SECTION_GAP = 8;
 const CONTAINER_GAP = 12;
@@ -69,7 +70,7 @@ export default function Option({ sections }: OptionProps) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingTop: 8,
+    paddingVertical: 8,
     gap: CONTAINER_GAP,
   },
   sectionGroup: {
