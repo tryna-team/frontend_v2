@@ -28,17 +28,17 @@ function Leading({ icon: Icon, color }: LeadingProps) {
 }
 
 // ## middle function
-function Middle({ content, color }: MiddleProps & { color: string }) {
+function Middle({ content, color }: MiddleProps) {
   return (
     <View style={styles.middle}>
-      <Text style={[styles.text, { color: color }]}>{content}</Text>
+      <Text style={[styles.text, { color }]}>{content}</Text>
     </View>
   );
 }
 
 // # Main component
 export default function MenuItem({
-  icon: Icon,
+  icon,
   status = 'default',
   content,
   onPress,
@@ -53,10 +53,12 @@ export default function MenuItem({
     <View style={styles.wrapper}>
       <Pressable
         onPress={onPress}
+        disabled={!onPress}
         accessibilityRole="button"
+        accessibilityState={{ disabled: !onPress }}
         style={({ pressed }) => [styles.container, pressed && styles.pressed]}
       >
-        <Leading icon={Icon} color={iconColor} />
+        <Leading icon={icon} color={iconColor} />
         <Middle content={content} color={textColor} />
       </Pressable>
     </View>
@@ -72,8 +74,9 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
-    height: 42,
+    minHeight: 42,
     paddingHorizontal: 26,
+    paddingVertical: 8,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,

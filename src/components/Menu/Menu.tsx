@@ -4,15 +4,14 @@ import BG from '@/components/Material/BG';
 import MenuItem from './MenuItem';
 import type { MenuProps } from './MenuType';
 
-
 // # main component
 export default function Menu({ items }: MenuProps) {
   return (
     <BG>
       <View style={styles.container}>
-        {items.map((item, index) => (
+        {items.map((item) => (
           <MenuItem
-            key={index}
+            key={item.id}
             icon={item.icon}
             content={item.content}
             status={item.status}

@@ -9,6 +9,10 @@ export type MenuItemProps = {
   onPress?: () => void;
 };
 
+export type MenuItemData = MenuItemProps & {
+  id: string;
+};
+
 export type MenuProps = {
-  items: MenuItemProps[];
+  items: MenuItemData[];
 };
