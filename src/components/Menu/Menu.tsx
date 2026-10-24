@@ -1,21 +1,9 @@
 import { View, StyleSheet } from 'react-native';
-import type { ComponentType } from 'react';
-import type { LucideProps } from 'lucide-react-native';
 
 import BG from '@/components/Material/BG';
 import MenuItem from './MenuItem';
+import type { MenuProps } from './MenuType';
 
-// # 타입 영역
-type MenuItemData = {
-  icon?: ComponentType<LucideProps>;
-  content: string;
-  status?: 'default' | 'destructive';
-  onPress?: () => void;
-};
-
-type MenuProps = {
-  items: MenuItemData[];
-};
 
 // # main component
 export default function Menu({ items }: MenuProps) {

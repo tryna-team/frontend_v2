@@ -3,6 +3,7 @@ import type { LucideProps } from 'lucide-react-native';
 import { Text, StyleSheet, Pressable, View } from 'react-native';
 
 import { colors } from '@/theme/colors';
+import type { MenuItemProps } from './MenuType';
 
 // # 상수 영역
 const ICON_SIZE = 22;
@@ -18,12 +19,6 @@ type MiddleProps = {
   content: string;
   color: string;
 };
-
-type MenuItemProps = Omit<LeadingProps, 'color'> &
-  Omit<MiddleProps, 'color'> & {
-    status?: 'default' | 'destructive';
-    onPress?: () => void;
-  };
 
 // # 함수 영역
 // ## leading function
