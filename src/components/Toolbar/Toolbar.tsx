@@ -8,15 +8,22 @@ import { colors } from '@/theme/colors';
 // # 타입 영역
 type ToolbarVariant = 'default' | 'leading' | 'trailing' | 'search';
 
-type ToolbarProps = {
-  variant?: ToolbarVariant;
+type BaseToolbarProps = {
   leadingIcon?: LucideIcon;
   trailingIcons?: LucideIcon[];
-  searchValue?: string;
-  onSearchChangeText?: (text: string) => void;
-  searchPlaceholder?: string;
-  onSearchSubmit?: () => void;
 };
+
+type ToolbarProps =
+  | (BaseToolbarProps & {
+      variant?: Exclude<ToolbarVariant, 'search'>;
+    })
+  | (BaseToolbarProps & {
+      variant: 'search';
+      searchValue: string;
+      onSearchChangeText: (text: string) => void;
+      searchPlaceholder?: string;
+      onSearchSubmit?: () => void;
+    });
 
 type LeadingProps = {
   icon?: LucideIcon;
@@ -80,15 +87,11 @@ function Search({ value, onChangeText, placeholder, onSubmitEditing }: SearchPro
 }
 
 // # main component
-export default function Toolbar({
-  variant = 'default',
-  leadingIcon,
-  trailingIcons = [Scan, Scan, Scan],
-  searchValue = '',
-  onSearchChangeText,
-  searchPlaceholder,
-  onSearchSubmit,
-}: ToolbarProps) {
+export default function Toolbar(props: ToolbarProps) {
+  const variant = props.variant ?? 'default';
+  const leadingIcon = props.leadingIcon;
+  const trailingIcons = props.trailingIcons ?? [Scan, Scan, Scan];
+
   const isSearch = variant === 'search';
   const showLeading = variant === 'default' || variant === 'leading';
   const showTrailing = variant === 'default' || variant === 'trailing';
@@ -99,12 +102,12 @@ export default function Toolbar({
 
       {showTrailing && <Trailing icons={trailingIcons} />}
 
-      {isSearch && (
+      {props.variant === 'search' && (
         <Search
-          value={searchValue}
-          onChangeText={onSearchChangeText ?? (() => {})}
-          placeholder={searchPlaceholder}
-          onSubmitEditing={onSearchSubmit}
+          value={props.searchValue}
+          onChangeText={props.onSearchChangeText}
+          placeholder={props.searchPlaceholder}
+          onSubmitEditing={props.onSearchSubmit}
         />
       )}
     </View>
