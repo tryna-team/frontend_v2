@@ -14,6 +14,7 @@ export const sizeLayouts = {
 };
 
 export type ButtonSize = keyof typeof sizeLayouts;
+export type ButtonLayout = (typeof sizeLayouts)[ButtonSize];
 
 // # 모양 표 (appearance) - Figma Style
 export const appearanceStyles = {
