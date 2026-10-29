@@ -2,37 +2,40 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Plus } from 'lucide-react-native';
 
+import { useBlurTarget } from '@/components/Material/BlurTarget';
 import { radius } from '@/theme/radius';
 import {
-  appearanceStyles,
   ctaStyle,
-  disabledAppearanceStyles,
   glassStyle,
   labelTextStyle,
+  resolveLook,
+  shadow,
   sizeLayouts,
 } from './ButtonVariants';
-import type { AppearanceStyle } from './ButtonVariants';
-import { ctaConfig } from './ButtonType';
+import type { ButtonLook } from './ButtonVariants';
 import type { ButtonProps, CTAButtonProps, ContentAreaButtonProps } from './ButtonType';
 
 // # 타입 영역
 type BackgroundProps = {
-  look: AppearanceStyle;
+  look: ButtonLook;
 };
 
 // # 함수 영역
 // ## 배경: 블러 → 배경색 순서로 깔고, 모서리 밖은 잘라낸다
 function Background({ look }: BackgroundProps) {
-  if (!look.glass && !look.backgroundColor) return null;
+  // Android: Header·Footer 안에서는 Layout의 블러 대상을 쓰고, Main 안에서는 반투명으로 대체된다
+  const blurTargetProps = useBlurTarget();
+
+  if (!look.blur && !look.backgroundColor) return null;
 
   return (
     <View pointerEvents="none" style={styles.background}>
-      {/* TODO: Android는 BlurTargetView로 감싸 blurTarget을 연결해야 실제 블러가 적용됨 (현재는 반투명만 표시) */}
-      {look.glass && (
+      {look.blur && (
         <BlurView
           intensity={glassStyle.intensity}
           tint={glassStyle.tint}
           style={StyleSheet.absoluteFill}
+          {...blurTargetProps}
         />
       )}
       {look.backgroundColor && (
@@ -44,34 +47,37 @@ function Background({ look }: BackgroundProps) {
 
 // ## contentArea
 function renderContentAreaButton(props: ContentAreaButtonProps) {
-  const { label, icon: Icon } = props;
+  const { label, icon: Icon, appearance, disabled } = props;
   const layout = sizeLayouts[props.size];
-  const look = props.disabled
-    ? disabledAppearanceStyles[props.appearance]
-    : appearanceStyles[props.appearance];
-  const isIconOnly = !label;
 
   return (
     <Pressable
       onPress={props.onPress}
-      disabled={props.disabled}
+      hitSlop={props.hitSlop ?? layout.hitSlop}
+      disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={props.accessibilityLabel}
-      accessibilityState={{ disabled: !!props.disabled }}
-      style={[
+      accessibilityState={{ disabled: !!disabled }}
+      style={({ pressed }) => [
         styles.container,
         { height: layout.height, gap: layout.gap },
-        isIconOnly
-          ? { width: layout.height }
-          : { paddingHorizontal: layout.paddingHorizontal },
-        look.glass && styles.glassShadow,
+        label ? { paddingHorizontal: layout.paddingHorizontal } : { width: layout.height },
+        resolveLook(appearance, disabled, pressed).shadow && styles.shadow,
       ]}
     >
-      <Background look={look} />
-      {Icon && <Icon size={layout.iconSize} color={look.iconColor} />}
-      {!!label && (
-        <Text style={[labelTextStyle, { color: look.textColor }]}>{label}</Text>
-      )}
+      {({ pressed }) => {
+        const look = resolveLook(appearance, disabled, pressed);
+
+        return (
+          <>
+            <Background look={look} />
+            {Icon && <Icon size={layout.iconSize} color={look.contentColor} />}
+            {!!label && (
+              <Text style={[labelTextStyle, { color: look.contentColor }]}>{label}</Text>
+            )}
+          </>
+        );
+      }}
     </Pressable>
   );
 }
@@ -81,12 +87,12 @@ function renderCTAButton(props: CTAButtonProps) {
   return (
     <Pressable
       onPress={props.onPress}
-      hitSlop={ctaConfig.hitSlop}
+      hitSlop={ctaStyle.hitSlop}
       accessibilityRole="button"
-      accessibilityLabel={props.accessibilityLabel ?? ctaConfig.accessibilityLabel}
+      accessibilityLabel={ctaStyle.accessibilityLabel}
       style={styles.cta}
     >
-      <Plus size={ctaConfig.iconSize} color={ctaStyle.iconColor} />
+      <Plus size={ctaStyle.iconSize} color={ctaStyle.iconColor} />
     </Pressable>
   );
 }
@@ -106,8 +112,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: radius.full,
   },
-  glassShadow: {
-    boxShadow: glassStyle.boxShadow,
+  shadow: {
+    boxShadow: shadow,
   },
   background: {
     ...StyleSheet.absoluteFill,
@@ -115,8 +121,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   cta: {
-    width: ctaConfig.size,
-    height: ctaConfig.size,
+    width: ctaStyle.size,
+    height: ctaStyle.size,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: ctaStyle.borderRadius,

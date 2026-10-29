@@ -1,10 +1,11 @@
 import type { ComponentType } from 'react';
-import type { LucideProps } from 'lucide-react-native';
+import type { PressableProps } from 'react-native';
 
 import type { ButtonAppearance, ButtonSize } from './ButtonVariants';
 
 // # 타입 영역
-export type ButtonIcon = ComponentType<LucideProps>;
+// Button은 아이콘에 size·color만 넘기므로 그 두 값만 요구한다 (lucide 아이콘, components/Icon 모두 사용 가능)
+export type ButtonIcon = ComponentType<{ size?: number; color?: string }>;
 
 // ## 내용: label·icon을 넘겼는지로 Figma Label Style이 정해진다
 // - label만 / label + icon → 텍스트만 / 텍스트+아이콘
@@ -13,38 +14,22 @@ type ButtonContentProps =
   | { label: string; icon?: ButtonIcon; accessibilityLabel?: string }
   | { label?: never; icon: ButtonIcon; accessibilityLabel: string };
 
-type ButtonBaseProps = {
+// ## contentArea (기본값): Figma Button - Content Area
+export type ContentAreaButtonProps = ButtonContentProps & {
+  variant?: 'contentArea';
+  size: ButtonSize;
+  appearance: ButtonAppearance;
+  disabled?: boolean;
+  onPress?: () => void;
+  /** 버튼 바깥으로 넓힐 터치 영역. 지정하지 않으면 size별 기본값(최소 44) */
+  hitSlop?: PressableProps['hitSlop'];
+};
+
+// ## cta: 일정 추가 전용 "+" 버튼. 모양·아이콘·접근성 이름 고정
+// TODO: 중복 입력 방지가 필요해지면 disabled 추가 (비활성 디자인 확인 필요)
+export type CTAButtonProps = {
+  variant: 'cta';
   onPress?: () => void;
 };
 
-// ## contentArea (기본값): Figma Button - Content Area
-export type ContentAreaButtonProps = ButtonBaseProps &
-  ButtonContentProps & {
-    variant?: 'contentArea';
-    size: ButtonSize;
-    appearance: ButtonAppearance;
-    disabled?: boolean;
-  };
-
-// ## cta: 화면 하단 "+" 버튼 (v1 MainCTAButton). 모양·아이콘 고정
-export type CTAButtonProps = ButtonBaseProps & {
-  variant: 'cta';
-  accessibilityLabel?: string;
-  label?: never;
-  icon?: never;
-  size?: never;
-  appearance?: never;
-  disabled?: never;
-};
-
 export type ButtonProps = ContentAreaButtonProps | CTAButtonProps;
-export type ButtonVariant = NonNullable<ButtonProps['variant']>;
-
-// # 종류별 고정값
-// ## cta
-export const ctaConfig = {
-  size: 52,
-  iconSize: 22,
-  hitSlop: 6, // v1과 같은 64 터치 영역
-  accessibilityLabel: '일정 추가', // v1 MainCTAButton 기본값
-} as const;
