@@ -6,7 +6,9 @@ import { radius } from '@/theme/radius';
 
 // # 크기 표 (size)
 // 높이를 고정하고 가운데 정렬하므로 Figma의 세로 여백(4/7/14·15)은 따로 두지 않는다
-// hitSlop: 보이는 크기는 유지하고 터치 영역을 최소 44까지 넓힌다 ((44 - height) / 2)
+// hitSlop: 보이는 크기는 유지하고 터치 영역을 44까지 넓힌다 ((44 - height) / 2)
+// ⚠️ hitSlop은 부모 영역 밖으로 넓어지지 않는다. 44를 보장하려면 배치하는 쪽에서 부모 여백을 두거나 hitSlop prop으로 조정한다
+//    (버튼 틀 자체를 44로 키우면 레이아웃 크기가 바뀌어 Figma 간격과 달라지므로 그렇게 하지 않는다)
 export const sizeLayouts = {
   small: { height: 28, paddingHorizontal: 10, gap: 3, iconSize: 20, hitSlop: 8 },
   medium: { height: 34, paddingHorizontal: 14, gap: 4, iconSize: 20, hitSlop: 5 },
@@ -33,7 +35,7 @@ export type ButtonLook = {
 };
 
 // # 상태별 모양 (비활성: Figma Is Disable / 눌림: Figma _Button - 44pt Pressed)
-// TODO: Prominent 눌림 디자인 없음 → 기본 모양 유지
+// TODO: Prominent는 임시로 Bordered와 같은 눌림 모양 적용. Prominent 전용 디자인 확정 시 교체
 export function resolveLook(
   appearance: ButtonAppearance,
   disabled = false,
@@ -50,7 +52,7 @@ export function resolveLook(
     };
   }
 
-  if (pressed && appearance !== 'prominent') {
+  if (pressed) {
     return {
       backgroundColor: palette.greyOpacity[100],
       contentColor: colors.text.default,
