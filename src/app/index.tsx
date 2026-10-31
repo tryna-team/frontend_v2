@@ -1,9 +1,7 @@
-import { Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
 
 export default function SplashScreen() {
   return (
-    <View>
-      <Text>Splash Screen</Text>
-    </View>
+      <Redirect href="/home" />
   );
 }
