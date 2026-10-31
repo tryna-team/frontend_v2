@@ -8,8 +8,15 @@ export default function DailyScreen() {
 
       <Button 
         title="Back (home)" 
-        onPress={() => router.back()} 
-      />
+        onPress={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            // 현재는 임시로 홈으로 이동하도록 설정
+            router.replace('/home');
+          }
+        }} 
+      /> 
     </View>
   );
 }
