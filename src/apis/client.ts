@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { normalizeApiError } from './error';
 
 // # 상수 영역
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -22,13 +23,13 @@ apiClient.interceptors.request.use(
   (config) => {
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(normalizeApiError(error)),
 );
 
 // # 응답 인터셉터
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(normalizeApiError(error)),
 );
 
 export default apiClient;
