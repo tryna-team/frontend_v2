@@ -6,7 +6,7 @@ import { SECURE_KEYS, secureStorage } from '@/lib/storage';
 // SecureStore 쓰기·삭제는 기다리지 않으므로, 앞 작업이 끝난 뒤에 실행되도록 이어 붙여 순서를 보장한다.
 // 순서가 뒤집혀 옛 토큰이 남으면 다음 실행 때 재발급이 실패한다.
 // secureStorage는 실패해도 reject하지 않으므로 체인이 중간에 끊기지 않는다.
-let pendingWrite: Promise<void> = Promise.resolve();
+let pendingWrite: Promise<unknown> = Promise.resolve();
 let writeCount = 0;
 
 function persistRefreshToken(refreshToken: string | null) {
@@ -80,6 +80,9 @@ export const useAuthStore = create<AuthState>()((set) => ({
       userRole: null,
       isAuthenticated: false,
     });
+    // 추가 예정: SecureStore 삭제가 실패하면 다음 실행에 옛 토큰이 복원될 수 있다.
+    // 서버 로그아웃(A109)으로 세션이 무효화되면 재발급이 거절돼 비회원으로 넘어가지만,
+    // 로그아웃 흐름을 옮길 때 삭제 실패를 기록해 다음 실행에서 토큰 복원 전에 다시 지우도록 처리한다
     persistRefreshToken(null);
   },
 }));

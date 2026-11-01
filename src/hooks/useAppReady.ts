@@ -7,9 +7,12 @@ import { useAuthStore } from '@/stores';
 let preparing: Promise<void> | null = null;
 
 async function prepareApp(): Promise<void> {
-  // 재설치 후 남은 옛 토큰을 지운 다음에 읽어야 한다
-  await clearSecureStorageOnFirstLaunch();
-  await useAuthStore.getState().restoreRefreshToken();
+  // 재설치 후 남은 옛 토큰을 지운 다음에 읽어야 한다. 지우지 못했으면 이번 실행에서는 토큰 없이 시작한다
+  const canRestore = await clearSecureStorageOnFirstLaunch();
+
+  if (canRestore) {
+    await useAuthStore.getState().restoreRefreshToken();
+  }
   // 추가 예정: 재발급(A108) → 상태 확인(A101) → 비회원 시작(A102)은 API 계층 이식 후 여기에 연결
 }
 
