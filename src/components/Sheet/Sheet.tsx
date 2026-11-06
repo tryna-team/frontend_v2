@@ -1,12 +1,8 @@
-
 import type { ReactNode } from 'react';
-import {
-  View,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { X } from 'lucide-react-native';
+
+import Button44 from '@/components/Button/Button44/Button44'
 
 // # Types
 type SheetProps = {
@@ -37,19 +33,17 @@ export default function Sheet({ children, onClose }: SheetProps) {
         <Grabber />
 
         {onClose && (
-          <Pressable
-            style={styles.closeButton}
-            onPress={onClose}
-            accessibilityRole="button"
-            accessibilityLabel="시트 닫기"
-          >
-            <X size={24} color="#1C1630" />
-          </Pressable>
+          <View style={styles.closeButton}>
+            <Button44
+              appearance="bordered"
+              icon={X}
+              onPress={onClose}
+              accessibilityLabel="시트 닫기"
+            />
+          </View>
         )}
 
-        <View style={styles.content}>
-          {children}
-        </View>
+        <View style={styles.content}>{children}</View>
       </View>
     </View>
   );
@@ -94,15 +88,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     right: 16,
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 100,
     zIndex: 1,
-
-    // TODO: Figma의 Button 디자인 토큰 확인 후 교체
-    backgroundColor: '#FFFFFF',
   },
   content: {
     flex: 1,
