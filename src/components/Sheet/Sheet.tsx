@@ -1,8 +1,15 @@
+
 import type { ReactNode } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Modal,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 
-import Button44 from '@/components/Button/Button44/Button44'
+import Button44 from '@/components/Button/Button44/Button44';
 
 // # Types
 type SheetProps = {
@@ -23,36 +30,57 @@ function Grabber() {
 // # Main component
 export default function Sheet({ children, onClose }: SheetProps) {
   const { height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
-      <View style={styles.overlay} />
+    <Modal
+      visible
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={() => onClose?.()}
+    >
+      <View style={styles.container}>
+        <View
+          style={styles.overlay}
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        />
 
-      {/* TODO: Sheet 높이를 화면 높이 - 62px로 반응형 처리하는 방식은 임시 결정이므로 디자인 확인 필요 */}
-      <View style={[styles.sheet, { height: Math.max(0, height - 62) }]}>
-        <Grabber />
+        {/* TODO: Sheet 높이를 화면 높이 - 62px로 반응형 처리하는 방식은 임시 결정이므로 디자인 확인 필요 */}
+        <View style={[styles.sheet, { height: Math.max(0, height - 62) }]}>
+          <View style={styles.header}>
+            <Grabber />
 
-        {onClose && (
-          <View style={styles.closeButton}>
-            <Button44
-              appearance="bordered"
-              icon={X}
-              onPress={onClose}
-              accessibilityLabel="시트 닫기"
-            />
+            {onClose && (
+              <View style={styles.closeButton}>
+                <Button44
+                  appearance="bordered"
+                  icon={X}
+                  onPress={onClose}
+                  accessibilityLabel="시트 닫기"
+                />
+              </View>
+            )}
           </View>
-        )}
 
-        <View style={styles.content}>{children}</View>
+          <View
+            style={[styles.content, { paddingBottom: insets.bottom }]}
+          >
+            {children}
+          </View>
+        </View>
       </View>
-    </View>
+    </Modal>
   );
 }
 
 // # Styles
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFill,
+    flex: 1,
     justifyContent: 'flex-end',
   },
   overlay: {
@@ -69,6 +97,9 @@ const styles = StyleSheet.create({
 
     // TODO: theme/colors.ts에 색상 토큰 정의 후 교체
     backgroundColor: '#FAFAFB',
+  },
+  header: {
+    height: 76,
   },
   grabberContainer: {
     paddingTop: 6,
@@ -88,7 +119,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 16,
     right: 16,
-    zIndex: 1,
   },
   content: {
     flex: 1,
