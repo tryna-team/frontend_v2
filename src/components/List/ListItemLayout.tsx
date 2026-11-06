@@ -14,7 +14,7 @@ import { spacing } from '@/theme/spacing';
 
 // # 타입 영역
 export type ListItemLayoutProps = {
-  leading?: ReactNode;
+  leading: ReactNode;
   middle: ReactNode;
 
   date?: string;
@@ -94,7 +94,12 @@ const styles = StyleSheet.create({
   trailing: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.gap.xsmall, // 4px
+    gap: spacing.gap.xsmall,
+
+    // TODO: Middle과 Trailing의 시각적 구분을 위한 임시 간격.
+    // 디자인에서 필요 여부 및 정확한 간격 확인 후 조정.
+    marginLeft: spacing.gap.xsmall,
+
     flexShrink: 0,
   },
 });
