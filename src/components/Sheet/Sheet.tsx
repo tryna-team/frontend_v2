@@ -1,0 +1,111 @@
+
+import type { ReactNode } from 'react';
+import {
+  View,
+  Pressable,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
+import { X } from 'lucide-react-native';
+
+// # Types
+type SheetProps = {
+  children?: ReactNode;
+  onClose?: () => void;
+};
+
+// # Grabber component
+function Grabber() {
+  // TODO: Dark 모드용 Grabber가 별도로 존재하지만, 현재는 Light 모드만 지원
+  return (
+    <View style={styles.grabberContainer}>
+      <View style={styles.grabber} />
+    </View>
+  );
+}
+
+// # Main component
+export default function Sheet({ children, onClose }: SheetProps) {
+  const { height } = useWindowDimensions();
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.overlay} />
+
+      {/* TODO: Sheet 높이를 화면 높이 - 62px로 반응형 처리하는 방식은 임시 결정이므로 디자인 확인 필요 */}
+      <View style={[styles.sheet, { height: Math.max(0, height - 62) }]}>
+        <Grabber />
+
+        {onClose && (
+          <Pressable
+            style={styles.closeButton}
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="시트 닫기"
+          >
+            <X size={24} color="#1C1630" />
+          </Pressable>
+        )}
+
+        <View style={styles.content}>
+          {children}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// # Styles
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: 'flex-end',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+
+    // TODO: theme/colors.ts에 색상 토큰 정의 후 교체
+    backgroundColor: 'rgba(28, 22, 48, 0.30)',
+  },
+  sheet: {
+    width: '100%',
+    borderTopLeftRadius: 38,
+    borderTopRightRadius: 38,
+    overflow: 'hidden',
+
+    // TODO: theme/colors.ts에 색상 토큰 정의 후 교체
+    backgroundColor: '#FAFAFB',
+  },
+  grabberContainer: {
+    paddingTop: 6,
+    alignItems: 'center',
+  },
+  grabber: {
+    width: 60,
+    height: 4,
+    borderRadius: 100,
+
+    // TODO: theme/colors.ts에 색상 토큰 정의 후 교체
+    backgroundColor: '#D8D7DC',
+
+    // TODO: Figma의 mix-blend-mode: plus-darker 적용 여부 검토
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 100,
+    zIndex: 1,
+
+    // TODO: Figma의 Button 디자인 토큰 확인 후 교체
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+    flexDirection: 'column',
+  },
+});
