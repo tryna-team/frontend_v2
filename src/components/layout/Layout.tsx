@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { BlurTargetView } from 'expo-blur';
 
+import { BlurTargetContext } from '@/components/Material/BlurTarget';
 import { colors } from '@theme/colors';
 
 import { Footer } from './Footer';
@@ -32,27 +34,35 @@ export function Layout({ toolbar, headerAccessory, footer, children }: LayoutPro
     hasHeader,
     hasFooter,
   });
+  const blurTargetRef = useRef<View>(null);
 
   return (
-    <View style={styles.root}>
-      {/* Main: 오버레이보다 먼저 그려서 Header/Footer 아래에 깔리도록 한다 */}
-      <View style={styles.main}>{children(getMainArea(insets))}</View>
+    <BlurTargetContext.Provider value={blurTargetRef}>
+      <View style={styles.root}>
+        {/* Main: 오버레이보다 먼저 그려서 Header/Footer 아래에 깔리도록 한다 */}
+        {/* Android 블러 대상. Main 안의 BlurView는 자기가 속한 대상을 블러할 수 없어 대상을 넘기지 않는다 */}
+        <BlurTargetView ref={blurTargetRef} style={styles.main}>
+          <BlurTargetContext.Provider value={null}>
+            {children(getMainArea(insets))}
+          </BlurTargetContext.Provider>
+        </BlurTargetView>
 
-      {hasHeader && (
-        <Header
-          safeAreaTop={safeAreaTop}
-          toolbar={toolbar}
-          accessory={headerAccessory}
-          onLayout={onHeaderLayout}
-        />
-      )}
+          {hasHeader && (
+          <Header
+            safeAreaTop={safeAreaTop}
+            toolbar={toolbar}
+            accessory={headerAccessory}
+            onLayout={onHeaderLayout}
+          />
+        )}
 
-      {hasFooter && (
-        <Footer height={footerHeight} safeAreaBottom={safeAreaBottom}>
-          {footer}
-        </Footer>
-      )}
-    </View>
+        {hasFooter && (
+          <Footer height={footerHeight} safeAreaBottom={safeAreaBottom}>
+            {footer}
+          </Footer>
+        )}
+      </View>
+    </BlurTargetContext.Provider>
   );
 }
 

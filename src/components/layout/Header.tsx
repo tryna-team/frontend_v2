@@ -2,6 +2,7 @@ import { BlurView } from 'expo-blur';
 import type { ReactNode } from 'react';
 import { Platform, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 
+import { useBlurTarget } from '@/components/Material/BlurTarget';
 import { colors, palette } from '@theme/colors';
 
 import { TOOLBAR_HEIGHT } from './constants';
@@ -20,11 +21,13 @@ type HeaderProps = {
 
 // Header 오버레이: 상태바 영역 + Toolbar + accessory를 배경 한 장으로 덮는다.
 export function Header({ safeAreaTop, toolbar, accessory, onLayout }: HeaderProps) {
+  const blurTargetProps = useBlurTarget();
+
   return (
     <View style={[styles.container, { paddingTop: safeAreaTop }]} onLayout={onLayout}>
       {/* Figma Calender Header 배경: 배경 블러 + 흰색 40% (상태바 영역까지 덮음) */}
-      {/* TODO: Android는 Main을 BlurTargetView로 감싸 blurTarget을 연결해야 실제 블러가 적용됨 (현재는 반투명만 표시) */}
-      <BlurView intensity={100} tint={BLUR_TINT} style={styles.background}>
+      {/* TODO: Android 블러 세기를 실기기에서 iOS와 비교해 blurReductionFactor로 맞추기 */}
+      <BlurView intensity={100} tint={BLUR_TINT} style={styles.background} {...blurTargetProps}>
         <View style={styles.backgroundFill} />
       </BlurView>
       <View style={styles.toolbar}>{toolbar}</View>
