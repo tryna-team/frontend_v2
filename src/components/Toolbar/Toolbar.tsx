@@ -1,36 +1,65 @@
-import { Text, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { Scan } from 'lucide-react-native';
 
+import Button44 from '@/components/Button/Button44/Button44';
 import SearchField from './SearchField';
-import { colors } from '@/theme/colors';
 
 // # 타입 영역
-type ToolbarVariant = 'default' | 'leading' | 'trailing' | 'search';
-
-type BaseToolbarProps = {
-  leadingIcon?: LucideIcon;
-  trailingIcons?: LucideIcon[];
+type ToolbarButton = {
+  icon: LucideIcon;
+  onPress?: () => void;
+  accessibilityLabel: string;
 };
 
-type ToolbarProps =
-  | (BaseToolbarProps & {
-      variant?: Exclude<ToolbarVariant, 'search'>;
-    })
-  | (BaseToolbarProps & {
-      variant: 'search';
-      searchValue: string;
-      onSearchChangeText: (text: string) => void;
-      searchPlaceholder?: string;
-      onSearchSubmit?: () => void;
-    });
+type LeadingContentProps =
+  | {
+      leadingIcon?: never;
+      leadingLabel?: never;
+      leadingAccessibilityLabel?: never;
+    }
+  | {
+      leadingIcon: LucideIcon;
+      leadingLabel?: never;
+      leadingAccessibilityLabel: string;
+    }
+  | {
+      leadingIcon?: never;
+      leadingLabel: string;
+      leadingAccessibilityLabel?: string;
+    }
+  | {
+      leadingIcon: LucideIcon;
+      leadingLabel: string;
+      leadingAccessibilityLabel?: string;
+    };
+
+type DefaultToolbarProps = LeadingContentProps & {
+  variant?: 'default';
+  leadingOnPress?: () => void;
+  trailingButtons?: ToolbarButton[];
+};
+
+type SearchToolbarProps = {
+  variant: 'search';
+  searchValue: string;
+  onSearchChangeText: (text: string) => void;
+  searchPlaceholder?: string;
+  onSearchSubmit?: () => void;
+  searchButtonOnPress: () => void;
+};
+
+type ToolbarProps = DefaultToolbarProps | SearchToolbarProps;
 
 type LeadingProps = {
   icon?: LucideIcon;
+  label?: string;
+  onPress?: () => void;
+  accessibilityLabel?: string;
 };
 
 type TrailingProps = {
-  icons: LucideIcon[];
+  buttons: ToolbarButton[];
 };
 
 type SearchProps = {
@@ -38,35 +67,79 @@ type SearchProps = {
   onChangeText: (text: string) => void;
   placeholder?: string;
   onSubmitEditing?: () => void;
+  onButtonPress: () => void;
 };
 
 // # 함수 영역
-function Leading({ icon: Icon = Scan }: LeadingProps) {
-  return (
-    <View style={styles.leading}>
-      {/* TODO: 공용 Button 컴포넌트 연결 */}
-      <Icon size={24} color={colors.icon.default} />
+function Leading({
+  icon,
+  label,
+  onPress,
+  accessibilityLabel,
+}: LeadingProps) {
+  // 아이콘 + 텍스트
+  if (icon && label) {
+    return (
+      <Button44
+        appearance="borderless"
+        icon={icon}
+        label={label}
+        onPress={onPress}
+        accessibilityLabel={accessibilityLabel}
+      />
+    );
+  }
 
-      {/* TODO: Label 디자인 토큰 적용 */}
-      <Text>Label</Text>
-    </View>
-  );
+  // 아이콘
+  if (icon) {
+    return (
+      <Button44
+        appearance="borderless"
+        icon={icon}
+        onPress={onPress}
+        accessibilityLabel={accessibilityLabel!}
+      />
+    );
+  }
+
+  // 텍스트
+  if (label) {
+    return (
+      <Button44
+        appearance="borderless"
+        label={label}
+        onPress={onPress}
+        accessibilityLabel={accessibilityLabel}
+      />
+    );
+  }
+
+  return null;
 }
 
-function Trailing({ icons }: TrailingProps) {
+function Trailing({ buttons }: TrailingProps) {
   return (
     <View style={styles.trailing}>
-      {/* TODO: 공용 Button 컴포넌트 연결 및 버튼 Props 처리 */}
-      {icons.map((Icon, index) => (
-        <View key={index} style={styles.buttonPlaceholder}>
-          <Icon size={24} color={colors.icon.default} />
-        </View>
+      {buttons.map(({ icon, onPress, accessibilityLabel }, index) => (
+        <Button44
+          key={index}
+          appearance="borderless"
+          icon={icon}
+          onPress={onPress}
+          accessibilityLabel={accessibilityLabel}
+        />
       ))}
     </View>
   );
 }
 
-function Search({ value, onChangeText, placeholder, onSubmitEditing }: SearchProps) {
+function Search({
+  value,
+  onChangeText,
+  placeholder,
+  onSubmitEditing,
+  onButtonPress,
+}: SearchProps) {
   return (
     <View style={styles.search}>
       <View style={styles.searchContainer}>
@@ -78,38 +151,56 @@ function Search({ value, onChangeText, placeholder, onSubmitEditing }: SearchPro
         />
       </View>
 
-      {/* TODO: Search 전용 Button 컴포넌트 연결 (아이콘 고정) */}
-      <View style={styles.buttonPlaceholder}>
-        <Scan size={24} color={colors.icon.default} />
-      </View>
+      {/* TODO: Search 전용 아이콘 확정 시 교체 */}
+      <Button44
+        appearance="bordered"
+        icon={Scan}
+        accessibilityLabel="검색 옵션"
+        onPress={onButtonPress}
+      />
     </View>
   );
 }
 
 // # main component
 export default function Toolbar(props: ToolbarProps) {
-  const variant = props.variant ?? 'default';
-  const leadingIcon = props.leadingIcon;
-  const trailingIcons = props.trailingIcons ?? [Scan, Scan, Scan];
-
-  const isSearch = variant === 'search';
-  const showLeading = variant === 'default' || variant === 'leading';
-  const showTrailing = variant === 'default' || variant === 'trailing';
-
-  return (
-    <View style={[styles.container, isSearch && styles.searchLayout]}>
-      {showLeading && <Leading icon={leadingIcon} />}
-
-      {showTrailing && <Trailing icons={trailingIcons} />}
-
-      {props.variant === 'search' && (
+  if (props.variant === 'search') {
+    return (
+      <View style={[styles.container, styles.searchLayout]}>
         <Search
           value={props.searchValue}
           onChangeText={props.onSearchChangeText}
           placeholder={props.searchPlaceholder}
           onSubmitEditing={props.onSearchSubmit}
+          onButtonPress={props.searchButtonOnPress}
+        />
+      </View>
+    );
+  }
+
+  const {
+    leadingIcon,
+    leadingLabel,
+    leadingOnPress,
+    leadingAccessibilityLabel,
+    trailingButtons = [],
+  } = props;
+
+  const showLeading = !!leadingIcon || !!leadingLabel;
+  const showTrailing = trailingButtons.length > 0;
+
+  return (
+    <View style={styles.container}>
+      {showLeading && (
+        <Leading
+          icon={leadingIcon}
+          label={leadingLabel}
+          onPress={leadingOnPress}
+          accessibilityLabel={leadingAccessibilityLabel}
         />
       )}
+
+      {showTrailing && <Trailing buttons={trailingButtons} />}
     </View>
   );
 }
@@ -123,12 +214,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-  },
-  leading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    gap: 4,
   },
   trailing: {
     flexDirection: 'row',
@@ -148,12 +233,5 @@ const styles = StyleSheet.create({
   searchContainer: {
     flex: 1,
     minWidth: 0,
-  },
-  // TODO: 공용 Button 컴포넌트 연결 후 제거
-  buttonPlaceholder: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
