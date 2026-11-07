@@ -63,6 +63,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: KV_KEYS.settings,
+      // 알려진 문제(웹): 웹 빌드를 고쳐도 store를 만들 때의 동기 읽기가 실패해 설정이 복원되지 않는다 (kvStorage.ts 참고)
       storage: createJSONStorage(() => persistStorage),
       // 저장 구조를 바꿀 때 version을 올리고 migrate를 추가한다. migrate 없이 올리면 저장된 설정이 버려진다
       version: 1,

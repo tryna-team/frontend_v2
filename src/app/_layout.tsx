@@ -5,6 +5,8 @@ import { useAppReady } from '@/hooks/useAppReady';
 import { useTodaySync } from '@/hooks/useTodaySync';
 import Splash from '@/screens/Splash';
 
+// 알려진 문제(웹): 위 훅들이 store를 거쳐 expo-sqlite까지 불러와 웹 빌드가 실패한다 (lib/storage/kvStorage.ts 참고)
+
 // 앱 시작 준비가 끝날 때까지 네이티브 스플래시를 유지한다. 첫 렌더보다 먼저 실행되도록 모듈 최상단에 둔다.
 // 숨기는 시점은 Splash가 정한다.
 SplashScreen.preventAutoHideAsync();

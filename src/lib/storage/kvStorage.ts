@@ -5,7 +5,8 @@ import type { KvKey } from './keys';
 
 // 동기 API를 쓴다. 오류 처리 규칙은 secureStorage와 같다.
 
-// 확인 예정: 웹은 지원 대상이 아니다. 웹 지원이 정해지면 Expo SQLite 웹 설정(Metro wasm, COOP/COEP 헤더)을 추가
+// 알려진 문제(웹): 이 파일의 expo-sqlite import 때문에 웹 빌드가 실패한다. 기본 Metro 설정이 .wasm을 처리하지 못한다.
+// .wasm 설정과 COOP/COEP 헤더를 추가해도, SQLite 워커가 준비되기 전의 동기 호출은 실패해 값이 저장되지 않는다.
 
 /** 값 없음(value: null)과 읽기 실패(ok: false)를 구분해야 할 때 쓴다 */
 export type KvReadResult = { ok: true; value: string | null } | { ok: false };

@@ -19,6 +19,7 @@ async function prepareApp(): Promise<void> {
 /**
  * 앱 시작 준비가 끝났는지 반환한다. 루트 레이아웃은 준비가 끝난 뒤에 화면을 그린다.
  * 화면이 먼저 마운트되면 토큰을 복원하기 전에 API 요청이 나갈 수 있기 때문이다.
+ * 알려진 문제(웹): 준비 전에는 화면을 그리지 않아 정적 HTML에 화면 내용이 없고, JS가 실행된 뒤에 나타난다.
  */
 export function useAppReady(): boolean {
   const [isReady, setIsReady] = useState(false);

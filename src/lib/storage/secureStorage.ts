@@ -4,6 +4,7 @@ import type { SecureKey } from './keys';
 
 // 동기 getItem은 JS 스레드를 멈추고 동기 삭제 API는 없어서 비동기 API만 쓴다.
 // 예외는 이 계층에서 끝낸다: 읽기 실패는 값 없음(null), 쓰기·삭제는 성공 여부(boolean)를 돌려주고 개발 모드 경고.
+// 알려진 문제(웹): expo-secure-store는 웹 구현이 비어 있어 웹에서는 토큰이 저장되지 않는다.
 
 function warn(action: string, key: SecureKey, error: unknown) {
   if (__DEV__) {
