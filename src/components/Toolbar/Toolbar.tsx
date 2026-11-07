@@ -12,12 +12,31 @@ type ToolbarButton = {
   accessibilityLabel: string;
 };
 
-type DefaultToolbarProps = {
+type LeadingContentProps =
+  | {
+      leadingIcon?: never;
+      leadingLabel?: never;
+      leadingAccessibilityLabel?: never;
+    }
+  | {
+      leadingIcon: LucideIcon;
+      leadingLabel?: never;
+      leadingAccessibilityLabel: string;
+    }
+  | {
+      leadingIcon?: never;
+      leadingLabel: string;
+      leadingAccessibilityLabel?: string;
+    }
+  | {
+      leadingIcon: LucideIcon;
+      leadingLabel: string;
+      leadingAccessibilityLabel?: string;
+    };
+
+type DefaultToolbarProps = LeadingContentProps & {
   variant?: 'default';
-  leadingIcon?: LucideIcon;
-  leadingLabel?: string;
   leadingOnPress?: () => void;
-  leadingAccessibilityLabel?: string;
   trailingButtons?: ToolbarButton[];
 };
 
@@ -27,7 +46,7 @@ type SearchToolbarProps = {
   onSearchChangeText: (text: string) => void;
   searchPlaceholder?: string;
   onSearchSubmit?: () => void;
-  searchButtonOnPress?: () => void;
+  searchButtonOnPress: () => void;
 };
 
 type ToolbarProps = DefaultToolbarProps | SearchToolbarProps;
@@ -48,7 +67,7 @@ type SearchProps = {
   onChangeText: (text: string) => void;
   placeholder?: string;
   onSubmitEditing?: () => void;
-  onButtonPress?: () => void;
+  onButtonPress: () => void;
 };
 
 // # 함수 영역
@@ -78,7 +97,7 @@ function Leading({
         appearance="borderless"
         icon={icon}
         onPress={onPress}
-        accessibilityLabel={accessibilityLabel ?? '왼쪽 버튼'}
+        accessibilityLabel={accessibilityLabel!}
       />
     );
   }
