@@ -14,14 +14,15 @@ export default function List({
   variant = 'plain',
   children,
 }: ListProps) {
+  if (variant === 'plain') {
+    return <View style={styles.container}>{children}</View>;
+  }
+
   return (
-    <View
-      style={[
-        styles.container,
-        variant === 'background' && styles.background,
-      ]}
-    >
-      {children}
+    <View style={[styles.container, styles.background]}>
+      <View style={styles.backgroundContent}>
+        {children}
+      </View>
     </View>
   );
 }
@@ -34,9 +35,14 @@ const styles = StyleSheet.create({
   },
 
   background: {
-    paddingVertical: 8,
-    borderRadius: radius.large,
+    borderRadius: radius.medium,
     backgroundColor: '#FFFFFF',
     boxShadow: '0px 0px 20px 0px rgba(0, 0, 0, 0.04)',
+  },
+
+  backgroundContent: {
+    paddingVertical: 8,
+    borderRadius: radius.medium,
+    overflow: 'hidden',
   },
 });
