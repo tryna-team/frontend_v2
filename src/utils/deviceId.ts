@@ -4,6 +4,15 @@ import { KV_KEYS, kvStorage } from '@/lib/storage';
 
 // 저장소 읽기·쓰기가 실패해도 앱이 켜져 있는 동안은 같은 값을 쓰도록 메모리에도 둔다.
 let cachedDeviceId: string | null = null;
+// 메모리의 ID를 아직 저장하지 못했으면 true. 다음 호출 때 다시 저장한다.
+let isPersistPending = false;
+
+/** 메모리의 ID를 저장한다. 실패하면 다음 호출 때 다시 시도하도록 표시한다 */
+function persist(deviceId: string): boolean {
+  const saved = kvStorage.set(KV_KEYS.deviceId, deviceId);
+  isPersistPending = !saved;
+  return saved;
+}
 
 /**
  * 이 설치본을 구분하는 deviceId. 저장된 값이 없으면 새로 만들어 저장한다.
@@ -12,6 +21,9 @@ let cachedDeviceId: string | null = null;
  */
 export function getDeviceId(): string {
   if (cachedDeviceId) {
+    if (isPersistPending) {
+      persist(cachedDeviceId);
+    }
     return cachedDeviceId;
   }
 
@@ -26,9 +38,11 @@ export function getDeviceId(): string {
 
   let deviceId = stored.value;
 
+  // 저장에 실패해도 이번 실행에서는 같은 ID를 쓰고, 다음 호출 때 다시 저장한다.
+  // 끝내 저장하지 못한 채 앱이 종료되면 다음 실행에서 새 ID가 만들어진다.
   if (!deviceId) {
     deviceId = randomUUID();
-    kvStorage.set(KV_KEYS.deviceId, deviceId);
+    persist(deviceId);
   }
 
   cachedDeviceId = deviceId;
@@ -49,7 +63,8 @@ export function resetDeviceId(): string {
 
   cachedDeviceId = deviceId;
 
-  if (!kvStorage.set(KV_KEYS.deviceId, deviceId)) {
+  // 실패해도 getDeviceId()가 호출될 때 다시 저장을 시도한다
+  if (!persist(deviceId)) {
     throw new Error('deviceId 저장 실패');
   }
 
