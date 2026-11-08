@@ -39,7 +39,19 @@
     "eslint": "^9.0.0",
     "eslint-config-expo": "~58.0.4",
     "prettier": "^3.9.10",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "storybook": "^10.6.6",
+    "@storybook/react-native-web-vite": "^10.6.6",
+    "@chromatic-com/storybook": "latest",
+    "@storybook/addon-vitest": "^10.6.6",
+    "@storybook/addon-a11y": "^10.6.6",
+    "@storybook/addon-docs": "^10.6.6",
+    "vite": "latest",
+    "eslint-plugin-storybook": "^10.6.6",
+    "vitest": "latest",
+    "@vitest/browser-playwright": "latest",
+    "@vitest/coverage-v8": "latest",
+    "playwright": "latest"
   },
   "scripts": {
     "start": "expo start",
@@ -48,7 +60,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json}\""
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json}\"",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "private": true
 }
