@@ -2,6 +2,12 @@ import type { Preview } from '@storybook/react-native-web-vite';
 
 const preview: Preview = {
   parameters: {
+    layout: 'centered',
+
+    viewport: {
+      defaultViewport: 'mobile1',
+    },
+
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -14,6 +20,10 @@ const preview: Preview = {
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: 'todo',
+    },
+
+    docs: {
+      codePanel: true,
     },
   },
 };
