@@ -1,12 +1,15 @@
 import type { Preview } from '@storybook/react-native-web-vite';
 
 const preview: Preview = {
+  initialGlobals: {
+    viewport: {
+      value: 'mobile1',
+      isRotated: false,
+    },
+  },
+
   parameters: {
     layout: 'centered',
-
-    viewport: {
-      defaultViewport: 'mobile1',
-    },
 
     controls: {
       matchers: {
