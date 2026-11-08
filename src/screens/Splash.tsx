@@ -16,7 +16,9 @@ interface SplashProps {
  */
 export default function Splash({ isAppReady }: SplashProps) {
   useEffect(() => {
-    // 앱 화면이 함께 그려진 뒤에 숨겨야 빈 화면이 잠깐 보이지 않는다
+    // 준비가 끝나 Stack이 그려진 직후에 숨긴다 (SDK 58 문서의 Expo Router 권장 방식).
+    // 다만 첫 화면이 한 박자 늦게 그려지면(index → /home 리다이렉트 등) 그 사이 빈 배경이 잠깐 보일 수 있다.
+    // 추가 예정: 화면 전체를 덮는 스플래시를 그릴 때, 첫 화면이 그려진 뒤에 사라지도록 함께 처리
     if (isAppReady) {
       SplashScreen.hide();
     }
