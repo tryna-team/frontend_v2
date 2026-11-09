@@ -5,19 +5,12 @@ import { colors, palette } from '@/theme/colors';
 // # 타입 영역
 type DateStatus = 'enable' | 'disable' | 'selected';
 
-type DateProps =
-  | {
-      variant: 'dateTime';
-      status?: DateStatus;
-      date: string;
-      time: string;
-    }
-  | {
-      variant: 'date';
-      status?: DateStatus;
-      date: string;
-      time?: never;
-    };
+type DateProps = {
+  variant: 'date' | 'dateTime';
+  status: 'enable' | 'selected';
+  date: string;
+  time: string;
+};
 
 // # 상수 영역
 const STATUS_COLORS = {

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -25,6 +24,9 @@ export default function Period({
   endTime,
 }: PeriodProps) {
   const [selectedDate, setSelectedDate] = useState<SelectedDate>(null);
+  const [isAllDay, setIsAllDay] = useState(false);
+
+  const dateVariant = isAllDay ? 'date' : 'dateTime';
 
   return (
     <View style={styles.container}>
@@ -38,7 +40,7 @@ export default function Period({
           accessibilityState={{ selected: selectedDate === 'start' }}
         >
           <Date
-            variant="dateTime"
+            variant={dateVariant}
             status={selectedDate === 'start' ? 'selected' : 'enable'}
             date={startDate}
             time={startTime}
@@ -56,7 +58,7 @@ export default function Period({
           accessibilityState={{ selected: selectedDate === 'end' }}
         >
           <Date
-            variant="dateTime"
+            variant={dateVariant}
             status={selectedDate === 'end' ? 'selected' : 'enable'}
             date={endDate}
             time={endTime}
@@ -66,13 +68,21 @@ export default function Period({
 
       {/* Trailing */}
       <View style={styles.trailing}>
-        {/* TODO: 하루종일 버튼 클릭 시 동작 확정 후 구현 */}
-        <Button
-          size="small"
-          appearance="bordered"
-          label="하루종일"
-          disabled
-        />
+        <Pressable
+          onPress={() => setIsAllDay((previous) => !previous)}
+          accessibilityRole="switch"
+          accessibilityLabel="하루종일"
+          accessibilityState={{ checked: isAllDay }}
+        >
+          <View pointerEvents="none">
+            <Button
+              size="small"
+              appearance="bordered"
+              label="하루종일"
+              disabled={!isAllDay}
+            />
+          </View>
+        </Pressable>
       </View>
     </View>
   );
@@ -86,11 +96,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
   },
+
   leading: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
   },
+
   trailing: {
     marginLeft: 'auto',
   },
