@@ -76,12 +76,14 @@ function Title({ date, onPrevious, onNext }: TitleProps) {
 // # WeekHeader
 function WeekHeader({ date, selectedColor }: WeekHeaderProps) {
   const startOfWeek = addDays(date, -date.getDay());
+  const today = new Date();
 
   return (
     <View style={styles.weekHeader}>
       {WEEKDAYS.map((weekday, index) => {
         const day = addDays(startOfWeek, index);
         const selected = isSameDate(day, date);
+        const isToday = isSameDate(day, today);
         const weekend = index === 0 || index === 6;
 
         return (
@@ -102,6 +104,7 @@ function WeekHeader({ date, selectedColor }: WeekHeaderProps) {
                 style={[
                   styles.numberText,
                   weekend && styles.weekendText,
+                  isToday && styles.todayText,
                   selected && styles.selectedText,
                   selected && { backgroundColor: selectedColor },
                 ]}
@@ -224,6 +227,10 @@ const styles = StyleSheet.create({
 
   weekendText: {
     color: colors.text.additional,
+  },
+
+  todayText: {
+    color: palette.apricot[400],
   },
 
   selectedText: {
