@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -22,8 +23,10 @@ type TitleProps = {
 };
 
 type WeekHeaderProps = {
-  date: Date;
+  weekStart: Date;
+  selectedDate: Date;
   selectedColor: string;
+  onSelect: (date: Date) => void;
 };
 
 // # 유틸 함수
@@ -32,6 +35,10 @@ function addDays(date: Date, days: number): Date {
   nextDate.setDate(nextDate.getDate() + days);
 
   return nextDate;
+}
+
+function getWeekStart(date: Date): Date {
+  return addDays(date, -date.getDay());
 }
 
 function isSameDate(a: Date, b: Date): boolean {
@@ -74,20 +81,31 @@ function Title({ date, onPrevious, onNext }: TitleProps) {
 }
 
 // # WeekHeader
-function WeekHeader({ date, selectedColor }: WeekHeaderProps) {
-  const startOfWeek = addDays(date, -date.getDay());
+function WeekHeader({
+  weekStart,
+  selectedDate,
+  selectedColor,
+  onSelect,
+}: WeekHeaderProps) {
   const today = new Date();
 
   return (
     <View style={styles.weekHeader}>
       {WEEKDAYS.map((weekday, index) => {
-        const day = addDays(startOfWeek, index);
-        const selected = isSameDate(day, date);
+        const day = addDays(weekStart, index);
+        const selected = isSameDate(day, selectedDate);
         const isToday = isSameDate(day, today);
         const weekend = index === 0 || index === 6;
 
         return (
-          <View key={weekday} style={styles.day}>
+          <Pressable
+            key={weekday}
+            style={styles.day}
+            onPress={() => onSelect(day)}
+            accessibilityRole="button"
+            accessibilityLabel={`${day.getMonth() + 1}월 ${day.getDate()}일`}
+            accessibilityState={{ selected }}
+          >
             {/* Week */}
             <Text
               style={[
@@ -112,7 +130,7 @@ function WeekHeader({ date, selectedColor }: WeekHeaderProps) {
                 {day.getDate()}
               </Text>
             </View>
-          </View>
+          </Pressable>
         );
       })}
     </View>
@@ -125,8 +143,14 @@ export default function DatePicker({
   onChange,
   selectedColor = palette.apricot[300],
 }: DatePickerProps) {
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(value));
+
   const handleWeekChange = (weeks: number) => {
-    onChange(addDays(value, weeks * 7));
+    setWeekStart((previous) => addDays(previous, weeks * 7));
+  };
+
+  const handleDateSelect = (date: Date) => {
+    onChange(date);
   };
 
   return (
@@ -138,8 +162,10 @@ export default function DatePicker({
       />
 
       <WeekHeader
-        date={value}
+        weekStart={weekStart}
+        selectedDate={value}
         selectedColor={selectedColor}
+        onSelect={handleDateSelect}
       />
     </View>
   );
