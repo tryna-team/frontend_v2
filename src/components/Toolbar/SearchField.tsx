@@ -72,7 +72,7 @@ export default function SearchField({
           isTyping ? styles.typing : styles.placeholder,
         ]}
       >
-        {!isTyping && <Leading />}
+        <Leading />
 
         {/* TODO: 입력필드 커서 커스텀 */}
         <TextInput
