@@ -1,5 +1,5 @@
 // ⚠️ 임시 더미 일정: API 연동 전까지 화면 확인에 쓴다. API 연동 후 삭제한다
-import type { CalendarEventDaySummary, CalendarEventDetail } from '@/apis/types/calendar';
+import type { CalendarEventDaySummary, CalendarEventDetail } from '@/apis/types';
 import { getMonthWeeks } from './utils/monthGrid';
 
 // # 함수 영역
@@ -79,4 +79,22 @@ export function getMockMonthlyEventDays(year: number, month: number): CalendarEv
       };
     })
     .filter((eventDay) => eventDay.hasEvent);
+}
+
+// ## 월 목록용 더미 응답: 'YYYY-MM' → 그 달의 날짜별 요약
+// 더미 일정은 길어야 두 달에 걸치므로, 일정이 시작하는 달과 끝나는 달만 모은다
+export function getMockEventDaysByMonth(): Partial<Record<string, CalendarEventDaySummary[]>> {
+  const monthKeys = new Set(
+    MOCK_EVENTS.flatMap((event) => [
+      event.startDate.slice(0, 7),
+      (event.endDate ?? event.startDate).slice(0, 7),
+    ]),
+  );
+
+  return Object.fromEntries(
+    [...monthKeys].map((key) => {
+      const [year, month] = key.split('-').map(Number);
+      return [key, getMockMonthlyEventDays(year, month)];
+    }),
+  );
 }

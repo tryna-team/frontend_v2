@@ -1,5 +1,5 @@
 // 일정 순서 규칙. 칸 안의 정렬과 여러 날 일정의 줄 배정 순서를 여기서만 정한다
-import type { CalendarEventDetail } from '@/apis/types/calendar';
+import type { CalendarEventDetail } from '@/apis/types';
 
 // # 타입 영역
 // 블록 모양(getEventBlockProps)과 정렬 순서를 함께 정하는 일정 종류

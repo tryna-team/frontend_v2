@@ -1,4 +1,4 @@
-import type { CalendarEventDaySummary, CalendarEventDetail } from '@/apis/types/calendar';
+import type { CalendarEventDaySummary, CalendarEventDetail } from '@/apis/types';
 import { tempDesignValues } from '@/theme/tempDesignValues';
 import type {
   CalendarWeek,

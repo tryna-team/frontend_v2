@@ -2,7 +2,7 @@ import { useRef, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BlurTargetView } from 'expo-blur';
 
-import { BlurTargetContext } from '@/components/Material/BlurTarget';
+import { BlurTargetContext, type ViewRef } from '@/components/Material/BlurTarget';
 import { colors } from '@theme/colors';
 
 import { Footer } from './Footer';
@@ -34,7 +34,7 @@ export function Layout({ toolbar, headerAccessory, footer, children }: LayoutPro
     hasHeader,
     hasFooter,
   });
-  const blurTargetRef = useRef<View>(null);
+  const blurTargetRef = useRef<ViewRef>(null);
 
   return (
     <BlurTargetContext.Provider value={blurTargetRef}>

@@ -3,6 +3,7 @@ import type { LucideProps } from 'lucide-react-native';
 import { Text, StyleSheet, Pressable, View } from 'react-native';
 
 import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
 import type { MenuItemProps } from './MenuType';
 
 // # 상수 영역
@@ -85,10 +86,15 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     backgroundColor: 'rgba(28, 22, 48, 0.05)',
   },
+  // Figma TDS/Label/Label1 (Wanted Sans 17/500/20/-0.2). 같은 값의 토큰이 없어
+  // Button의 labelTextStyle처럼 폰트만 기본값으로 두고 나머지는 Figma 값을 쓴다
   // TODO: TDS Typo로 교체
   text: {
+    fontFamily: fontFamily.default,
     fontSize: 17,
     fontWeight: '500',
+    lineHeight: 20,
+    letterSpacing: -0.2,
   },
   middle: {
     flex: 1,

@@ -19,6 +19,10 @@ export type ButtonSize = keyof typeof sizeLayouts;
 export type ButtonLayout = (typeof sizeLayouts)[ButtonSize];
 
 // # 모양 표 (appearance) - Figma Style
+// TODO: Figma Destructive 속성 미반영 (Style=Bordered - Prominent에만 있음)
+//   - 모양: 배경 palette.danger[200], 글자·아이콘 colors.text.white / 비활성은 기존 비활성과 동일 / 눌림 디자인 미정
+//   - 반영 시 appearance에 'destructive'를 추가하고, Button44Type의 Exclude<ButtonAppearance, 'prominent'>를
+//     Extract<ButtonAppearance, 'bordered' | 'borderless'>로 바꿔 Button44에 destructive가 들어가지 않게 한다
 export const appearanceStyles = {
   prominent: { backgroundColor: palette.blue[400], contentColor: colors.text.white },
   bordered: { backgroundColor: palette.whiteOpacity, contentColor: colors.text.default },

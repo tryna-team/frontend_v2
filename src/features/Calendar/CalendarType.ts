@@ -1,9 +1,13 @@
-import type { CalendarEventDaySummary } from '@/apis/types/calendar';
+import type { Ref } from 'react';
+
+import type { CalendarEventDaySummary } from '@/apis/types';
+import type { MainArea } from '@/components/layout';
+import type { MonthlyViewMode } from '@/stores';
 
 // # 데이터 타입
 // 월간 캘린더 표시 방식. Figma Day Block의 Information=Compact가 'summary', Detail이 'detail'이다
-// TODO: zustand 병합 후 settingsStore의 MonthlyViewMode를 다시 내보내도록 교체 (값이 같아 사용처는 그대로 둔다)
-export type MonthlyViewMode = 'summary' | 'detail';
+// 사용자 설정으로 저장되는 값이라 settingsStore의 타입을 그대로 다시 내보낸다
+export type { MonthlyViewMode };
 
 // 달력 한 칸의 날짜. getMonthWeeks가 만든다
 export type CalendarDate = {
@@ -13,6 +17,13 @@ export type CalendarDate = {
   day: number;
   dayOfWeek: number; // 0(일)~6(토). Week Body에서 칸 위치를 정한다
   isFirstDay: boolean; // Figma FirstDay. 1일이면 칸 위에 월을 표시한다
+};
+
+// 월 목록의 한 달. getMonthList가 만든다
+export type CalendarMonth = {
+  key: string; // 'YYYY-MM'. 목록의 키이자 eventDaysByMonth에서 그 달의 일정을 찾는 키
+  year: number;
+  month: number; // 1~12
 };
 
 // 한 달 안의 한 주. 그 달의 날짜만 담으므로 첫 주와 마지막 주는 7일보다 짧을 수 있다
@@ -120,4 +131,30 @@ export type CalendarBodyProps = {
   today: string;
   selectedDate?: string;
   onSelectDate?: (date: string) => void;
+};
+
+// 월 목록에서 화면이 직접 부르는 동작
+export type MonthlyCalendarHandle = {
+  // 날짜가 있는 달로 스크롤한다. 달 맨 위를 Header 바로 아래에 맞추고, 그 날짜의 주가 가려지면 보일 만큼 더 내린다
+  scrollToDate: (date: string) => void;
+};
+
+export type MonthlyCalendarProps = {
+  mainArea: MainArea; // Layout이 넘겨주는 메인 영역. 스크롤 여백과 Header·Footer 높이를 쓴다
+  viewMode: MonthlyViewMode;
+  // 처음 보여 줄 달과 월 목록 범위의 기준. 화면을 연 뒤 날짜가 바뀌어도 범위는 그대로 둔다
+  today: string;
+  selectedDate?: string;
+  // 'YYYY-MM' → 그 달의 날짜별 일정 요약 (B101 monthlyEventDays). 없는 달은 날짜만 그린다
+  eventDaysByMonth?: Partial<Record<string, CalendarEventDaySummary[]>>;
+  onSelectDate?: (date: string) => void;
+  // 화면에서 가장 많이 보이는 달이 바뀔 때 부른다. 헤더의 월 제목과 Toolbar의 연도에 쓴다
+  onVisibleMonthChange?: (year: number, month: number) => void;
+  ref?: Ref<MonthlyCalendarHandle>;
+};
+
+export type ViewModeMenuProps = {
+  visible: boolean;
+  onSelect: (mode: MonthlyViewMode) => void; // 항목을 누르면 부르고, 이어서 onClose로 메뉴를 닫는다
+  onClose: () => void; // 바깥을 누르거나 Android 뒤로가기를 누르면 부른다
 };

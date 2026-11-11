@@ -1,0 +1,28 @@
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+
+interface SplashProps {
+  /** 앱 시작 준비(useAppReady)가 끝났는지 */
+  isAppReady: boolean;
+}
+
+// 추가 예정: 디자인이 나오면 화면 전체를 덮는 스플래시를 그리고, 네이티브 스플래시는 이 화면이 그려진 직후(onLayout) 숨긴다
+// 추가 예정: 최소 표시 시간·종료 애니메이션도 여기서 처리하고, 끝나면 null을 반환해 뒤의 앱 화면이 드러나게 한다
+
+/**
+ * 앱 시작 스플래시. 루트 레이아웃이 앱 화면 위에 겹쳐 그리며, 스플래시 처리는 이 파일에서만 한다.
+ * 지금은 디자인이 없어 아무것도 그리지 않고, 네이티브 스플래시를 준비가 끝날 때까지 유지했다가 숨긴다.
+ * 웹에서는 expo-splash-screen이 아무 일도 하지 않는다.
+ */
+export default function Splash({ isAppReady }: SplashProps) {
+  useEffect(() => {
+    // 준비가 끝나 Stack이 그려진 직후에 숨긴다 (SDK 58 문서의 Expo Router 권장 방식).
+    // 다만 첫 화면이 한 박자 늦게 그려지면(index → /home 리다이렉트 등) 그 사이 빈 배경이 잠깐 보일 수 있다.
+    // 추가 예정: 화면 전체를 덮는 스플래시를 그릴 때, 첫 화면이 그려진 뒤에 사라지도록 함께 처리
+    if (isAppReady) {
+      SplashScreen.hide();
+    }
+  }, [isAppReady]);
+
+  return null;
+}

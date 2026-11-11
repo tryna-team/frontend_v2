@@ -23,6 +23,30 @@ export const tempDesignValues = {
     gap: 16, // 월 제목 ~ 요일 줄
   },
 
+  // ## 월 목록 (Home/Montly의 Calender Body 프레임)
+  monthList: {
+    // 달 사이 간격. Compact 화면은 10, Detail 화면은 0이다
+    gap: {
+      summary: 10,
+      detail: 0,
+    },
+  },
+
+  // ## 화면 Footer의 버튼 줄 (Home/Montly의 Footer)
+  // 버튼은 아래 끝을 맞춘다("+" 52, "오늘" 50). Figma Footer의 아래 여백이 28이라
+  // 버튼 아래 끝이 홈 인디케이터 영역(34) 안으로 6 들어간다
+  homeFooter: {
+    paddingTop: 16, // Footer 위 끝 ~ 가장 높은 버튼("+") 위 끝
+    paddingHorizontal: 24,
+  },
+
+  // ## 보기 전환 메뉴 (Home/Montly Menu의 Menu)
+  // 세로 위치는 Toolbar 윗변(상태바 바로 아래)과 같다
+  viewModeMenu: {
+    width: 250,
+    right: 19, // 화면 오른쪽 끝 ~ 메뉴
+  },
+
   // ## Day Block
   dayBlock: {
     titleGap: 4,

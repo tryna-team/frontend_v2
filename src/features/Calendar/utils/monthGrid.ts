@@ -1,23 +1,18 @@
 import { tempDesignValues } from '@/theme/tempDesignValues';
+import { toDateKey } from '@/utils/date';
 import type { CalendarDate, CalendarWeek, MonthlyViewMode } from '../CalendarType';
 
 // # 상수 영역
 const DAYS_IN_WEEK = 7;
 const SATURDAY = 6;
+const { dateTitle, dayBlock, weekBody } = tempDesignValues;
+// 첫 주는 1일 칸 위의 월 제목만큼 높다
+const MONTH_TITLE_HEIGHT = dateTitle.smallHeight + dayBlock.titleGap;
 
 // 일요일 시작. dayOfWeek(0~6)로 찾는다
 export const WEEKDAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'] as const;
 
 // # 함수 영역
-// ## 날짜 키
-// TODO: zustand 병합 후 src/utils/date.ts의 toDateKey로 교체 (같은 형식이라 import만 바꾼다)
-const pad2 = (value: number) => String(value).padStart(2, '0');
-
-// Date → 'YYYY-MM-DD'. toISOString()은 UTC라 기기 로컬 시간으로 만든다
-function toDateKey(date: Date): string {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
-}
-
 // ## 달의 주 목록
 // 일요일 시작 기준으로 그 달의 날짜를 주 단위로 나눈다. month는 1~12
 export function getMonthWeeks(year: number, month: number): CalendarWeek[] {
@@ -41,23 +36,36 @@ export function getMonthWeeks(year: number, month: number): CalendarWeek[] {
   return weeks;
 }
 
-// ## Calendar Body 높이
-// 칸 높이가 고정이라 주 수만으로 정해진다. 월 목록에서 스크롤 위치를 계산할 때 쓴다
+// ## 높이
+// 칸 높이가 고정이라 주 수와 주의 위치만으로 정해진다. 월 목록에서 스크롤 위치를 계산할 때 쓴다
+function getWeekHeight(viewMode: MonthlyViewMode): number {
+  return weekBody.paddingTop + dayBlock.contentHeight[viewMode] + weekBody.paddingBottom;
+}
+
+// 날짜가 그 달의 몇 번째 주인지 (0부터). 첫 주 앞의 빈 칸(1일의 요일)만큼 더해서 센다
+function getWeekIndex(year: number, month: number, day: number): number {
+  const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
+  return Math.floor((firstDayOfWeek + day - 1) / DAYS_IN_WEEK);
+}
+
+// ### Calendar Body 높이
 export function getCalendarBodyHeight(
   year: number,
   month: number,
   viewMode: MonthlyViewMode,
 ): number {
-  const { dateTitle, dayBlock, weekBody } = tempDesignValues;
-
-  const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
   const lastDay = new Date(year, month, 0).getDate();
-  const weekCount = Math.ceil((firstDayOfWeek + lastDay) / DAYS_IN_WEEK);
+  const weekCount = getWeekIndex(year, month, lastDay) + 1;
 
-  const weekHeight =
-    weekBody.paddingTop + dayBlock.contentHeight[viewMode] + weekBody.paddingBottom;
-  // 첫 주는 1일 칸 위의 월 제목만큼 높다
-  const titleHeight = dateTitle.smallHeight + dayBlock.titleGap;
+  return MONTH_TITLE_HEIGHT + getWeekHeight(viewMode) * weekCount;
+}
 
-  return weekHeight * weekCount + titleHeight;
+// ### 날짜가 있는 주의 아래 끝. Calendar Body 맨 위가 0이다
+export function getWeekBottom(
+  year: number,
+  month: number,
+  day: number,
+  viewMode: MonthlyViewMode,
+): number {
+  return MONTH_TITLE_HEIGHT + getWeekHeight(viewMode) * (getWeekIndex(year, month, day) + 1);
 }

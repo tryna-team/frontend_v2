@@ -32,6 +32,8 @@ export function Header({ safeAreaTop, toolbar, accessory, onLayout }: HeaderProp
       </BlurView>
       <View style={styles.toolbar}>{toolbar}</View>
       {accessory}
+      {/* 하단 구분선. Figma처럼 높이에 더하지 않고 맨 아래 1px에 겹쳐 그린다 (Calender Header 188) */}
+      <View style={styles.divider} />
     </View>
   );
 }
@@ -42,9 +44,15 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    // Figma Header Layer 하단 구분선: 1px, semantic/devider/default
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider.default,
+  },
+  // Figma Header Layer 하단 구분선: 1px, semantic/devider/default
+  divider: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 1,
+    backgroundColor: colors.divider.default,
   },
   background: {
     position: 'absolute',
