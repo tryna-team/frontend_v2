@@ -83,6 +83,7 @@ export default function EventCreate({
 
   // # Modal 상태
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+  const [listLayerTop, setListLayerTop] = useState(0);
 
   // # Todo 상태
   const [todos, setTodos] = useState<TodoItem[]>([]);
@@ -97,7 +98,7 @@ export default function EventCreate({
   };
 
   const handleCloseModal = () => {
-    // 선택값을 변경하지 않고 모달만 닫기
+    // 선택값은 유지하고 팝오버만 닫기
     setActiveModal(null);
   };
 
@@ -195,143 +196,152 @@ export default function EventCreate({
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
-        scrollEnabled={activeModal === null}
       >
-        {/* Title + Period */}
-        <View style={styles.headerContent}>
-          <Title
-            value={title}
-            onChangeText={setTitle}
-          />
-
-          <Period
-            startDate={startDate}
-            startTime={startTime}
-            endDate={endDate}
-            endTime={endTime}
-          />
-        </View>
-
-        {/* ListLayer */}
-        <View style={styles.listLayer}>
-          {/* 1. 반복 / 알림 */}
-          <Lists variant="default">
-            <List
-              variant="modal"
-              icon={RotateCw}
-              placeholder="반복 없음"
-              value={repeat === '없음' ? '' : repeat}
-              onPress={() => handleOpenModal('repeat')}
+        <View style={styles.contentInner}>
+          {/* Title + Period */}
+          <View style={styles.headerContent}>
+            <Title
+              value={title}
+              onChangeText={setTitle}
             />
 
-            <List
-              variant="modal"
-              icon={Bell}
-              placeholder="알림 없음"
-              value={
-                notification === '없음'
-                  ? ''
-                  : notification
-              }
-              onPress={() => handleOpenModal('notification')}
+            <Period
+              startDate={startDate}
+              startTime={startTime}
+              endDate={endDate}
+              endTime={endTime}
             />
-          </Lists>
+          </View>
 
-          {/* 2. TodoList */}
-          <Lists
-            variant="background"
-            paddingVertical={0}
+          {/* ListLayer */}
+          <View
+            style={styles.listLayer}
+            onLayout={(event) => {
+              const top = event.nativeEvent.layout.y;
+
+              setListLayerTop((previous) =>
+                previous === top ? previous : top,
+              );
+            }}
           >
-            {todos.map((todo) => (
-              <TodoList
-                key={todo.id}
-                variant="default"
-                value={todo.value}
-                onChangeText={(text) =>
-                  handleChangeTodo(todo.id, text)
-                }
-                onCopy={() => handleCopyTodo(todo.id)}
-                onDelete={() => handleDeleteTodo(todo.id)}
-                isOpen={openId === todo.id}
-                onOpenChange={(open) =>
-                  setOpenId(open ? todo.id : null)
-                }
+            {/* 1. 반복 / 알림 */}
+            <Lists variant="default">
+              <List
+                variant="modal"
+                icon={RotateCw}
+                placeholder="반복 없음"
+                value={repeat === '없음' ? '' : repeat}
+                onPress={() => handleOpenModal('repeat')}
               />
-            ))}
 
-            <TodoList
-              variant="add"
-              onAdd={handleAddTodo}
-            />
-          </Lists>
+              <List
+                variant="modal"
+                icon={Bell}
+                placeholder="알림 없음"
+                value={
+                  notification === '없음'
+                    ? ''
+                    : notification
+                }
+                onPress={() => handleOpenModal('notification')}
+              />
+            </Lists>
 
-          {/* 3. 위치 / URL / 메모 */}
-          <Lists variant="background">
-            <List
-              variant="input"
-              icon={MapPin}
-              placeholder="위치"
-              value={location}
-              onChangeText={setLocation}
-            />
-
-            <View style={styles.separator} />
-
-            <List
-              variant="input"
-              icon={Link}
-              placeholder="URL"
-              value={url}
-              onChangeText={setUrl}
-            />
-
-            <View style={styles.separator} />
-
-            <List
-              variant="input"
-              icon={FileText}
-              placeholder="메모"
-              value={memo}
-              onChangeText={setMemo}
-            />
-          </Lists>
-
-          {/* Option Popover */}
-          {activeModal && (
-            <View
-              style={styles.optionLayer}
-              pointerEvents="box-none"
+            {/* 2. TodoList */}
+            <Lists
+              variant="background"
+              paddingVertical={0}
             >
-              <View style={styles.option}>
-                <Option
-                  sections={
-                    activeModal === 'repeat'
-                      ? repeatSections
-                      : notificationSections
+              {todos.map((todo) => (
+                <TodoList
+                  key={todo.id}
+                  variant="default"
+                  value={todo.value}
+                  onChangeText={(text) =>
+                    handleChangeTodo(todo.id, text)
+                  }
+                  onCopy={() => handleCopyTodo(todo.id)}
+                  onDelete={() => handleDeleteTodo(todo.id)}
+                  isOpen={openId === todo.id}
+                  onOpenChange={(open) =>
+                    setOpenId(open ? todo.id : null)
                   }
                 />
+              ))}
+
+              <TodoList
+                variant="add"
+                onAdd={handleAddTodo}
+              />
+            </Lists>
+
+            {/* 3. 위치 / URL / 메모 */}
+            <Lists variant="background">
+              <List
+                variant="input"
+                icon={MapPin}
+                placeholder="위치"
+                value={location}
+                onChangeText={setLocation}
+              />
+
+              <View style={styles.separator} />
+
+              <List
+                variant="input"
+                icon={Link}
+                placeholder="URL"
+                value={url}
+                onChangeText={setUrl}
+              />
+
+              <View style={styles.separator} />
+
+              <List
+                variant="input"
+                icon={FileText}
+                placeholder="메모"
+                value={memo}
+                onChangeText={setMemo}
+              />
+            </Lists>
+          </View>
+
+          {/* Option Layer */}
+          {activeModal && (
+            <View style={styles.optionLayer}>
+              {/* 외부 터치 시 닫기 */}
+              <Pressable
+                style={StyleSheet.absoluteFill}
+                onPress={handleCloseModal}
+                accessibilityRole="button"
+                accessibilityLabel="선택 메뉴 닫기"
+              />
+
+              {/* Option Popover */}
+              <View
+                style={[
+                  styles.optionPosition,
+                  { top: listLayerTop },
+                ]}
+                pointerEvents="box-none"
+              >
+                <View style={styles.option}>
+                  <Option
+                    sections={
+                      activeModal === 'repeat'
+                        ? repeatSections
+                        : notificationSections
+                    }
+                  />
+                </View>
               </View>
             </View>
           )}
         </View>
       </ScrollView>
-
-      {/* Option 외부 터치 영역 */}
-      {activeModal && (
-        <View
-          style={styles.dismissLayer}
-          pointerEvents="box-none"
-        >
-          <Pressable
-            style={StyleSheet.absoluteFill}
-            onPress={handleCloseModal}
-            accessibilityRole="button"
-            accessibilityLabel="선택 메뉴 닫기"
-          />
-        </View>
-      )}
     </View>
   );
 }
@@ -353,6 +363,10 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
 
+  contentInner: {
+    width: '100%',
+  },
+
   // ## Title + Period
   headerContent: {
     gap: 32,
@@ -362,7 +376,6 @@ const styles = StyleSheet.create({
   listLayer: {
     marginTop: 16,
     gap: 32,
-    position: 'relative',
   },
 
   separator: {
@@ -371,27 +384,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#1C16300D',
   },
 
-  // ## Option
+  // ## Option Layer
   optionLayer: {
+    ...StyleSheet.absoluteFill,
+    zIndex: 10,
+    elevation: 10,
+  },
+
+  optionPosition: {
     position: 'absolute',
-    top: 0,
     left: 0,
     right: 0,
     alignItems: 'flex-end',
-    zIndex: 10,
-    elevation: 10,
   },
 
   option: {
     width: POPOVER_WIDTH,
     borderRadius: 30,
     overflow: 'hidden',
-  },
-
-  // ## 외부 터치
-  dismissLayer: {
-    ...StyleSheet.absoluteFill,
-    zIndex: 5,
-    elevation: 5,
   },
 });
