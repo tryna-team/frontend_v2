@@ -1,21 +1,7 @@
 import { useEffect, useState } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import {
-  CalendarDays,
-  Copy,
-  Plus,
-  Trash2,
-} from 'lucide-react-native';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { CalendarDays, Copy, Plus, Trash2 } from 'lucide-react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -37,8 +23,7 @@ const ACTION_GAP = 8;
 const HORIZONTAL_PADDING = 16;
 
 const ACTIONS_WIDTH = ACTION_SIZE * 2 + ACTION_GAP;
-const SWIPE_DISTANCE =
-  ACTIONS_WIDTH + ACTION_GAP + HORIZONTAL_PADDING;
+const SWIPE_DISTANCE = ACTIONS_WIDTH + ACTION_GAP + HORIZONTAL_PADDING;
 
 const SWIPE_THRESHOLD = 12;
 const ANIMATION_DURATION = 80;
@@ -52,6 +37,8 @@ type DefaultTodoListProps = {
   onTrailingPress?: () => void;
   onCopy?: () => void;
   onDelete?: () => void;
+  onFocus?: () => void;
+  onInteraction?: () => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -61,9 +48,7 @@ type AddTodoListProps = {
   onAdd: () => void;
 };
 
-type TodoListProps =
-  | DefaultTodoListProps
-  | AddTodoListProps;
+type TodoListProps = DefaultTodoListProps | AddTodoListProps;
 
 // # Add
 function AddTodoList({ onAdd }: AddTodoListProps) {
@@ -75,17 +60,8 @@ function AddTodoList({ onAdd }: AddTodoListProps) {
       accessibilityLabel="할 일 추가"
     >
       <ListItemLayout
-        leading={
-          <Plus
-            size={24}
-            color={colors.icon.additional}
-          />
-        }
-        middle={
-          <Text style={styles.addText}>
-            할 일 추가
-          </Text>
-        }
+        leading={<Plus size={24} color={colors.icon.additional} />}
+        middle={<Text style={styles.addText}>할 일 추가</Text>}
         gap={16}
         style={styles.listLayout}
       />
@@ -101,6 +77,8 @@ function DefaultTodoList({
   onTrailingPress,
   onCopy,
   onDelete,
+  onFocus,
+  onInteraction,
   isOpen,
   onOpenChange,
 }: DefaultTodoListProps) {
@@ -110,10 +88,7 @@ function DefaultTodoList({
 
   // # 애니메이션 영역
   useEffect(() => {
-    translateX.value = withTiming(
-      isOpen ? -SWIPE_DISTANCE : 0,
-      { duration: ANIMATION_DURATION },
-    );
+    translateX.value = withTiming(isOpen ? -SWIPE_DISTANCE : 0, { duration: ANIMATION_DURATION });
   }, [isOpen, translateX]);
 
   const rowAnimatedStyle = useAnimatedStyle(() => ({
@@ -121,32 +96,21 @@ function DefaultTodoList({
   }));
 
   const overlayAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      translateX.value,
-      [-SWIPE_DISTANCE, 0],
-      [1, 0],
-      'clamp',
-    ),
+    opacity: interpolate(translateX.value, [-SWIPE_DISTANCE, 0], [1, 0], 'clamp'),
   }));
 
   // # 제스처 영역
   const panGesture = Gesture.Pan()
-    .activeOffsetX([
-      -SWIPE_THRESHOLD,
-      SWIPE_THRESHOLD,
-    ])
+    .activeOffsetX([-SWIPE_THRESHOLD, SWIPE_THRESHOLD])
     .failOffsetY([-15, 15])
     .runOnJS(true)
+    .onStart(() => {
+      onInteraction?.();
+    })
     .onEnd((event) => {
-      if (
-        !isOpen &&
-        event.translationX < -SWIPE_THRESHOLD
-      ) {
+      if (!isOpen && event.translationX < -SWIPE_THRESHOLD) {
         onOpenChange(true);
-      } else if (
-        isOpen &&
-        event.translationX > SWIPE_THRESHOLD
-      ) {
+      } else if (isOpen && event.translationX > SWIPE_THRESHOLD) {
         onOpenChange(false);
       }
     });
@@ -155,16 +119,10 @@ function DefaultTodoList({
   return (
     <View
       style={styles.container}
-      onTouchStart={(event) => {
-        // Todo 내부 터치는 외부 터치로 처리하지 않음
-        event.stopPropagation();
-      }}
       onLayout={(event) => {
         const width = event.nativeEvent.layout.width;
 
-        setContainerWidth((previous) =>
-          previous === width ? previous : width,
-        );
+        setContainerWidth((previous) => (previous === width ? previous : width));
       }}
     >
       <GestureDetector gesture={panGesture}>
@@ -178,38 +136,24 @@ function DefaultTodoList({
           ]}
         >
           {/* Content */}
-          <View
-            style={[
-              styles.content,
-              { width: containerWidth },
-            ]}
-          >
+          <View style={[styles.content, { width: containerWidth }]}>
             {/* Overlay */}
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                styles.overlay,
-                overlayAnimatedStyle,
-              ]}
-            />
+            <Animated.View pointerEvents="none" style={[styles.overlay, overlayAnimatedStyle]} />
 
             {/* Leading + Middle */}
             <View style={styles.list}>
               <ListItemLayout
-                leading={
-                  <CircleIcon
-                    size={22}
-                    color={colors.icon.additional}
-                  />
-                }
+                leading={<CircleIcon size={22} color={colors.icon.additional} />}
                 middle={
                   <TextInput
                     value={value}
                     onChangeText={onChangeText}
+                    onFocus={() => {
+                      onInteraction?.();
+                      onFocus?.();
+                    }}
                     placeholder="할 일 추가"
-                    placeholderTextColor={
-                      colors.text.disable
-                    }
+                    placeholderTextColor={colors.text.disable}
                     style={styles.input}
                     returnKeyType="done"
                     accessibilityLabel="할 일 입력"
@@ -222,24 +166,18 @@ function DefaultTodoList({
 
             {/* Trailing */}
             <Pressable
-              onPress={onTrailingPress}
+              onPress={() => {
+                onInteraction?.();
+                onTrailingPress?.();
+              }}
               style={styles.trailing}
               accessibilityRole="button"
               accessibilityLabel="할 일 날짜 선택"
             >
               {trailingText ? (
-                <Text style={styles.trailingText}>
-                  {trailingText}
-                </Text>
+                <Text style={styles.trailingText}>{trailingText}</Text>
               ) : (
-                <CalendarDays
-                  size={24}
-                  color={
-                    value
-                      ? colors.icon.default
-                      : colors.icon.disable
-                  }
-                />
+                <CalendarDays size={24} color={value ? colors.icon.default : colors.icon.disable} />
               )}
             </Pressable>
           </View>
@@ -267,10 +205,7 @@ function DefaultTodoList({
                 onOpenChange(false);
               }}
             >
-              <Trash2
-                size={22}
-                color={colors.icon.white}
-              />
+              <Trash2 size={22} color={colors.icon.white} />
             </Pressable>
           </View>
         </Animated.View>
@@ -306,12 +241,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 50,
     backgroundColor: 'transparent',
+    borderTopRightRadius: radius.full,
+    borderBottomRightRadius: radius.full,
     overflow: 'hidden',
   },
 
   overlay: {
     ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(28, 22, 48, 0.05)',
+    borderTopRightRadius: radius.full,
+    borderBottomRightRadius: radius.full,
   },
 
   list: {
