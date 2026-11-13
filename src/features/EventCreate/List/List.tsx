@@ -1,28 +1,49 @@
-import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import type { ComponentType } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
+import type { LucideProps } from 'lucide-react-native';
 
-import { radius } from '@/theme/radius';
+import ListItemLayout from '@/components/List/ListItemLayout';
+
+import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
 
 // # 타입 영역
 type ListProps = {
-  variant?: 'background' | 'plain';
-  children: ReactNode;
+  icon: ComponentType<LucideProps>;
+  placeholder: string;
+  value: string;
+  onChangeText: (text: string) => void;
 };
 
 // # Main component
 export default function List({
-  variant = 'plain',
-  children,
+  icon: Icon,
+  placeholder,
+  value,
+  onChangeText,
 }: ListProps) {
-  if (variant === 'plain') {
-    return <View style={styles.container}>{children}</View>;
-  }
-
   return (
-    <View style={[styles.container, styles.background]}>
-      <View style={styles.backgroundContent}>
-        {children}
-      </View>
+    <View style={styles.container}>
+      <ListItemLayout
+        leading={
+          <Icon
+            size={24}
+            color={colors.icon.additional}
+          />
+        }
+        middle={
+          <TextInput
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={colors.text.disable}
+            style={styles.input}
+            accessibilityLabel={placeholder}
+          />
+        }
+        gap={16}
+        style={styles.layout}
+      />
     </View>
   );
 }
@@ -31,18 +52,26 @@ export default function List({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    gap: 0,
+    minHeight: 50,
+    justifyContent: 'center',
   },
 
-  background: {
-    borderRadius: radius.medium,
-    backgroundColor: '#FFFFFF',
-    boxShadow: '0px 0px 20px 0px rgba(0, 0, 0, 0.04)',
+  layout: {
+    paddingHorizontal: 16,
   },
 
-  backgroundContent: {
-    paddingVertical: 8,
-    borderRadius: radius.medium,
-    overflow: 'hidden',
+  input: {
+    flex: 1,
+    minWidth: 0,
+    padding: 0,
+
+    fontFamily: fontFamily.default,
+    fontSize: 17,
+    fontWeight: '400',
+    lineHeight: 20,
+    letterSpacing: -0.2,
+
+    color: colors.text.default,
+    includeFontPadding: false,
   },
 });

@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import {
   Bell,
   FileText,
@@ -13,9 +7,6 @@ import {
   MapPin,
   RotateCw,
 } from 'lucide-react-native';
-
-import { colors } from '@/theme/colors';
-import { fontFamily } from '@/theme/typography';
 
 import Title from './Title';
 import Period from './Period';
@@ -36,37 +27,6 @@ type TodoItem = {
   value: string;
 };
 
-type ListRowProps = {
-  icon: typeof Bell;
-  label: string;
-  onPress?: () => void;
-};
-
-// # ListRow
-function ListRow({
-  icon: Icon,
-  label,
-  onPress,
-}: ListRowProps) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={styles.listRow}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-    >
-      <Icon
-        size={24}
-        color={colors.icon.additional}
-      />
-
-      <Text style={styles.listText}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 // # Main component
 export default function EventCreate({
   startDate,
@@ -75,11 +35,20 @@ export default function EventCreate({
   endTime,
 }: EventCreateProps) {
   const [title, setTitle] = useState('');
+
+  // # List 상태
+  const [repeat, setRepeat] = useState('');
+  const [notification, setNotification] = useState('');
+  const [location, setLocation] = useState('');
+  const [url, setUrl] = useState('');
+  const [memo, setMemo] = useState('');
+
+  // # Todo 상태
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
   const [nextId, setNextId] = useState(1);
 
-  // # 함수 영역
+  // # Todo 함수
   const handleAddTodo = () => {
     setTodos((previous) => [
       ...previous,
@@ -149,19 +118,19 @@ export default function EventCreate({
       <View style={styles.listLayer}>
         {/* 1. 반복 / 알림 */}
         <Lists variant="default">
-          <List>
-            <ListRow
-              icon={RotateCw}
-              label="반복 없음"
-            />
-          </List>
+          <List
+            icon={RotateCw}
+            placeholder="반복 없음"
+            value={repeat}
+            onChangeText={setRepeat}
+          />
 
-          <List>
-            <ListRow
-              icon={Bell}
-              label="알림 없음"
-            />
-          </List>
+          <List
+            icon={Bell}
+            placeholder="알림 없음"
+            value={notification}
+            onChangeText={setNotification}
+          />
         </Lists>
 
         {/* 2. TodoList */}
@@ -194,30 +163,30 @@ export default function EventCreate({
 
         {/* 3. 위치 / URL / 메모 */}
         <Lists variant="background">
-          <List>
-            <ListRow
-              icon={MapPin}
-              label="위치"
-            />
-          </List>
+          <List
+            icon={MapPin}
+            placeholder="위치"
+            value={location}
+            onChangeText={setLocation}
+          />
 
           <View style={styles.separator} />
 
-          <List>
-            <ListRow
-              icon={Link}
-              label="URL"
-            />
-          </List>
+          <List
+            icon={Link}
+            placeholder="URL"
+            value={url}
+            onChangeText={setUrl}
+          />
 
           <View style={styles.separator} />
 
-          <List>
-            <ListRow
-              icon={FileText}
-              label="메모"
-            />
-          </List>
+          <List
+            icon={FileText}
+            placeholder="메모"
+            value={memo}
+            onChangeText={setMemo}
+          />
         </Lists>
       </View>
     </ScrollView>
@@ -228,7 +197,6 @@ export default function EventCreate({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
     width: '100%',
   },
 
@@ -243,32 +211,14 @@ const styles = StyleSheet.create({
 
   // ## ListLayer
   listLayer: {
+    paddingHorizontal: 16,
     marginTop: 16,
     gap: 32,
-  },
-
-  // ## List
-  listRow: {
-    minHeight: 50,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    gap: 16,
-  },
-
-  listText: {
-    fontFamily: fontFamily.default,
-    fontSize: 17,
-    fontWeight: '400',
-    lineHeight: 20,
-    letterSpacing: -0.2,
-    color: colors.text.disable,
-    includeFontPadding: false,
   },
 
   separator: {
     height: 1,
     marginHorizontal: 16,
-    backgroundColor: colors.divider.default,
+    backgroundColor: '#1C16300D',
   },
 });
