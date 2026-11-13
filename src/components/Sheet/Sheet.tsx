@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFB',
   },
   header: {
-    height: 76,
+    height: 58,
   },
   grabberContainer: {
     paddingTop: 6,
