@@ -21,7 +21,7 @@ import Title from './Title';
 import Period from './Period';
 import List from './List/List';
 import Lists from './List/Lists';
-import TodoList from './TodoList';
+import TodoList from './List/TodoList';
 
 // # 타입 영역
 type EventCreateProps = {
