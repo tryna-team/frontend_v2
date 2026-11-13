@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { CalendarDays, Copy, Trash2 } from 'lucide-react-native';
+import { CalendarDays, Copy, Plus, Trash2 } from 'lucide-react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
@@ -29,7 +29,8 @@ const SWIPE_THRESHOLD = 12;
 const ANIMATION_DURATION = 80;
 
 // # 타입 영역
-type TodoListProps = {
+type DefaultTodoListProps = {
+  variant?: 'default';
   value: string;
   onChangeText: (text: string) => void;
   trailingText?: string;
@@ -40,8 +41,43 @@ type TodoListProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-// # Main component
-export default function TodoList({
+type AddTodoListProps = {
+  variant: 'add';
+  onAdd: () => void;
+};
+
+type TodoListProps = DefaultTodoListProps | AddTodoListProps;
+
+// # Add
+function AddTodoList({ onAdd }: AddTodoListProps) {
+  return (
+    <Pressable
+      onPress={onAdd}
+      style={styles.addContainer}
+      accessibilityRole="button"
+      accessibilityLabel="할 일 추가"
+    >
+      <ListItemLayout
+        leading={
+          <Plus
+            size={24}
+            color={colors.icon.additional}
+          />
+        }
+        middle={
+          <Text style={styles.addText}>
+            할 일 추가
+          </Text>
+        }
+        gap={16}
+        style={styles.listLayout}
+      />
+    </Pressable>
+  );
+}
+
+// # Default
+function DefaultTodoList({
   value,
   onChangeText,
   trailingText,
@@ -50,7 +86,7 @@ export default function TodoList({
   onDelete,
   isOpen,
   onOpenChange,
-}: TodoListProps) {
+}: DefaultTodoListProps) {
   const [containerWidth, setContainerWidth] = useState(0);
 
   const translateX = useSharedValue(0);
@@ -211,6 +247,15 @@ export default function TodoList({
   );
 }
 
+// # Main component
+export default function TodoList(props: TodoListProps) {
+  if (props.variant === 'add') {
+    return <AddTodoList {...props} />;
+  }
+
+  return <DefaultTodoList {...props} />;
+}
+
 // # 스타일 영역
 const styles = StyleSheet.create({
   container: {
@@ -291,5 +336,21 @@ const styles = StyleSheet.create({
     backgroundColor: palette.danger[200],
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // ## Add
+  addContainer: {
+    width: '100%',
+    minHeight: 50,
+    justifyContent: 'center',
+  },
+
+  addText: {
+    fontFamily: fontFamily.default,
+    fontSize: 17,
+    fontWeight: '500',
+    lineHeight: 22,
+    letterSpacing: -0.2,
+    color: colors.text.disable,
   },
 });
