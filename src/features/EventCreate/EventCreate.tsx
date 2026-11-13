@@ -6,6 +6,10 @@ import {
   View,
 } from 'react-native';
 import {
+  Gesture,
+  GestureDetector,
+} from 'react-native-gesture-handler';
+import {
   Bell,
   FileText,
   Link,
@@ -89,6 +93,16 @@ export default function EventCreate({
   // # Todo 상태
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
+
+  // # Todo 외부 탭 감지
+  const outsideTap = Gesture.Tap()
+    .maxDistance(10)
+    .runOnJS(true)
+    .onEnd((_event, success) => {
+      if (success) {
+        setOpenId(null);
+      }
+    });
 
   // # Modal 함수
   const handleOpenModal = (
@@ -204,182 +218,186 @@ export default function EventCreate({
 
   // # Main UI
   return (
-    <View
-      style={styles.root}
-      onTouchStart={() => {
-        // Todo 외부 영역을 터치하면 열린 행 닫기
-        if (openId !== null) {
-          setOpenId(null);
-        }
-      }}
-    >
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="always"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.contentInner}>
-          {/* Title + Period */}
-          <View style={styles.headerContent}>
-            <Title
-              value={title}
-              onChangeText={setTitle}
-            />
-
-            <Period
-              startDate={startDate}
-              startTime={startTime}
-              endDate={endDate}
-              endTime={endTime}
-            />
-          </View>
-
-          {/* ListLayer */}
-          <View
-            style={styles.listLayer}
-            onLayout={(event) => {
-              const top = event.nativeEvent.layout.y;
-
-              setListLayerTop((previous) =>
-                previous === top
-                  ? previous
-                  : top,
-              );
-            }}
-          >
-            {/* 1. 반복 / 알림 */}
-            <Lists variant="default">
-              <List
-                variant="modal"
-                icon={RotateCw}
-                placeholder="반복 없음"
-                value={
-                  repeat === '없음'
-                    ? ''
-                    : repeat
-                }
-                onPress={() =>
-                  handleOpenModal('repeat')
-                }
+    <GestureDetector gesture={outsideTap}>
+      <View style={styles.root}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="always"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.contentInner}>
+            {/* Title + Period */}
+            <View style={styles.headerContent}>
+              <Title
+                value={title}
+                onChangeText={setTitle}
               />
 
-              <List
-                variant="modal"
-                icon={Bell}
-                placeholder="알림 없음"
-                value={
-                  notification === '없음'
-                    ? ''
-                    : notification
-                }
-                onPress={() =>
-                  handleOpenModal('notification')
-                }
+              <Period
+                startDate={startDate}
+                startTime={startTime}
+                endDate={endDate}
+                endTime={endTime}
               />
-            </Lists>
+            </View>
 
-            {/* 2. TodoList */}
-            <Lists
-              variant="background"
-              paddingVertical={0}
+            {/* ListLayer */}
+            <View
+              style={styles.listLayer}
+              onLayout={(event) => {
+                const top = event.nativeEvent.layout.y;
+
+                setListLayerTop((previous) =>
+                  previous === top
+                    ? previous
+                    : top,
+                );
+              }}
             >
-              {todos.map((todo) => (
-                <TodoList
-                  key={todo.id}
-                  variant="default"
-                  value={todo.value}
-                  onChangeText={(text) =>
-                    handleChangeTodo(
-                      todo.id,
-                      text,
-                    )
+              {/* 1. 반복 / 알림 */}
+              <Lists variant="default">
+                <List
+                  variant="modal"
+                  icon={RotateCw}
+                  placeholder="반복 없음"
+                  value={
+                    repeat === '없음'
+                      ? ''
+                      : repeat
                   }
-                  onCopy={() =>
-                    handleCopyTodo(todo.id)
-                  }
-                  onDelete={() =>
-                    handleDeleteTodo(todo.id)
-                  }
-                  isOpen={openId === todo.id}
-                  onOpenChange={(open) =>
-                    setOpenId(
-                      open ? todo.id : null,
-                    )
+                  onPress={() =>
+                    handleOpenModal('repeat')
                   }
                 />
-              ))}
 
-              <TodoList
-                variant="add"
-                onAdd={handleAddTodo}
-              />
-            </Lists>
+                <List
+                  variant="modal"
+                  icon={Bell}
+                  placeholder="알림 없음"
+                  value={
+                    notification === '없음'
+                      ? ''
+                      : notification
+                  }
+                  onPress={() =>
+                    handleOpenModal('notification')
+                  }
+                />
+              </Lists>
 
-            {/* 3. 위치 / URL / 메모 */}
-            <Lists variant="background">
-              <List
-                variant="input"
-                icon={MapPin}
-                placeholder="위치"
-                value={location}
-                onChangeText={setLocation}
-              />
-
-              <View style={styles.separator} />
-
-              <List
-                variant="input"
-                icon={Link}
-                placeholder="URL"
-                value={url}
-                onChangeText={setUrl}
-              />
-
-              <View style={styles.separator} />
-
-              <List
-                variant="input"
-                icon={FileText}
-                placeholder="메모"
-                value={memo}
-                onChangeText={setMemo}
-              />
-            </Lists>
-          </View>
-
-          {/* Option Layer */}
-          {activeModal && (
-            <View style={styles.optionLayer}>
-              <Pressable
-                style={StyleSheet.absoluteFill}
-                onPress={handleCloseModal}
-                accessibilityRole="button"
-                accessibilityLabel="선택 메뉴 닫기"
-              />
-
-              <View
-                style={[
-                  styles.optionPosition,
-                  { top: listLayerTop },
-                ]}
-                pointerEvents="box-none"
+              {/* 2. TodoList */}
+              <Lists
+                variant="background"
+                paddingVertical={0}
               >
-                <View style={styles.option}>
-                  <Option
-                    sections={
-                      activeModal === 'repeat'
-                        ? repeatSections
-                        : notificationSections
+                {todos.map((todo) => (
+                  <TodoList
+                    key={todo.id}
+                    variant="default"
+                    value={todo.value}
+                    onChangeText={(text) =>
+                      handleChangeTodo(
+                        todo.id,
+                        text,
+                      )
+                    }
+                    onFocus={() => {
+                      if (openId !== todo.id) {
+                        setOpenId(null);
+                      }
+                    }}
+                    onInteraction={() => {
+                      if (openId !== todo.id) {
+                        setOpenId(null);
+                      }
+                    }}
+                    onCopy={() =>
+                      handleCopyTodo(todo.id)
+                    }
+                    onDelete={() =>
+                      handleDeleteTodo(todo.id)
+                    }
+                    isOpen={openId === todo.id}
+                    onOpenChange={(open) =>
+                      setOpenId(
+                        open ? todo.id : null,
+                      )
                     }
                   />
+                ))}
+
+                <TodoList
+                  variant="add"
+                  onAdd={handleAddTodo}
+                />
+              </Lists>
+
+              {/* 3. 위치 / URL / 메모 */}
+              <Lists variant="background">
+                <List
+                  variant="input"
+                  icon={MapPin}
+                  placeholder="위치"
+                  value={location}
+                  onChangeText={setLocation}
+                />
+
+                <View style={styles.separator} />
+
+                <List
+                  variant="input"
+                  icon={Link}
+                  placeholder="URL"
+                  value={url}
+                  onChangeText={setUrl}
+                />
+
+                <View style={styles.separator} />
+
+                <List
+                  variant="input"
+                  icon={FileText}
+                  placeholder="메모"
+                  value={memo}
+                  onChangeText={setMemo}
+                />
+              </Lists>
+            </View>
+
+            {/* Option Layer */}
+            {activeModal && (
+              <View style={styles.optionLayer}>
+                <Pressable
+                  style={StyleSheet.absoluteFill}
+                  onPress={handleCloseModal}
+                  accessibilityRole="button"
+                  accessibilityLabel="선택 메뉴 닫기"
+                />
+
+                <View
+                  style={[
+                    styles.optionPosition,
+                    { top: listLayerTop },
+                  ]}
+                  pointerEvents="box-none"
+                >
+                  <View style={styles.option}>
+                    <Option
+                      sections={
+                        activeModal === 'repeat'
+                          ? repeatSections
+                          : notificationSections
+                      }
+                    />
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </View>
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    </GestureDetector>
   );
 }
 
