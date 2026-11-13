@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
-import { View, StyleSheet } from 'react-native';
+import {
+  StyleSheet,
+  View,
+} from 'react-native';
 
-import { colors } from '@/theme/colors';
 import { radius } from '@/theme/radius';
 
 // # 타입 영역
@@ -24,9 +26,8 @@ export default function Lists({
       style={[
         styles.container,
         isBackground && styles.background,
-        {
-          paddingVertical:
-            paddingVertical ?? (isBackground ? 8 : 0),
+        isBackground && {
+          paddingVertical: paddingVertical ?? 8,
         },
       ]}
     >
@@ -39,13 +40,15 @@ export default function Lists({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    flexDirection: 'column',
-    gap: 0,
   },
 
   background: {
+    backgroundColor: '#FFFFFF',
     borderRadius: radius.large,
-    backgroundColor: colors.background.white,
-    boxShadow: '0px 0px 20px 0px rgba(0, 0, 0, 0.04)',
+    boxShadow: '0 0 20px rgba(0, 0, 0, 0.04)',
+
+    // 내부 Todo 스와이프 영역이 Lists 바깥으로
+    // 그려지지 않도록 제한
+    overflow: 'hidden',
   },
 });

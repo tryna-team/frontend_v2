@@ -82,7 +82,8 @@ export default function EventCreate({
   const [memo, setMemo] = useState('');
 
   // # Modal 상태
-  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
+  const [activeModal, setActiveModal] =
+    useState<ActiveModal>(null);
   const [listLayerTop, setListLayerTop] = useState(0);
 
   // # Todo 상태
@@ -98,7 +99,6 @@ export default function EventCreate({
   };
 
   const handleCloseModal = () => {
-    // 선택값은 유지하고 팝오버만 닫기
     setActiveModal(null);
   };
 
@@ -131,17 +131,21 @@ export default function EventCreate({
           id: 'none',
           content: '없음',
           selection: notification === '없음',
-          onPress: () => handleSelectNotification('없음'),
+          onPress: () =>
+            handleSelectNotification('없음'),
         },
       ],
     },
     {
-      items: NOTIFICATION_OPTIONS.slice(1).map((value) => ({
-        id: value,
-        content: value,
-        selection: notification === value,
-        onPress: () => handleSelectNotification(value),
-      })),
+      items: NOTIFICATION_OPTIONS.slice(1).map(
+        (value) => ({
+          id: value,
+          content: value,
+          selection: notification === value,
+          onPress: () =>
+            handleSelectNotification(value),
+        }),
+      ),
     },
   ];
 
@@ -157,7 +161,10 @@ export default function EventCreate({
     setOpenId(null);
   };
 
-  const handleChangeTodo = (id: number, text: string) => {
+  const handleChangeTodo = (
+    id: number,
+    text: string,
+  ) => {
     setTodos((previous) =>
       previous.map((todo) =>
         todo.id === id
@@ -168,7 +175,9 @@ export default function EventCreate({
   };
 
   const handleCopyTodo = (id: number) => {
-    const target = todos.find((todo) => todo.id === id);
+    const target = todos.find(
+      (todo) => todo.id === id,
+    );
 
     if (!target) return;
 
@@ -176,7 +185,10 @@ export default function EventCreate({
 
     setTodos((previous) => [
       ...previous,
-      { id: newId, value: target.value },
+      {
+        id: newId,
+        value: target.value,
+      },
     ]);
 
     setOpenId(null);
@@ -192,7 +204,15 @@ export default function EventCreate({
 
   // # Main UI
   return (
-    <View style={styles.root}>
+    <View
+      style={styles.root}
+      onTouchStart={() => {
+        // Todo 외부 영역을 터치하면 열린 행 닫기
+        if (openId !== null) {
+          setOpenId(null);
+        }
+      }}
+    >
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.content}
@@ -222,7 +242,9 @@ export default function EventCreate({
               const top = event.nativeEvent.layout.y;
 
               setListLayerTop((previous) =>
-                previous === top ? previous : top,
+                previous === top
+                  ? previous
+                  : top,
               );
             }}
           >
@@ -232,8 +254,14 @@ export default function EventCreate({
                 variant="modal"
                 icon={RotateCw}
                 placeholder="반복 없음"
-                value={repeat === '없음' ? '' : repeat}
-                onPress={() => handleOpenModal('repeat')}
+                value={
+                  repeat === '없음'
+                    ? ''
+                    : repeat
+                }
+                onPress={() =>
+                  handleOpenModal('repeat')
+                }
               />
 
               <List
@@ -245,7 +273,9 @@ export default function EventCreate({
                     ? ''
                     : notification
                 }
-                onPress={() => handleOpenModal('notification')}
+                onPress={() =>
+                  handleOpenModal('notification')
+                }
               />
             </Lists>
 
@@ -260,13 +290,22 @@ export default function EventCreate({
                   variant="default"
                   value={todo.value}
                   onChangeText={(text) =>
-                    handleChangeTodo(todo.id, text)
+                    handleChangeTodo(
+                      todo.id,
+                      text,
+                    )
                   }
-                  onCopy={() => handleCopyTodo(todo.id)}
-                  onDelete={() => handleDeleteTodo(todo.id)}
+                  onCopy={() =>
+                    handleCopyTodo(todo.id)
+                  }
+                  onDelete={() =>
+                    handleDeleteTodo(todo.id)
+                  }
                   isOpen={openId === todo.id}
                   onOpenChange={(open) =>
-                    setOpenId(open ? todo.id : null)
+                    setOpenId(
+                      open ? todo.id : null,
+                    )
                   }
                 />
               ))}
@@ -312,7 +351,6 @@ export default function EventCreate({
           {/* Option Layer */}
           {activeModal && (
             <View style={styles.optionLayer}>
-              {/* 외부 터치 시 닫기 */}
               <Pressable
                 style={StyleSheet.absoluteFill}
                 onPress={handleCloseModal}
@@ -320,7 +358,6 @@ export default function EventCreate({
                 accessibilityLabel="선택 메뉴 닫기"
               />
 
-              {/* Option Popover */}
               <View
                 style={[
                   styles.optionPosition,

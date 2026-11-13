@@ -1,7 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { CalendarDays, Copy, Plus, Trash2 } from 'lucide-react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import {
+  CalendarDays,
+  Copy,
+  Plus,
+  Trash2,
+} from 'lucide-react-native';
+import {
+  Gesture,
+  GestureDetector,
+} from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -23,7 +37,8 @@ const ACTION_GAP = 8;
 const HORIZONTAL_PADDING = 16;
 
 const ACTIONS_WIDTH = ACTION_SIZE * 2 + ACTION_GAP;
-const SWIPE_DISTANCE = ACTIONS_WIDTH + ACTION_GAP + HORIZONTAL_PADDING;
+const SWIPE_DISTANCE =
+  ACTIONS_WIDTH + ACTION_GAP + HORIZONTAL_PADDING;
 
 const SWIPE_THRESHOLD = 12;
 const ANIMATION_DURATION = 80;
@@ -46,7 +61,9 @@ type AddTodoListProps = {
   onAdd: () => void;
 };
 
-type TodoListProps = DefaultTodoListProps | AddTodoListProps;
+type TodoListProps =
+  | DefaultTodoListProps
+  | AddTodoListProps;
 
 // # Add
 function AddTodoList({ onAdd }: AddTodoListProps) {
@@ -114,13 +131,22 @@ function DefaultTodoList({
 
   // # 제스처 영역
   const panGesture = Gesture.Pan()
-    .activeOffsetX([-SWIPE_THRESHOLD, SWIPE_THRESHOLD])
+    .activeOffsetX([
+      -SWIPE_THRESHOLD,
+      SWIPE_THRESHOLD,
+    ])
     .failOffsetY([-15, 15])
     .runOnJS(true)
     .onEnd((event) => {
-      if (!isOpen && event.translationX < -SWIPE_THRESHOLD) {
+      if (
+        !isOpen &&
+        event.translationX < -SWIPE_THRESHOLD
+      ) {
         onOpenChange(true);
-      } else if (isOpen && event.translationX > SWIPE_THRESHOLD) {
+      } else if (
+        isOpen &&
+        event.translationX > SWIPE_THRESHOLD
+      ) {
         onOpenChange(false);
       }
     });
@@ -129,6 +155,10 @@ function DefaultTodoList({
   return (
     <View
       style={styles.container}
+      onTouchStart={(event) => {
+        // Todo 내부 터치는 외부 터치로 처리하지 않음
+        event.stopPropagation();
+      }}
       onLayout={(event) => {
         const width = event.nativeEvent.layout.width;
 
@@ -142,7 +172,9 @@ function DefaultTodoList({
           style={[
             styles.row,
             rowAnimatedStyle,
-            { width: containerWidth + SWIPE_DISTANCE },
+            {
+              width: containerWidth + SWIPE_DISTANCE,
+            },
           ]}
         >
           {/* Content */}
@@ -175,7 +207,9 @@ function DefaultTodoList({
                     value={value}
                     onChangeText={onChangeText}
                     placeholder="할 일 추가"
-                    placeholderTextColor={colors.text.disable}
+                    placeholderTextColor={
+                      colors.text.disable
+                    }
                     style={styles.input}
                     returnKeyType="done"
                     accessibilityLabel="할 일 입력"
@@ -218,7 +252,6 @@ function DefaultTodoList({
               icon={Copy}
               accessibilityLabel="할 일 복사"
               onPress={() => {
-                // TODO: 복사 기능 연결
                 onCopy?.();
                 onOpenChange(false);
               }}
@@ -230,7 +263,6 @@ function DefaultTodoList({
               accessibilityRole="button"
               accessibilityLabel="할 일 삭제"
               onPress={() => {
-                // TODO: 삭제 기능 연결
                 onDelete?.();
                 onOpenChange(false);
               }}
@@ -274,16 +306,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 50,
     backgroundColor: 'transparent',
-    borderTopRightRadius: 50,
-    borderBottomRightRadius: 50,
     overflow: 'hidden',
   },
 
   overlay: {
     ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(28, 22, 48, 0.05)',
-    borderTopRightRadius: 50,
-    borderBottomRightRadius: 50,
   },
 
   list: {
