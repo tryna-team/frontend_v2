@@ -183,6 +183,7 @@ function DefaultTodoList({
           </View>
 
           {/* Swipe Actions */}
+          {/* TODO: Button 컴포넌트 사이즈 지정 42*42 */}
           <View style={styles.actions}>
             <Button
               size="large"
