@@ -7,19 +7,27 @@ import { radius } from '@/theme/radius';
 // # 타입 영역
 type ListsProps = {
   variant?: 'default' | 'background';
+  paddingVertical?: number;
   children: ReactNode;
 };
 
 // # Main component
 export default function Lists({
   variant = 'default',
+  paddingVertical,
   children,
 }: ListsProps) {
+  const isBackground = variant === 'background';
+
   return (
     <View
       style={[
         styles.container,
-        variant === 'background' && styles.background,
+        isBackground && styles.background,
+        {
+          paddingVertical:
+            paddingVertical ?? (isBackground ? 8 : 0),
+        },
       ]}
     >
       {children}
@@ -36,7 +44,6 @@ const styles = StyleSheet.create({
   },
 
   background: {
-    paddingVertical: 6,
     borderRadius: radius.large,
     backgroundColor: colors.background.white,
     boxShadow: '0px 0px 20px 0px rgba(0, 0, 0, 0.04)',
