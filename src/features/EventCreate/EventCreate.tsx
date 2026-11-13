@@ -197,6 +197,7 @@ export default function EventCreate({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 16,
     width: '100%',
   },
 
@@ -211,7 +212,6 @@ const styles = StyleSheet.create({
 
   // ## ListLayer
   listLayer: {
-    paddingHorizontal: 16,
     marginTop: 16,
     gap: 32,
   },
