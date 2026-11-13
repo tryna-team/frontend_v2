@@ -27,6 +27,8 @@ type TodoItem = {
   value: string;
 };
 
+type ActiveModal = 'repeat' | 'notification' | null;
+
 // # Main component
 export default function EventCreate({
   startDate,
@@ -37,16 +39,26 @@ export default function EventCreate({
   const [title, setTitle] = useState('');
 
   // # List 상태
-  const [repeat, setRepeat] = useState('');
-  const [notification, setNotification] = useState('');
+  const [repeat] = useState('');
+  const [notification] = useState('');
   const [location, setLocation] = useState('');
   const [url, setUrl] = useState('');
   const [memo, setMemo] = useState('');
+
+  // # Modal 상태
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
 
   // # Todo 상태
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
   const [nextId, setNextId] = useState(1);
+
+  // # Modal 함수
+  const handleOpenModal = (modal: Exclude<ActiveModal, null>) => {
+    setActiveModal(modal);
+
+    // TODO: 반복/알림 선택 모달 구현 후 연결
+  };
 
   // # Todo 함수
   const handleAddTodo = () => {
@@ -119,17 +131,19 @@ export default function EventCreate({
         {/* 1. 반복 / 알림 */}
         <Lists variant="default">
           <List
+            variant="modal"
             icon={RotateCw}
             placeholder="반복 없음"
             value={repeat}
-            onChangeText={setRepeat}
+            onPress={() => handleOpenModal('repeat')}
           />
 
           <List
+            variant="modal"
             icon={Bell}
             placeholder="알림 없음"
             value={notification}
-            onChangeText={setNotification}
+            onPress={() => handleOpenModal('notification')}
           />
         </Lists>
 
@@ -164,6 +178,7 @@ export default function EventCreate({
         {/* 3. 위치 / URL / 메모 */}
         <Lists variant="background">
           <List
+            variant="input"
             icon={MapPin}
             placeholder="위치"
             value={location}
@@ -173,6 +188,7 @@ export default function EventCreate({
           <View style={styles.separator} />
 
           <List
+            variant="input"
             icon={Link}
             placeholder="URL"
             value={url}
@@ -182,6 +198,7 @@ export default function EventCreate({
           <View style={styles.separator} />
 
           <List
+            variant="input"
             icon={FileText}
             placeholder="메모"
             value={memo}
