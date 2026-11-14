@@ -11,7 +11,7 @@ import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
 
 import Title from './Title';
-import Period, { type SelectedPeriod } from './Period';
+import Period, { type SelectedPeriod } from './Period/Period';
 import Picker from './Picker/Picker';
 import type { TimePickerValue } from './Picker/TimePicker';
 
