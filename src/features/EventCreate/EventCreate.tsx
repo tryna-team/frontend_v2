@@ -148,6 +148,27 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     handleCloseModal,
   } = useEventOption();
 
+  // # 공통 상호작용 정리 함수
+  const closeTodoInteraction = () => {
+    setOpenId(null);
+    setSelectedTodoDateId(null);
+  };
+
+  const closePeriodInteraction = () => {
+    setSelectedPeriod(null);
+    setIsTimePickerTouched(false);
+  };
+
+  const closeOptionInteraction = () => {
+    setActiveModal(null);
+  };
+
+  const closeAllInteractions = () => {
+    closeTodoInteraction();
+    closePeriodInteraction();
+    closeOptionInteraction();
+  };
+
   // # Todo 외부 탭 감지
   const outsideTap = Gesture.Tap()
     .maxDistance(10)
@@ -158,19 +179,22 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
       }
     });
 
+  // # Title 이벤트
+  const handleTitleFocus = () => {
+    closeAllInteractions();
+  };
+
   // # Period 이벤트
   const handlePeriodPress = (period: 'start' | 'end') => {
-    setOpenId(null);
-    setActiveModal(null);
-    setSelectedTodoDateId(null);
+    closeTodoInteraction();
+    closeOptionInteraction();
 
     handlePeriodPressFromHook(period);
   };
 
   const handleAllDayChange = (value: boolean) => {
-    setOpenId(null);
-    setActiveModal(null);
-    setSelectedTodoDateId(null);
+    closeTodoInteraction();
+    closeOptionInteraction();
 
     handleAllDayChangeFromHook(value);
   };
@@ -178,23 +202,37 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   // # Todo 이벤트
   const handleAddTodo = () => {
     handleAddTodoFromHook();
-    setActiveModal(null);
+    closeOptionInteraction();
   };
 
   const handleTodoDatePress = (id: number) => {
-    setActiveModal(null);
-    setSelectedPeriod(null);
-    setIsTimePickerTouched(false);
+    closeOptionInteraction();
+    closePeriodInteraction();
 
     handleTodoDatePressFromHook(id);
   };
 
+  const handleTodoFocus = (id: number) => {
+    // 현재 Todo의 스와이프가 열려 있으면 기존 동작 유지
+    if (openId !== id) {
+      setOpenId(null);
+    }
+
+    setSelectedTodoDateId(null);
+    closePeriodInteraction();
+    closeOptionInteraction();
+  };
+
+  const handleTodoInteraction = (id: number) => {
+    if (openId !== id) {
+      setOpenId(null);
+    }
+  };
+
   // # Modal 이벤트
   const handleOpenModal = (modal: 'label' | 'repeat' | 'notification') => {
-    setOpenId(null);
-    setSelectedPeriod(null);
-    setSelectedTodoDateId(null);
-    setIsTimePickerTouched(false);
+    closeTodoInteraction();
+    closePeriodInteraction();
 
     handleOpenModalFromHook(modal);
   };
@@ -226,13 +264,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   onChangeText={setTitle}
                   onIconPress={() => handleOpenModal('label')}
                   iconBackgroundColor={iconBackgroundColor}
-                  onFocus={() => {
-                    setOpenId(null);
-                    setActiveModal(null);
-                    setSelectedPeriod(null);
-                    setSelectedTodoDateId(null);
-                    setIsTimePickerTouched(false);
-                  }}
+                  onFocus={handleTitleFocus}
                 />
               </View>
 
@@ -310,21 +342,8 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                           trailingText={formatTodoDate(todo.date, startDateTime, endDateTime)}
                           isDatePickerOpen={isDatePickerOpen}
                           onTrailingPress={() => handleTodoDatePress(todo.id)}
-                          onFocus={() => {
-                            if (openId !== todo.id) {
-                              setOpenId(null);
-                            }
-
-                            setActiveModal(null);
-                            setSelectedPeriod(null);
-                            setSelectedTodoDateId(null);
-                            setIsTimePickerTouched(false);
-                          }}
-                          onInteraction={() => {
-                            if (openId !== todo.id) {
-                              setOpenId(null);
-                            }
-                          }}
+                          onFocus={() => handleTodoFocus(todo.id)}
+                          onInteraction={() => handleTodoInteraction(todo.id)}
                           onCopy={() => handleCopyTodo(todo.id)}
                           onDelete={() => handleDeleteTodo(todo.id)}
                           isOpen={openId === todo.id}
