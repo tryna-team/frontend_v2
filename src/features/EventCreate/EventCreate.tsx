@@ -124,8 +124,24 @@ function getTimeValue(date: Date): TimePickerValue {
   };
 }
 
-function formatTodoDate(date: Date | null): string {
+function formatTodoDate(date: Date | null, startDate: Date, endDate: Date): string {
   if (!date) return '당일';
+
+  // 시간 제외, 날짜만 비교
+  const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
+  const start = new Date(
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    startDate.getDate(),
+  ).getTime();
+
+  const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime();
+
+  // 시작일 ~ 종료일 범위에 포함되는 경우
+  if (selected >= start && selected <= end) {
+    return '당일';
+  }
 
   const year = String(date.getFullYear()).slice(-2);
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -484,7 +500,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                         variant="default"
                         value={todo.value}
                         onChangeText={(text) => handleChangeTodo(todo.id, text)}
-                        trailingText={formatTodoDate(todo.date)}
+                        trailingText={formatTodoDate(todo.date, startDateTime, endDateTime)}
                         isDatePickerOpen={isDatePickerOpen}
                         onTrailingPress={() => handleTodoDatePress(todo.id)}
                         onFocus={() => {
