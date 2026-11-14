@@ -5,7 +5,6 @@ import { Bell, FileText, Link, MapPin, RefreshCcw, RotateCw } from 'lucide-react
 
 import Button from '@/components/Button/Button';
 import Option from '@/components/Option/Option';
-import type { SectionData } from '@/components/Option/OptionType';
 
 import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
@@ -20,6 +19,7 @@ import TodoList from './List/TodoList';
 
 import useEventPeriod from './hooks/useEventPeriod';
 import useEventTodo from './hooks/useEventTodo';
+import useEventOption from './hooks/useEventOption';
 
 // # 상수 영역
 const POPOVER_WIDTH = 219;
@@ -27,46 +27,6 @@ const POPOVER_WIDTH = 219;
 // TODO: 추천 API 연동 후 추천 결과가 성공적으로 생성된 경우에만 Footer 표시
 // 현재는 Footer UI 확인을 위해 true로 고정
 const SHOW_RECOMMENDATION_FOOTER = true;
-
-const REPEAT_OPTIONS = ['없음', '매일', '매주', '2주마다', '매월', '매년'];
-
-const NOTIFICATION_OPTIONS = [
-  '없음',
-  '이벤트 시간',
-  '5분 전',
-  '10분 전',
-  '15분 전',
-  '30분 전',
-  '1시간 전',
-  '2시간 전',
-  '1일 전',
-  '2일 전',
-  '1주 전',
-];
-
-// TODO: 사용자 계정 및 캘린더 연동 후 동적 데이터로 교체
-const LABEL_GROUPS = [
-  {
-    title: 'Gmail',
-    items: [{ id: 'gmail', name: 'Gmail Cal', color: '#E89A35' }],
-  },
-  {
-    title: 'iCloud',
-    items: [
-      { id: 'icloud', name: 'iCloud Cal', color: '#608BEA' },
-      { id: 'tryna', name: 'tryna', color: '#70C98B' },
-      { id: 'school', name: 'School', color: '#B58AF1' },
-    ],
-  },
-];
-
-// TODO: 실제 라벨 색상과 Title 아이콘 배경색 매핑 확정
-const LABEL_ICON_COLORS: Record<string, string> = {
-  gmail: '#F8DEB7',
-  icloud: '#DDE8FF',
-  tryna: '#DDF4E4',
-  school: '#EBDDFF',
-};
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -77,8 +37,6 @@ type EventCreateProps = {
   endDate: string;
   endTime: string;
 };
-
-type ActiveModal = 'label' | 'repeat' | 'notification' | null;
 
 // # 유틸 함수
 function formatDate(date: Date): string {
@@ -131,11 +89,15 @@ function formatTodoDate(date: Date | null, startDate: Date, endDate: Date): stri
 
 // # Main component
 export default function EventCreate({ startDate, startTime, endDate, endTime }: EventCreateProps) {
+  // # 기본 입력 상태
   const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [url, setUrl] = useState('');
+  const [memo, setMemo] = useState('');
 
-  // # Label 상태
-  const [selectedLabel, setSelectedLabel] = useState('gmail');
+  // # 레이아웃 상태
   const [titleHeight, setTitleHeight] = useState(0);
+  const [listLayerTop, setListLayerTop] = useState(0);
 
   // # Period Hook
   const {
@@ -151,18 +113,12 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     handleAllDayChange: handleAllDayChangeFromHook,
     handlePickerDateChange,
     handlePickerTimeChange,
-  } = useEventPeriod({ startDate, startTime, endDate, endTime });
-
-  // # List 상태
-  const [repeat, setRepeat] = useState('없음');
-  const [notification, setNotification] = useState('없음');
-  const [location, setLocation] = useState('');
-  const [url, setUrl] = useState('');
-  const [memo, setMemo] = useState('');
-
-  // # Modal 상태
-  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
-  const [listLayerTop, setListLayerTop] = useState(0);
+  } = useEventPeriod({
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+  });
 
   // # Todo Hook
   const {
@@ -179,6 +135,18 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     handleTodoDateChange,
     handleTodoOpenChange,
   } = useEventTodo();
+
+  // # Option Hook
+  const {
+    repeat,
+    notification,
+    activeModal,
+    iconBackgroundColor,
+    currentSections,
+    setActiveModal,
+    handleOpenModal: handleOpenModalFromHook,
+    handleCloseModal,
+  } = useEventOption();
 
   // # Todo 외부 탭 감지
   const outsideTap = Gesture.Tap()
@@ -221,86 +189,15 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     handleTodoDatePressFromHook(id);
   };
 
-  // # Modal 함수
-  const handleOpenModal = (modal: Exclude<ActiveModal, null>) => {
+  // # Modal 이벤트
+  const handleOpenModal = (modal: 'label' | 'repeat' | 'notification') => {
     setOpenId(null);
     setSelectedPeriod(null);
     setSelectedTodoDateId(null);
     setIsTimePickerTouched(false);
-    setActiveModal(modal);
+
+    handleOpenModalFromHook(modal);
   };
-
-  const handleCloseModal = () => {
-    setActiveModal(null);
-  };
-
-  const handleSelectLabel = (id: string) => {
-    setSelectedLabel(id);
-    setActiveModal(null);
-  };
-
-  const handleSelectRepeat = (value: string) => {
-    setRepeat(value);
-    setActiveModal(null);
-  };
-
-  const handleSelectNotification = (value: string) => {
-    setNotification(value);
-    setActiveModal(null);
-  };
-
-  // # Option 데이터
-  const labelSections: SectionData[] = LABEL_GROUPS.map((group) => ({
-    title: group.title,
-    items: group.items.map((item) => ({
-      id: item.id,
-      content: item.name,
-      selection: selectedLabel === item.id,
-      icon: true,
-      iconColor: item.color,
-      onPress: () => handleSelectLabel(item.id),
-    })),
-  }));
-
-  const repeatSections: SectionData[] = [
-    {
-      items: REPEAT_OPTIONS.map((value) => ({
-        id: value,
-        content: value,
-        selection: repeat === value,
-        onPress: () => handleSelectRepeat(value),
-      })),
-    },
-  ];
-
-  const notificationSections: SectionData[] = [
-    {
-      items: [
-        {
-          id: 'none',
-          content: '없음',
-          selection: notification === '없음',
-          onPress: () => handleSelectNotification('없음'),
-        },
-      ],
-    },
-    {
-      items: NOTIFICATION_OPTIONS.slice(1).map((value) => ({
-        id: value,
-        content: value,
-        selection: notification === value,
-        onPress: () => handleSelectNotification(value),
-      })),
-    },
-  ];
-
-  // # Option 선택
-  const currentSections =
-    activeModal === 'label'
-      ? labelSections
-      : activeModal === 'repeat'
-        ? repeatSections
-        : notificationSections;
 
   // # Main UI
   return (
@@ -328,7 +225,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   value={title}
                   onChangeText={setTitle}
                   onIconPress={() => handleOpenModal('label')}
-                  iconBackgroundColor={LABEL_ICON_COLORS[selectedLabel]}
+                  iconBackgroundColor={iconBackgroundColor}
                   onFocus={() => {
                     setOpenId(null);
                     setActiveModal(null);
