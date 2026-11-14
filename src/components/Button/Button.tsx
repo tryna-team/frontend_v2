@@ -2,32 +2,34 @@ import { Pressable, StyleSheet } from 'react-native';
 import { Plus } from 'lucide-react-native';
 
 import ButtonBase from './ButtonBase';
-import { ctaStyle, glassStyle, sizeLayouts } from './ButtonVariants';
+import { ctaStyle, parseBoxSize, scaleToBox, sizeLayouts, touchHitSlop } from './ButtonVariants';
 import type { ButtonProps, CTAButtonProps, ContentAreaButtonProps } from './ButtonType';
 
 // # 함수 영역
 // ## contentArea: size별 크기 값으로 ButtonBase를 그린다
 function renderContentAreaButton(props: ContentAreaButtonProps) {
-  return (
-    <ButtonBase
-      {...props}
-      layout={sizeLayouts[props.size]}
-      blurIntensity={glassStyle.intensity}
-    />
-  );
+  return <ButtonBase {...props} layout={sizeLayouts[props.size]} />;
 }
 
 // ## cta
+// boxSize를 주면 아이콘·모서리를 기본 크기(52) 대비 비율로 키우거나 줄이고, 터치 영역도 다시 계산한다
 function renderCTAButton(props: CTAButtonProps) {
+  const box = parseBoxSize(props.boxSize);
+  const boxStyle = box && {
+    ...box,
+    borderRadius: scaleToBox(ctaStyle.borderRadius, box, ctaStyle.size),
+  };
+  const iconSize = box ? scaleToBox(ctaStyle.iconSize, box, ctaStyle.size) : ctaStyle.iconSize;
+
   return (
     <Pressable
       onPress={props.onPress}
-      hitSlop={ctaStyle.hitSlop}
+      hitSlop={box ? touchHitSlop(box, ctaStyle.touchSize) : ctaStyle.hitSlop}
       accessibilityRole="button"
       accessibilityLabel={ctaStyle.accessibilityLabel}
-      style={styles.cta}
+      style={[styles.cta, boxStyle]}
     >
-      <Plus size={ctaStyle.iconSize} color={ctaStyle.iconColor} />
+      <Plus size={iconSize} color={ctaStyle.iconColor} />
     </Pressable>
   );
 }

@@ -58,6 +58,7 @@ export default function Sheet({ children, onClose }: SheetProps) {
               <View style={styles.closeButton}>
                 <Button44
                   appearance="bordered"
+                  shadow
                   icon={X}
                   onPress={onClose}
                   accessibilityLabel="시트 닫기"

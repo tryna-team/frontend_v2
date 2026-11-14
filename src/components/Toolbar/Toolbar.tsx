@@ -154,6 +154,7 @@ function Search({
       {/* TODO: Search 전용 아이콘 확정 시 교체 */}
       <Button44
         appearance="bordered"
+        shadow
         icon={Scan}
         accessibilityLabel="검색 옵션"
         onPress={onButtonPress}
