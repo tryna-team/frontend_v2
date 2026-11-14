@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Bell, FileText, Link, MapPin, RefreshCcw, RotateCw } from 'lucide-react-native';
@@ -19,6 +19,7 @@ import Lists from './List/Lists';
 import TodoList from './List/TodoList';
 
 import useEventPeriod from './hooks/useEventPeriod';
+import useEventTodo from './hooks/useEventTodo';
 
 // # 상수 영역
 const POPOVER_WIDTH = 219;
@@ -77,12 +78,6 @@ type EventCreateProps = {
   endTime: string;
 };
 
-type TodoItem = {
-  id: number;
-  value: string;
-  date: Date | null;
-};
-
 type ActiveModal = 'label' | 'repeat' | 'notification' | null;
 
 // # 유틸 함수
@@ -136,8 +131,6 @@ function formatTodoDate(date: Date | null, startDate: Date, endDate: Date): stri
 
 // # Main component
 export default function EventCreate({ startDate, startTime, endDate, endTime }: EventCreateProps) {
-  const nextIdRef = useRef(1);
-
   const [title, setTitle] = useState('');
 
   // # Label 상태
@@ -171,10 +164,21 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [listLayerTop, setListLayerTop] = useState(0);
 
-  // # Todo 상태
-  const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [openId, setOpenId] = useState<number | null>(null);
-  const [selectedTodoDateId, setSelectedTodoDateId] = useState<number | null>(null);
+  // # Todo Hook
+  const {
+    todos,
+    openId,
+    selectedTodoDateId,
+    setOpenId,
+    setSelectedTodoDateId,
+    handleAddTodo: handleAddTodoFromHook,
+    handleChangeTodo,
+    handleCopyTodo,
+    handleDeleteTodo,
+    handleTodoDatePress: handleTodoDatePressFromHook,
+    handleTodoDateChange,
+    handleTodoOpenChange,
+  } = useEventTodo();
 
   // # Todo 외부 탭 감지
   const outsideTap = Gesture.Tap()
@@ -187,7 +191,6 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     });
 
   // # Period 이벤트
-  // 다른 UI 영역의 선택 상태를 정리한 후 Hook 함수 실행
   const handlePeriodPress = (period: 'start' | 'end') => {
     setOpenId(null);
     setActiveModal(null);
@@ -204,20 +207,18 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     handleAllDayChangeFromHook(value);
   };
 
-  // # Todo 날짜 함수
+  // # Todo 이벤트
+  const handleAddTodo = () => {
+    handleAddTodoFromHook();
+    setActiveModal(null);
+  };
+
   const handleTodoDatePress = (id: number) => {
-    setOpenId(null);
     setActiveModal(null);
     setSelectedPeriod(null);
     setIsTimePickerTouched(false);
 
-    setSelectedTodoDateId((previous) => (previous === id ? null : id));
-  };
-
-  const handleTodoDateChange = (id: number, date: Date) => {
-    setTodos((previous) =>
-      previous.map((todo) => (todo.id === id ? { ...todo, date: new Date(date) } : todo)),
-    );
+    handleTodoDatePressFromHook(id);
   };
 
   // # Modal 함수
@@ -292,51 +293,6 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
       })),
     },
   ];
-
-  // # Todo 함수
-  const handleAddTodo = () => {
-    const id = nextIdRef.current++;
-
-    setTodos((previous) => [...previous, { id, value: '', date: null }]);
-
-    setOpenId(null);
-    setActiveModal(null);
-  };
-
-  const handleChangeTodo = (id: number, text: string) => {
-    setTodos((previous) =>
-      previous.map((todo) => (todo.id === id ? { ...todo, value: text } : todo)),
-    );
-  };
-
-  const handleCopyTodo = (id: number) => {
-    const target = todos.find((todo) => todo.id === id);
-
-    if (!target) return;
-
-    const newId = nextIdRef.current++;
-
-    setTodos((previous) => [
-      ...previous,
-      {
-        id: newId,
-        value: target.value,
-        date: target.date ? new Date(target.date) : null,
-      },
-    ]);
-
-    setOpenId(null);
-  };
-
-  const handleDeleteTodo = (id: number) => {
-    setTodos((previous) => previous.filter((todo) => todo.id !== id));
-
-    setOpenId(null);
-
-    if (selectedTodoDateId === id) {
-      setSelectedTodoDateId(null);
-    }
-  };
 
   // # Option 선택
   const currentSections =
@@ -475,13 +431,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                           onCopy={() => handleCopyTodo(todo.id)}
                           onDelete={() => handleDeleteTodo(todo.id)}
                           isOpen={openId === todo.id}
-                          onOpenChange={(open) => {
-                            setOpenId(open ? todo.id : null);
-
-                            if (open) {
-                              setSelectedTodoDateId(null);
-                            }
-                          }}
+                          onOpenChange={(open) => handleTodoOpenChange(todo.id, open)}
                         />
 
                         {/* TodoList 바로 아래: 간격 0 */}
