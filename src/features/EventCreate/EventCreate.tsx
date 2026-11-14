@@ -11,13 +11,14 @@ import { colors } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
 
 import Title from './Title';
-import Period, { type SelectedPeriod } from './Period/Period';
+import Period from './Period/Period';
 import Picker from './Picker/Picker';
-import type { TimePickerValue } from './Picker/TimePicker';
 
 import List from './List/List';
 import Lists from './List/Lists';
 import TodoList from './List/TodoList';
+
+import useEventPeriod from './hooks/useEventPeriod';
 
 // # 상수 영역
 const POPOVER_WIDTH = 219;
@@ -84,32 +85,7 @@ type TodoItem = {
 
 type ActiveModal = 'label' | 'repeat' | 'notification' | null;
 
-type PeriodTarget = Exclude<SelectedPeriod, null>;
-
 // # 유틸 함수
-// TODO: API 날짜 형식 확정 후 문자열 파싱 대신 ISO 날짜 또는 Date 기반으로 통일
-function parseDateTime(dateText: string, timeText: string): Date {
-  const now = new Date();
-
-  const dateMatch = dateText.match(/(?:(\d{4})[.-]\s*)?(\d{1,2})월\s*(\d{1,2})일/);
-
-  const timeMatch = timeText.match(/^(\d{1,2}):(\d{2})$/);
-
-  if (!dateMatch || !timeMatch) {
-    // TODO: 잘못된 초기 날짜·시간에 대한 오류 처리 정책 확정
-    return new Date(now);
-  }
-
-  const year = dateMatch[1] ? Number(dateMatch[1]) : now.getFullYear();
-
-  const month = Number(dateMatch[2]) - 1;
-  const day = Number(dateMatch[3]);
-  const hour = Number(timeMatch[1]);
-  const minute = Number(timeMatch[2]);
-
-  return new Date(year, month, day, hour, minute);
-}
-
 function formatDate(date: Date): string {
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -125,7 +101,7 @@ function formatTime(date: Date): string {
   return `${hour}:${minute}`;
 }
 
-function getTimeValue(date: Date): TimePickerValue {
+function getTimeValue(date: Date) {
   return {
     hour: date.getHours(),
     minute: date.getMinutes(),
@@ -168,17 +144,21 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const [selectedLabel, setSelectedLabel] = useState('gmail');
   const [titleHeight, setTitleHeight] = useState(0);
 
-  // # Period 상태
-  const [startDateTime, setStartDateTime] = useState(() => parseDateTime(startDate, startTime));
-
-  const [endDateTime, setEndDateTime] = useState(() => parseDateTime(endDate, endTime));
-
-  const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod>(null);
-
-  const [isAllDay, setIsAllDay] = useState(false);
-
-  // # TimePicker 터치 상태
-  const [isTimePickerTouched, setIsTimePickerTouched] = useState(false);
+  // # Period Hook
+  const {
+    startDateTime,
+    endDateTime,
+    selectedDateTime,
+    selectedPeriod,
+    isAllDay,
+    isTimePickerTouched,
+    setSelectedPeriod,
+    setIsTimePickerTouched,
+    handlePeriodPress: handlePeriodPressFromHook,
+    handleAllDayChange: handleAllDayChangeFromHook,
+    handlePickerDateChange,
+    handlePickerTimeChange,
+  } = useEventPeriod({ startDate, startTime, endDate, endTime });
 
   // # List 상태
   const [repeat, setRepeat] = useState('없음');
@@ -196,9 +176,6 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const [openId, setOpenId] = useState<number | null>(null);
   const [selectedTodoDateId, setSelectedTodoDateId] = useState<number | null>(null);
 
-  // # 선택된 날짜·시간
-  const selectedDateTime = selectedPeriod === 'end' ? endDateTime : startDateTime;
-
   // # Todo 외부 탭 감지
   const outsideTap = Gesture.Tap()
     .maxDistance(10)
@@ -209,54 +186,22 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
       }
     });
 
-  // # Period 함수
-  const handlePeriodPress = (period: PeriodTarget) => {
+  // # Period 이벤트
+  // 다른 UI 영역의 선택 상태를 정리한 후 Hook 함수 실행
+  const handlePeriodPress = (period: 'start' | 'end') => {
     setOpenId(null);
     setActiveModal(null);
     setSelectedTodoDateId(null);
-    setIsTimePickerTouched(false);
 
-    setSelectedPeriod((previous) => (previous === period ? null : period));
+    handlePeriodPressFromHook(period);
   };
 
   const handleAllDayChange = (value: boolean) => {
-    setIsAllDay(value);
     setOpenId(null);
     setActiveModal(null);
     setSelectedTodoDateId(null);
-    setIsTimePickerTouched(false);
-  };
 
-  const handlePickerDateChange = (date: Date) => {
-    const updateDate = (previous: Date) => {
-      const next = new Date(previous);
-
-      next.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-
-      return next;
-    };
-
-    if (selectedPeriod === 'start') {
-      setStartDateTime(updateDate);
-    } else if (selectedPeriod === 'end') {
-      setEndDateTime(updateDate);
-    }
-  };
-
-  const handlePickerTimeChange = (time: TimePickerValue) => {
-    const updateTime = (previous: Date) => {
-      const next = new Date(previous);
-
-      next.setHours(time.hour, time.minute, 0, 0);
-
-      return next;
-    };
-
-    if (selectedPeriod === 'start') {
-      setStartDateTime(updateTime);
-    } else if (selectedPeriod === 'end') {
-      setEndDateTime(updateTime);
-    }
+    handleAllDayChangeFromHook(value);
   };
 
   // # Todo 날짜 함수
