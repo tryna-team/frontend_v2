@@ -38,32 +38,14 @@ const NOTIFICATION_OPTIONS = [
 const LABEL_GROUPS = [
   {
     title: 'Gmail',
-    items: [
-      {
-        id: 'gmail',
-        name: 'Gmail Cal',
-        color: '#E89A35',
-      },
-    ],
+    items: [{ id: 'gmail', name: 'Gmail Cal', color: '#E89A35' }],
   },
   {
     title: 'iCloud',
     items: [
-      {
-        id: 'icloud',
-        name: 'iCloud Cal',
-        color: '#608BEA',
-      },
-      {
-        id: 'tryna',
-        name: 'tryna',
-        color: '#70C98B',
-      },
-      {
-        id: 'school',
-        name: 'School',
-        color: '#B58AF1',
-      },
+      { id: 'icloud', name: 'iCloud Cal', color: '#608BEA' },
+      { id: 'tryna', name: 'tryna', color: '#70C98B' },
+      { id: 'school', name: 'School', color: '#B58AF1' },
     ],
   },
 ];
@@ -89,6 +71,7 @@ type EventCreateProps = {
 type TodoItem = {
   id: number;
   value: string;
+  date: Date | null;
 };
 
 type ActiveModal = 'label' | 'repeat' | 'notification' | null;
@@ -141,6 +124,16 @@ function getTimeValue(date: Date): TimePickerValue {
   };
 }
 
+function formatTodoDate(date: Date | null): string {
+  if (!date) return '당일';
+
+  const year = String(date.getFullYear()).slice(-2);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}. ${month}. ${day}`;
+}
+
 // # Main component
 export default function EventCreate({ startDate, startTime, endDate, endTime }: EventCreateProps) {
   const nextIdRef = useRef(1);
@@ -177,6 +170,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   // # Todo 상태
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
+  const [selectedTodoDateId, setSelectedTodoDateId] = useState<number | null>(null);
 
   // # 선택된 날짜·시간
   const selectedDateTime = selectedPeriod === 'end' ? endDateTime : startDateTime;
@@ -195,6 +189,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const handlePeriodPress = (period: PeriodTarget) => {
     setOpenId(null);
     setActiveModal(null);
+    setSelectedTodoDateId(null);
     setIsTimePickerTouched(false);
 
     setSelectedPeriod((previous) => (previous === period ? null : period));
@@ -204,6 +199,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     setIsAllDay(value);
     setOpenId(null);
     setActiveModal(null);
+    setSelectedTodoDateId(null);
     setIsTimePickerTouched(false);
   };
 
@@ -239,10 +235,27 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     }
   };
 
+  // # Todo 날짜 함수
+  const handleTodoDatePress = (id: number) => {
+    setOpenId(null);
+    setActiveModal(null);
+    setSelectedPeriod(null);
+    setIsTimePickerTouched(false);
+
+    setSelectedTodoDateId((previous) => (previous === id ? null : id));
+  };
+
+  const handleTodoDateChange = (id: number, date: Date) => {
+    setTodos((previous) =>
+      previous.map((todo) => (todo.id === id ? { ...todo, date: new Date(date) } : todo)),
+    );
+  };
+
   // # Modal 함수
   const handleOpenModal = (modal: Exclude<ActiveModal, null>) => {
     setOpenId(null);
     setSelectedPeriod(null);
+    setSelectedTodoDateId(null);
     setIsTimePickerTouched(false);
     setActiveModal(modal);
   };
@@ -315,7 +328,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const handleAddTodo = () => {
     const id = nextIdRef.current++;
 
-    setTodos((previous) => [...previous, { id, value: '' }]);
+    setTodos((previous) => [...previous, { id, value: '', date: null }]);
 
     setOpenId(null);
     setActiveModal(null);
@@ -339,6 +352,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
       {
         id: newId,
         value: target.value,
+        date: target.date ? new Date(target.date) : null,
       },
     ]);
 
@@ -349,6 +363,10 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     setTodos((previous) => previous.filter((todo) => todo.id !== id));
 
     setOpenId(null);
+
+    if (selectedTodoDateId === id) {
+      setSelectedTodoDateId(null);
+    }
   };
 
   // # Option 선택
@@ -379,7 +397,6 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   const height = event.nativeEvent.layout.height;
 
                   setTitleHeight((previous) => (previous === height ? previous : height));
-
                 }}
               >
                 <Title
@@ -391,6 +408,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                     setOpenId(null);
                     setActiveModal(null);
                     setSelectedPeriod(null);
+                    setSelectedTodoDateId(null);
                     setIsTimePickerTouched(false);
                   }}
                 />
@@ -455,36 +473,62 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                 />
               </Lists>
 
-              {/* 2. TodoList */}
+              {/* 2. TodoList + DatePicker */}
               <Lists variant="background" paddingVertical={0}>
-                {todos.map((todo) => (
-                  <TodoList
-                    key={todo.id}
-                    variant="default"
-                    value={todo.value}
-                    onChangeText={(text) => handleChangeTodo(todo.id, text)}
-                    onFocus={() => {
-                      if (openId !== todo.id) {
-                        setOpenId(null);
-                      }
+                {todos.map((todo) => {
+                  const isDatePickerOpen = selectedTodoDateId === todo.id;
 
-                      setActiveModal(null);
-                      setSelectedPeriod(null);
-                      setIsTimePickerTouched(false);
-                    }}
-                    onInteraction={() => {
-                      if (openId !== todo.id) {
-                        setOpenId(null);
-                      }
-                    }}
-                    onCopy={() => handleCopyTodo(todo.id)}
-                    onDelete={() => handleDeleteTodo(todo.id)}
-                    isOpen={openId === todo.id}
-                    onOpenChange={(open) => setOpenId(open ? todo.id : null)}
-                  />
-                ))}
+                  return (
+                    <View key={todo.id} style={styles.todoWithPicker}>
+                      <TodoList
+                        variant="default"
+                        value={todo.value}
+                        onChangeText={(text) => handleChangeTodo(todo.id, text)}
+                        trailingText={formatTodoDate(todo.date)}
+                        isDatePickerOpen={isDatePickerOpen}
+                        onTrailingPress={() => handleTodoDatePress(todo.id)}
+                        onFocus={() => {
+                          if (openId !== todo.id) {
+                            setOpenId(null);
+                          }
 
-                <TodoList variant="add" onAdd={handleAddTodo} /> 
+                          setActiveModal(null);
+                          setSelectedPeriod(null);
+                          setSelectedTodoDateId(null);
+                          setIsTimePickerTouched(false);
+                        }}
+                        onInteraction={() => {
+                          if (openId !== todo.id) {
+                            setOpenId(null);
+                          }
+                        }}
+                        onCopy={() => handleCopyTodo(todo.id)}
+                        onDelete={() => handleDeleteTodo(todo.id)}
+                        isOpen={openId === todo.id}
+                        onOpenChange={(open) => {
+                          setOpenId(open ? todo.id : null);
+
+                          if (open) {
+                            setSelectedTodoDateId(null);
+                          }
+                        }}
+                      />
+
+                      {/* TodoList 바로 아래: 간격 0 */}
+                      {isDatePickerOpen && (
+                        <View style={styles.todoPicker}>
+                          <Picker
+                            variant="date"
+                            date={todo.date ?? startDateTime}
+                            onDateChange={(date) => handleTodoDateChange(todo.id, date)}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+
+                <TodoList variant="add" onAdd={handleAddTodo} />
               </Lists>
 
               {/* 3. 위치 / URL / 메모 */}
@@ -522,7 +566,6 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
             {/* Option Layer */}
             {activeModal && (
               <View style={styles.optionLayer}>
-                {/* 외부 터치 시 닫기 */}
                 <Pressable
                   style={StyleSheet.absoluteFill}
                   onPress={handleCloseModal}
@@ -530,7 +573,6 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   accessibilityLabel="선택 메뉴 닫기"
                 />
 
-                {/* Option Popover */}
                 <View
                   style={[
                     styles.optionPosition,
@@ -600,6 +642,17 @@ const styles = StyleSheet.create({
   listLayer: {
     marginTop: 16,
     gap: 32,
+  },
+
+  // ## TodoList + Picker
+  todoWithPicker: {
+    width: '100%',
+    gap: 0,
+  },
+
+  todoPicker: {
+    width: '100%',
+    overflow: 'hidden',
   },
 
   separator: {

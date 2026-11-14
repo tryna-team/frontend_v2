@@ -36,6 +36,7 @@ type DefaultTodoListProps = {
   value: string;
   onChangeText: (text: string) => void;
   trailingText?: string;
+  isDatePickerOpen?: boolean;
   onTrailingPress?: () => void;
   onCopy?: () => void;
   onDelete?: () => void;
@@ -90,6 +91,7 @@ function DefaultTodoList({
   value,
   onChangeText,
   trailingText = DEFAULT_TRAILING_TEXT,
+  isDatePickerOpen = false,
   onTrailingPress,
   onCopy,
   onDelete,
@@ -182,6 +184,8 @@ function DefaultTodoList({
 
             {/* Trailing */}
             <View style={styles.trailing}>
+              {/* TODO: Button 배경색 Props 구현 후 Base/Grey/Grey 100 적용 */}
+              {/* TODO: Button 텍스트 색상 Props 구현 후 Picker 활성화 시 Base/Apricot/Apricot 300 적용 */}
               <Button
                 size="medium"
                 appearance="bordered"
