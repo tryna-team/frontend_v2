@@ -3,6 +3,9 @@ import { useState } from 'react';
 import type { SelectedPeriod } from '../Period/Period';
 import type { TimePickerValue } from '../Picker/TimePicker';
 
+// # 상수 영역
+const TIME_INTERVAL = 5;
+
 // # 타입 영역
 type UseEventPeriodProps = {
   startDate: string;
@@ -14,6 +17,20 @@ type UseEventPeriodProps = {
 type PeriodTarget = Exclude<SelectedPeriod, null>;
 
 // # 유틸 함수
+
+// ## 5분 단위 올림
+function roundUpToFiveMinutes(date: Date): Date {
+  const next = new Date(date);
+
+  const minutes = next.getMinutes();
+  const roundedMinutes = Math.ceil(minutes / TIME_INTERVAL) * TIME_INTERVAL;
+
+  next.setMinutes(roundedMinutes, 0, 0);
+
+  return next;
+}
+
+// ## 날짜·시간 문자열 변환
 // TODO: API 날짜 형식 확정 후 문자열 파싱 대신 ISO 날짜 또는 Date 기반으로 통일
 function parseDateTime(dateText: string, timeText: string): Date {
   const now = new Date();
@@ -24,7 +41,7 @@ function parseDateTime(dateText: string, timeText: string): Date {
 
   if (!dateMatch || !timeMatch) {
     // TODO: 잘못된 초기 날짜·시간에 대한 오류 처리 정책 확정
-    return new Date(now);
+    return roundUpToFiveMinutes(now);
   }
 
   const year = dateMatch[1] ? Number(dateMatch[1]) : now.getFullYear();
@@ -34,7 +51,9 @@ function parseDateTime(dateText: string, timeText: string): Date {
   const hour = Number(timeMatch[1]);
   const minute = Number(timeMatch[2]);
 
-  return new Date(year, month, day, hour, minute);
+  const date = new Date(year, month, day, hour, minute);
+
+  return roundUpToFiveMinutes(date);
 }
 
 // # Main Hook
@@ -76,17 +95,19 @@ export default function useEventPeriod({
     setIsTimePickerTouched(false);
   };
 
-  // # 시작·종료 순서 보장
+  // # 시작·종료 시간 순서 보장
   const updatePeriod = (period: PeriodTarget, next: Date) => {
     if (period === 'start') {
       setStartDateTime(next);
 
+      // 시작 시간이 종료 시간보다 늦어지면 종료 시간도 변경
       if (next > endDateTime) {
         setEndDateTime(new Date(next));
       }
     } else {
       setEndDateTime(next);
 
+      // 종료 시간이 시작 시간보다 빨라지면 시작 시간도 변경
       if (next < startDateTime) {
         setStartDateTime(new Date(next));
       }
@@ -94,6 +115,8 @@ export default function useEventPeriod({
   };
 
   // # Picker 함수
+
+  // ## 날짜 변경
   const handlePickerDateChange = (date: Date) => {
     if (!selectedPeriod) return;
 
@@ -106,6 +129,7 @@ export default function useEventPeriod({
     updatePeriod(selectedPeriod, next);
   };
 
+  // ## 시간 변경
   const handlePickerTimeChange = (time: TimePickerValue) => {
     if (!selectedPeriod) return;
 
@@ -115,7 +139,7 @@ export default function useEventPeriod({
 
     next.setHours(time.hour, time.minute, 0, 0);
 
-    updatePeriod(selectedPeriod, next);
+    updatePeriod(selectedPeriod, roundUpToFiveMinutes(next));
   };
 
   return {
