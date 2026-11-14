@@ -88,5 +88,7 @@ export const tempDesignValues = {
     paddingVertical: 1,
     edgePadding: 4.71, // Edge 변형에서 둥근 쪽 여백
     iconSize: 14,
+    // 요약형에서 넘친 제목의 오른쪽 끝을 흐리게 덮는 폭. Figma에 없는 임시 값이라 디자인이 정해지면 교체
+    fadeWidth: 12,
   },
 } as const;

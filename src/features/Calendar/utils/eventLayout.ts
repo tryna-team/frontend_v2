@@ -6,6 +6,7 @@ import type {
   EventBlockEdge,
   EventBlockProps,
   EventSlot,
+  MonthlyViewMode,
 } from '../CalendarType';
 import {
   compareEvents,
@@ -43,17 +44,21 @@ export function groupEventDaysByDate(
 // TODO: 라벨별 색이 정해지면 labelId로 찾은 색을 color로 넘긴다
 export function getEventBlockProps(
   event: CalendarEventDetail,
+  viewMode: MonthlyViewMode,
   span = 1,
   edge: EventBlockEdge = 'none',
 ): EventBlockProps {
-  const isTimed = getEventKind(event) === 'timed';
+  const isSummary = viewMode === 'summary';
+  // 요약형은 일정 영역(55)이 작아 시간 일정도 Detail(높이 45) 대신 한 줄로 그리고 시간은 표시하지 않는다
+  const detail = !isSummary && getEventKind(event) === 'timed';
 
   return {
     title: event.title,
     // 'HH:mm:ss'로 와도 Figma처럼 시:분만 표시한다
-    time: isTimed ? event.startTime?.slice(0, 5) : undefined,
+    time: detail ? event.startTime?.slice(0, 5) : undefined,
     labelStyle: event.isAllDay ? 'textAndIcon' : 'textOnly',
-    detail: isTimed,
+    detail,
+    fadeOverflow: isSummary,
     span,
     edge,
   };
@@ -79,6 +84,7 @@ function getEdge(continuesBefore: boolean, continuesAfter: boolean): EventBlockE
 function getMultiDaySegments(
   week: CalendarWeek,
   eventDaysByDate: Record<string, CalendarEventDaySummary>,
+  viewMode: MonthlyViewMode,
 ) {
   const { days } = week;
   const weekStart = days[0].date;
@@ -109,6 +115,7 @@ function getMultiDaySegments(
 
     const block = getEventBlockProps(
       event,
+      viewMode,
       endIndex - startIndex + 1,
       getEdge(continuesBefore, continuesAfter),
     );
@@ -124,8 +131,9 @@ function getMultiDaySegments(
 export function getWeekEventLayout(
   week: CalendarWeek,
   eventDaysByDate: Record<string, CalendarEventDaySummary>,
+  viewMode: MonthlyViewMode,
 ): Record<string, DayEventLayout> {
-  const { segments, lineHeights } = getMultiDaySegments(week, eventDaysByDate);
+  const { segments, lineHeights } = getMultiDaySegments(week, eventDaysByDate, viewMode);
   const layouts: Record<string, DayEventLayout> = {};
 
   week.days.forEach((day, index) => {
@@ -154,7 +162,7 @@ export function getWeekEventLayout(
       .sort(compareEvents);
 
     for (const event of singleDayEvents) {
-      const block = getEventBlockProps(event);
+      const block = getEventBlockProps(event, viewMode);
       slots.push({ key: `event-${event.eventId}`, height: getEventBlockHeight(block), block });
     }
 

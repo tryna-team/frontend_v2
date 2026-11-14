@@ -27,8 +27,10 @@ function WeekBody({
   // 날짜 키의 'YYYY-MM' 부분이 같으면 오늘이 속한 달이다
   const isCurrentMonth = today.slice(0, 7) === days[0].date.slice(0, 7);
   // 여러 날 일정이 칸끼리 같은 줄에 놓이도록 주 단위로 한 번에 배정한다.
-  // React Compiler가 week, eventDaysByDate가 바뀔 때만 다시 계산하므로 날짜를 선택해도 칸은 다시 그려지지 않는다
-  const eventLayouts = eventDaysByDate ? getWeekEventLayout(week, eventDaysByDate) : undefined;
+  // React Compiler가 week, eventDaysByDate, viewMode가 바뀔 때만 다시 계산하므로 날짜를 선택해도 칸은 다시 그려지지 않는다
+  const eventLayouts = eventDaysByDate
+    ? getWeekEventLayout(week, eventDaysByDate, viewMode)
+    : undefined;
 
   return (
     <View style={styles.container}>

@@ -70,7 +70,8 @@ export type EventBlockProps = {
   title: string;
   time?: string; // 'HH:mm'. detail일 때만 표시한다
   labelStyle: EventBlockLabelStyle;
-  detail: boolean; // Figma Detail. 제목 2줄과 시간을 표시한다
+  detail: boolean; // Figma Detail. 제목 2줄과 시간을 표시한다. 요약형에서는 쓰지 않는다
+  fadeOverflow?: boolean; // 한 줄 제목이 넘치면 말줄임(…) 대신 끝을 흐리게 자른다. 요약형에서 쓴다
   span?: number; // 여러 날 일정이 이 주에서 차지하는 칸 수 (Figma _Event Block - Multiple)
   edge?: EventBlockEdge;
   color?: EventBlockColor;

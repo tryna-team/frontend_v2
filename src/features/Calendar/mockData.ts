@@ -27,7 +27,7 @@ function createEvent(
 }
 
 // # 더미 일정 (2026년 9~11월)
-// 블록 종류, 주·달 경계를 넘는 여러 날 일정, 4개 초과, 요약형 높이 초과를 모두 담는다
+// 블록 종류, 주·달 경계를 넘는 여러 날 일정, 4개 초과, 칸보다 긴 제목을 모두 담는다
 const MOCK_EVENTS: CalendarEventDetail[] = [
   // ## 9월
   createEvent(1, '팀 회의', '2026-09-07', { startTime: '10:00:00' }),
@@ -40,7 +40,7 @@ const MOCK_EVENTS: CalendarEventDetail[] = [
   createEvent(6, '한글날', '2026-10-09', { isAllDay: true }),
   createEvent(7, '프로젝트 마감 주간', '2026-10-09', { endDate: '2026-10-26' }), // 4주에 걸침
   createEvent(8, '아침 운동', '2026-10-14', { startTime: '07:30:00' }),
-  createEvent(9, '스터디', '2026-10-14', { startTime: '19:00:00' }), // 요약형 높이 초과
+  createEvent(9, '스터디', '2026-10-14', { startTime: '19:00:00' }), // 시간 일정 2개 (상세형은 Detail 2개)
 
   // ## 11월
   createEvent(10, '가을 휴가', '2026-11-01', { endDate: '2026-11-02', isAllDay: true }),
@@ -48,7 +48,7 @@ const MOCK_EVENTS: CalendarEventDetail[] = [
   createEvent(12, '점심 약속', '2026-11-04', { startTime: '12:30:00' }),
   createEvent(13, '가을 축제', '2026-11-05', { endDate: '2026-11-07' }), // 출장과 겹쳐 두 번째 줄
   createEvent(14, '가족 모임', '2026-11-08', { isAllDay: true }),
-  createEvent(15, '디자인 시스템 리뷰 회의', '2026-11-12', { startTime: '14:00:00' }),
+  createEvent(15, '디자인 시스템 리뷰 회의', '2026-11-12', { startTime: '14:00:00' }), // 칸보다 긴 제목
   createEvent(16, '가을 캠핑', '2026-11-13', { endDate: '2026-11-16', isAllDay: true }), // 주 경계
   createEvent(17, '세무서 방문', '2026-11-19', { isAllDay: true }),
   createEvent(18, '독서 모임', '2026-11-19'),
