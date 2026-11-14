@@ -18,9 +18,7 @@ type PeriodTarget = Exclude<SelectedPeriod, null>;
 function parseDateTime(dateText: string, timeText: string): Date {
   const now = new Date();
 
-  const dateMatch = dateText.match(
-    /(?:(\d{4})[.-]\s*)?(\d{1,2})월\s*(\d{1,2})일/,
-  );
+  const dateMatch = dateText.match(/(?:(\d{4})[.-]\s*)?(\d{1,2})월\s*(\d{1,2})일/);
 
   const timeMatch = timeText.match(/^(\d{1,2}):(\d{2})$/);
 
@@ -29,9 +27,7 @@ function parseDateTime(dateText: string, timeText: string): Date {
     return new Date(now);
   }
 
-  const year = dateMatch[1]
-    ? Number(dateMatch[1])
-    : now.getFullYear();
+  const year = dateMatch[1] ? Number(dateMatch[1]) : now.getFullYear();
 
   const month = Number(dateMatch[2]) - 1;
   const day = Number(dateMatch[3]);
@@ -49,34 +45,30 @@ export default function useEventPeriod({
   endTime,
 }: UseEventPeriodProps) {
   // # Period 상태
-  const [startDateTime, setStartDateTime] = useState(() =>
-    parseDateTime(startDate, startTime),
-  );
+  const [startDateTime, setStartDateTime] = useState(() => parseDateTime(startDate, startTime));
 
-  const [endDateTime, setEndDateTime] = useState(() =>
-    parseDateTime(endDate, endTime),
-  );
+  const [endDateTime, setEndDateTime] = useState(() => {
+    const initialStart = parseDateTime(startDate, startTime);
+    const initialEnd = parseDateTime(endDate, endTime);
 
-  const [selectedPeriod, setSelectedPeriod] =
-    useState<SelectedPeriod>(null);
+    return initialEnd < initialStart ? initialStart : initialEnd;
+  });
+
+  const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod>(null);
 
   const [isAllDay, setIsAllDay] = useState(false);
 
   // # TimePicker 터치 상태
-  const [isTimePickerTouched, setIsTimePickerTouched] =
-    useState(false);
+  const [isTimePickerTouched, setIsTimePickerTouched] = useState(false);
 
   // # 선택된 날짜·시간
-  const selectedDateTime =
-    selectedPeriod === 'end' ? endDateTime : startDateTime;
+  const selectedDateTime = selectedPeriod === 'end' ? endDateTime : startDateTime;
 
   // # Period 함수
   const handlePeriodPress = (period: PeriodTarget) => {
     setIsTimePickerTouched(false);
 
-    setSelectedPeriod((previous) =>
-      previous === period ? null : period,
-    );
+    setSelectedPeriod((previous) => (previous === period ? null : period));
   };
 
   const handleAllDayChange = (value: boolean) => {
@@ -84,41 +76,46 @@ export default function useEventPeriod({
     setIsTimePickerTouched(false);
   };
 
-  // # Picker 함수
-  const handlePickerDateChange = (date: Date) => {
-    const updateDate = (previous: Date) => {
-      const next = new Date(previous);
+  // # 시작·종료 순서 보장
+  const updatePeriod = (period: PeriodTarget, next: Date) => {
+    if (period === 'start') {
+      setStartDateTime(next);
 
-      next.setFullYear(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      );
+      if (next > endDateTime) {
+        setEndDateTime(new Date(next));
+      }
+    } else {
+      setEndDateTime(next);
 
-      return next;
-    };
-
-    if (selectedPeriod === 'start') {
-      setStartDateTime(updateDate);
-    } else if (selectedPeriod === 'end') {
-      setEndDateTime(updateDate);
+      if (next < startDateTime) {
+        setStartDateTime(new Date(next));
+      }
     }
   };
 
+  // # Picker 함수
+  const handlePickerDateChange = (date: Date) => {
+    if (!selectedPeriod) return;
+
+    const previous = selectedPeriod === 'start' ? startDateTime : endDateTime;
+
+    const next = new Date(previous);
+
+    next.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+
+    updatePeriod(selectedPeriod, next);
+  };
+
   const handlePickerTimeChange = (time: TimePickerValue) => {
-    const updateTime = (previous: Date) => {
-      const next = new Date(previous);
+    if (!selectedPeriod) return;
 
-      next.setHours(time.hour, time.minute, 0, 0);
+    const previous = selectedPeriod === 'start' ? startDateTime : endDateTime;
 
-      return next;
-    };
+    const next = new Date(previous);
 
-    if (selectedPeriod === 'start') {
-      setStartDateTime(updateTime);
-    } else if (selectedPeriod === 'end') {
-      setEndDateTime(updateTime);
-    }
+    next.setHours(time.hour, time.minute, 0, 0);
+
+    updatePeriod(selectedPeriod, next);
   };
 
   return {
