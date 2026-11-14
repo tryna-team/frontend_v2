@@ -7,7 +7,10 @@ import Option from '@/components/Option/Option';
 import type { SectionData } from '@/components/Option/OptionType';
 
 import Title from './Title';
-import Period from './Period';
+import Period, { type SelectedPeriod } from './Period';
+import Picker from './Picker/Picker';
+import type { TimePickerValue } from './Picker/TimePicker';
+
 import List from './List/List';
 import Lists from './List/Lists';
 import TodoList from './List/TodoList';
@@ -73,6 +76,8 @@ const LABEL_ICON_COLORS: Record<string, string> = {
   school: '#EBDDFF',
 };
 
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
 // # 타입 영역
 type EventCreateProps = {
   startDate: string;
@@ -88,6 +93,54 @@ type TodoItem = {
 
 type ActiveModal = 'label' | 'repeat' | 'notification' | null;
 
+type PeriodTarget = Exclude<SelectedPeriod, null>;
+
+// # 유틸 함수
+// TODO: API 날짜 형식 확정 후 문자열 파싱 대신 ISO 날짜 또는 Date 기반으로 통일
+function parseDateTime(dateText: string, timeText: string): Date {
+  const now = new Date();
+
+  const dateMatch = dateText.match(/(?:(\d{4})[.-]\s*)?(\d{1,2})월\s*(\d{1,2})일/);
+
+  const timeMatch = timeText.match(/^(\d{1,2}):(\d{2})$/);
+
+  if (!dateMatch || !timeMatch) {
+    // TODO: 잘못된 초기 날짜·시간에 대한 오류 처리 정책 확정
+    return new Date(now);
+  }
+
+  const year = dateMatch[1] ? Number(dateMatch[1]) : now.getFullYear();
+
+  const month = Number(dateMatch[2]) - 1;
+  const day = Number(dateMatch[3]);
+  const hour = Number(timeMatch[1]);
+  const minute = Number(timeMatch[2]);
+
+  return new Date(year, month, day, hour, minute);
+}
+
+function formatDate(date: Date): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const weekday = WEEKDAYS[date.getDay()];
+
+  return `${month}월 ${day}일 (${weekday})`;
+}
+
+function formatTime(date: Date): string {
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+
+  return `${hour}:${minute}`;
+}
+
+function getTimeValue(date: Date): TimePickerValue {
+  return {
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+  };
+}
+
 // # Main component
 export default function EventCreate({ startDate, startTime, endDate, endTime }: EventCreateProps) {
   const nextIdRef = useRef(1);
@@ -97,6 +150,15 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   // # Label 상태
   const [selectedLabel, setSelectedLabel] = useState('gmail');
   const [titleHeight, setTitleHeight] = useState(0);
+
+  // # Period 상태
+  const [startDateTime, setStartDateTime] = useState(() => parseDateTime(startDate, startTime));
+
+  const [endDateTime, setEndDateTime] = useState(() => parseDateTime(endDate, endTime));
+
+  const [selectedPeriod, setSelectedPeriod] = useState<SelectedPeriod>(null);
+
+  const [isAllDay, setIsAllDay] = useState(false);
 
   // # List 상태
   const [repeat, setRepeat] = useState('없음');
@@ -113,7 +175,10 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
 
-  // # 외부 탭 감지
+  // # 선택된 날짜·시간
+  const selectedDateTime = selectedPeriod === 'end' ? endDateTime : startDateTime;
+
+  // # Todo 외부 탭 감지
   const outsideTap = Gesture.Tap()
     .maxDistance(10)
     .runOnJS(true)
@@ -123,9 +188,58 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
       }
     });
 
+  // # Period 함수
+  const handlePeriodPress = (period: PeriodTarget) => {
+    setOpenId(null);
+    setActiveModal(null);
+
+    setSelectedPeriod((previous) => (previous === period ? null : period));
+  };
+
+  const handleAllDayChange = (value: boolean) => {
+    setIsAllDay(value);
+    setOpenId(null);
+    setActiveModal(null);
+
+    // Picker가 열려 있다면 닫지 않고 variant만 변경
+  };
+
+  const handlePickerDateChange = (date: Date) => {
+    const updateDate = (previous: Date) => {
+      const next = new Date(previous);
+
+      next.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+
+      return next;
+    };
+
+    if (selectedPeriod === 'start') {
+      setStartDateTime(updateDate);
+    } else if (selectedPeriod === 'end') {
+      setEndDateTime(updateDate);
+    }
+  };
+
+  const handlePickerTimeChange = (time: TimePickerValue) => {
+    const updateTime = (previous: Date) => {
+      const next = new Date(previous);
+
+      next.setHours(time.hour, time.minute, 0, 0);
+
+      return next;
+    };
+
+    if (selectedPeriod === 'start') {
+      setStartDateTime(updateTime);
+    } else if (selectedPeriod === 'end') {
+      setEndDateTime(updateTime);
+    }
+  };
+
   // # Modal 함수
   const handleOpenModal = (modal: Exclude<ActiveModal, null>) => {
     setOpenId(null);
+    setSelectedPeriod(null);
     setActiveModal(modal);
   };
 
@@ -200,6 +314,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     setTodos((previous) => [...previous, { id, value: '' }]);
 
     setOpenId(null);
+    setActiveModal(null);
   };
 
   const handleChangeTodo = (id: number, text: string) => {
@@ -251,8 +366,9 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.contentInner}>
-            {/* Title + Period */}
+            {/* Title + Period + Picker */}
             <View style={styles.headerContent}>
+              {/* Title */}
               <View
                 onLayout={(event) => {
                   const height = event.nativeEvent.layout.height;
@@ -268,16 +384,38 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   onFocus={() => {
                     setOpenId(null);
                     setActiveModal(null);
+                    setSelectedPeriod(null);
                   }}
                 />
               </View>
 
-              <Period
-                startDate={startDate}
-                startTime={startTime}
-                endDate={endDate}
-                endTime={endTime}
-              />
+              {/* Period + Picker */}
+              <View style={styles.periodContent}>
+                <Period
+                  startDate={formatDate(startDateTime)}
+                  startTime={formatTime(startDateTime)}
+                  endDate={formatDate(endDateTime)}
+                  endTime={formatTime(endDateTime)}
+                  selectedPeriod={selectedPeriod}
+                  isAllDay={isAllDay}
+                  onPeriodPress={handlePeriodPress}
+                  onAllDayChange={handleAllDayChange}
+                />
+
+                {/* 선택된 영역이 있을 때만 Picker 표시 */}
+                {selectedPeriod && (
+                  <View style={styles.picker}>
+                    <Picker
+                      key={selectedPeriod}
+                      variant={isAllDay ? 'date' : 'dateTime'}
+                      date={selectedDateTime}
+                      onDateChange={handlePickerDateChange}
+                      time={getTimeValue(selectedDateTime)}
+                      onTimeChange={handlePickerTimeChange}
+                    />
+                  </View>
+                )}
+              </View>
             </View>
 
             {/* ListLayer */}
@@ -322,6 +460,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                       }
 
                       setActiveModal(null);
+                      setSelectedPeriod(null);
                     }}
                     onInteraction={() => {
                       if (openId !== todo.id) {
@@ -434,6 +573,17 @@ const styles = StyleSheet.create({
   // ## Title + Period
   headerContent: {
     gap: 32,
+  },
+
+  // ## Period + Picker
+  periodContent: {
+    gap: 24,
+  },
+
+  picker: {
+    width: '100%',
+    borderRadius: 24,
+    overflow: 'hidden',
   },
 
   // ## ListLayer

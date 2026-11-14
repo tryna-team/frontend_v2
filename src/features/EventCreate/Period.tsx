@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import Button from '@/components/Button/Button';
@@ -7,13 +6,17 @@ import ApproximatelyIcon from '@/components/Icon/Approximately';
 import Date from './Date';
 
 // # 타입 영역
-type SelectedDate = 'start' | 'end' | null;
+export type SelectedPeriod = 'start' | 'end' | null;
 
 type PeriodProps = {
   startDate: string;
   startTime: string;
   endDate: string;
   endTime: string;
+  selectedPeriod: SelectedPeriod;
+  isAllDay: boolean;
+  onPeriodPress: (period: 'start' | 'end') => void;
+  onAllDayChange: (value: boolean) => void;
 };
 
 // # Main component
@@ -22,10 +25,11 @@ export default function Period({
   startTime,
   endDate,
   endTime,
+  selectedPeriod,
+  isAllDay,
+  onPeriodPress,
+  onAllDayChange,
 }: PeriodProps) {
-  const [selectedDate, setSelectedDate] = useState<SelectedDate>(null);
-  const [isAllDay, setIsAllDay] = useState(false);
-
   const dateVariant = isAllDay ? 'date' : 'dateTime';
 
   return (
@@ -34,14 +38,20 @@ export default function Period({
       <View style={styles.leading}>
         {/* 시작 날짜 */}
         <Pressable
-          onPress={() => setSelectedDate('start')}
+          onPress={() => onPeriodPress('start')}
           accessibilityRole="button"
           accessibilityLabel="시작 날짜 선택"
-          accessibilityState={{ selected: selectedDate === 'start' }}
+          accessibilityState={{
+            selected: selectedPeriod === 'start',
+          }}
         >
           <Date
             variant={dateVariant}
-            status={selectedDate === 'start' ? 'selected' : 'enable'}
+            status={
+              selectedPeriod === 'start'
+                ? 'selected'
+                : 'enable'
+            }
             date={startDate}
             time={startTime}
           />
@@ -52,14 +62,20 @@ export default function Period({
 
         {/* 종료 날짜 */}
         <Pressable
-          onPress={() => setSelectedDate('end')}
+          onPress={() => onPeriodPress('end')}
           accessibilityRole="button"
           accessibilityLabel="종료 날짜 선택"
-          accessibilityState={{ selected: selectedDate === 'end' }}
+          accessibilityState={{
+            selected: selectedPeriod === 'end',
+          }}
         >
           <Date
             variant={dateVariant}
-            status={selectedDate === 'end' ? 'selected' : 'enable'}
+            status={
+              selectedPeriod === 'end'
+                ? 'selected'
+                : 'enable'
+            }
             date={endDate}
             time={endTime}
           />
@@ -69,7 +85,7 @@ export default function Period({
       {/* Trailing */}
       <View style={styles.trailing}>
         <Pressable
-          onPress={() => setIsAllDay((previous) => !previous)}
+          onPress={() => onAllDayChange(!isAllDay)}
           accessibilityRole="switch"
           accessibilityLabel="하루종일"
           accessibilityState={{ checked: isAllDay }}

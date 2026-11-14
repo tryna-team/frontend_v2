@@ -38,7 +38,10 @@ function addDays(date: Date, days: number): Date {
 }
 
 function getWeekStart(date: Date): Date {
-  return addDays(date, -date.getDay());
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+
+  return addDays(start, -start.getDay());
 }
 
 function isSameDate(a: Date, b: Date): boolean {
