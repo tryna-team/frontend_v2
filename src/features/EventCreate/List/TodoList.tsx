@@ -28,6 +28,8 @@ const SWIPE_DISTANCE = ACTIONS_WIDTH + ACTION_GAP + HORIZONTAL_PADDING;
 const SWIPE_THRESHOLD = 12;
 const ANIMATION_DURATION = 80;
 
+const DEFAULT_TRAILING_TEXT = '당일';
+
 // # 타입 영역
 type DefaultTodoListProps = {
   variant?: 'default';
@@ -53,19 +55,33 @@ type TodoListProps = DefaultTodoListProps | AddTodoListProps;
 // # Add
 function AddTodoList({ onAdd }: AddTodoListProps) {
   return (
-    <Pressable
-      onPress={onAdd}
-      style={styles.addContainer}
-      accessibilityRole="button"
-      accessibilityLabel="할 일 추가"
-    >
-      <ListItemLayout
-        leading={<Plus size={24} color={colors.icon.additional} />}
-        middle={<Text style={styles.addText}>할 일 추가</Text>}
-        gap={16}
-        style={styles.listLayout}
-      />
-    </Pressable>
+    <View style={styles.addRow}>
+      <Pressable
+        onPress={onAdd}
+        style={styles.addContainer}
+        accessibilityRole="button"
+        accessibilityLabel="할 일 추가"
+      >
+        <ListItemLayout
+          leading={<Plus size={24} color={colors.icon.additional} />}
+          middle={<Text style={styles.addText}>할 일 추가</Text>}
+          gap={16}
+          style={styles.listLayout}
+        />
+      </Pressable>
+
+      {/* Trailing: 디자인 전용 비활성 버튼 */}
+      {/* TODO: Button 배경색 Props 구현 후 Base/Grey/Grey 100 적용 */}
+      <View style={styles.addTrailing}>
+        <Button
+          size="medium"
+          appearance="bordered"
+          icon={CalendarDays}
+          disabled
+          accessibilityLabel="할 일 날짜 선택 비활성"
+        />
+      </View>
+    </View>
   );
 }
 
@@ -73,7 +89,7 @@ function AddTodoList({ onAdd }: AddTodoListProps) {
 function DefaultTodoList({
   value,
   onChangeText,
-  trailingText,
+  trailingText = DEFAULT_TRAILING_TEXT,
   onTrailingPress,
   onCopy,
   onDelete,
@@ -165,21 +181,18 @@ function DefaultTodoList({
             </View>
 
             {/* Trailing */}
-            <Pressable
-              onPress={() => {
-                onInteraction?.();
-                onTrailingPress?.();
-              }}
-              style={styles.trailing}
-              accessibilityRole="button"
-              accessibilityLabel="할 일 날짜 선택"
-            >
-              {trailingText ? (
-                <Text style={styles.trailingText}>{trailingText}</Text>
-              ) : (
-                <CalendarDays size={24} color={value ? colors.icon.default : colors.icon.disable} />
-              )}
-            </Pressable>
+            <View style={styles.trailing}>
+              <Button
+                size="medium"
+                appearance="bordered"
+                label={trailingText}
+                accessibilityLabel={`할 일 날짜 ${trailingText}`}
+                onPress={() => {
+                  onInteraction?.();
+                  onTrailingPress?.();
+                }}
+              />
+            </View>
           </View>
 
           {/* Swipe Actions */}
@@ -273,22 +286,14 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
+  // ## Default Trailing
   trailing: {
-    minWidth: 50,
-    height: 50,
     marginRight: HORIZONTAL_PADDING,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.full,
-    backgroundColor: palette.greyOpacity[50],
   },
 
-  trailingText: {
-    color: colors.text.default,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-
+  // ## Swipe Actions
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -307,8 +312,16 @@ const styles = StyleSheet.create({
   },
 
   // ## Add
-  addContainer: {
+  addRow: {
     width: '100%',
+    minHeight: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  addContainer: {
+    flex: 1,
+    minWidth: 0,
     minHeight: 50,
     justifyContent: 'center',
   },
@@ -320,5 +333,11 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     letterSpacing: -0.2,
     color: colors.text.disable,
+  },
+
+  addTrailing: {
+    marginRight: HORIZONTAL_PADDING,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
