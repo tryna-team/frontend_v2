@@ -13,6 +13,8 @@ type PickerProps = {
   time?: TimePickerValue;
   onTimeChange?: (time: TimePickerValue) => void;
   selectedColor?: string;
+  onTimeTouchStart?: () => void;
+  onTimeTouchEnd?: () => void;
 };
 
 // # Main component
@@ -23,6 +25,8 @@ export default function Picker({
   time,
   onTimeChange,
   selectedColor,
+  onTimeTouchStart,
+  onTimeTouchEnd,
 }: PickerProps) {
   const showTime = variant === 'dateTime';
 
@@ -43,6 +47,8 @@ export default function Picker({
           <TimePicker
             value={time}
             onChange={onTimeChange}
+            onTouchStart={onTimeTouchStart}
+            onTouchEnd={onTimeTouchEnd}
           />
         </>
       )}

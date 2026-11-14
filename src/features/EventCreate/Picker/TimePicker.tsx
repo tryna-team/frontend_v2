@@ -32,6 +32,8 @@ export type TimePickerValue = {
 type TimePickerProps = {
   value: TimePickerValue;
   onChange: (value: TimePickerValue) => void;
+  onTouchStart?: () => void;
+  onTouchEnd?: () => void;
 };
 
 type WheelColumnProps = {
@@ -149,6 +151,7 @@ function WheelColumn({ values, value, onChange }: WheelColumnProps) {
         x: 0,
         y: initialIndex * ITEM_HEIGHT,
       }}
+      nestedScrollEnabled
       showsVerticalScrollIndicator={false}
       snapToInterval={ITEM_HEIGHT}
       snapToAlignment="start"
@@ -185,9 +188,16 @@ function WheelColumn({ values, value, onChange }: WheelColumnProps) {
 export default function TimePicker({
   value,
   onChange,
+  onTouchStart,
+  onTouchEnd,
 }: TimePickerProps) {
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+    >
       {/* Selected Row */}
       <View pointerEvents="none" style={styles.selectedRow} />
 

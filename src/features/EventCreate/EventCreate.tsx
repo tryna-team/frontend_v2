@@ -160,6 +160,9 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
 
   const [isAllDay, setIsAllDay] = useState(false);
 
+  // # TimePicker 터치 상태
+  const [isTimePickerTouched, setIsTimePickerTouched] = useState(false);
+
   // # List 상태
   const [repeat, setRepeat] = useState('없음');
   const [notification, setNotification] = useState('없음');
@@ -192,6 +195,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const handlePeriodPress = (period: PeriodTarget) => {
     setOpenId(null);
     setActiveModal(null);
+    setIsTimePickerTouched(false);
 
     setSelectedPeriod((previous) => (previous === period ? null : period));
   };
@@ -200,8 +204,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     setIsAllDay(value);
     setOpenId(null);
     setActiveModal(null);
-
-    // Picker가 열려 있다면 닫지 않고 variant만 변경
+    setIsTimePickerTouched(false);
   };
 
   const handlePickerDateChange = (date: Date) => {
@@ -240,6 +243,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
   const handleOpenModal = (modal: Exclude<ActiveModal, null>) => {
     setOpenId(null);
     setSelectedPeriod(null);
+    setIsTimePickerTouched(false);
     setActiveModal(modal);
   };
 
@@ -362,6 +366,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
         <ScrollView
           style={styles.container}
           contentContainerStyle={styles.content}
+          scrollEnabled={!isTimePickerTouched}
           keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false}
         >
@@ -374,6 +379,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   const height = event.nativeEvent.layout.height;
 
                   setTitleHeight((previous) => (previous === height ? previous : height));
+
                 }}
               >
                 <Title
@@ -385,6 +391,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                     setOpenId(null);
                     setActiveModal(null);
                     setSelectedPeriod(null);
+                    setIsTimePickerTouched(false);
                   }}
                 />
               </View>
@@ -412,6 +419,8 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                       onDateChange={handlePickerDateChange}
                       time={getTimeValue(selectedDateTime)}
                       onTimeChange={handlePickerTimeChange}
+                      onTimeTouchStart={() => setIsTimePickerTouched(true)}
+                      onTimeTouchEnd={() => setIsTimePickerTouched(false)}
                     />
                   </View>
                 )}
@@ -461,6 +470,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
 
                       setActiveModal(null);
                       setSelectedPeriod(null);
+                      setIsTimePickerTouched(false);
                     }}
                     onInteraction={() => {
                       if (openId !== todo.id) {
@@ -474,7 +484,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   />
                 ))}
 
-                <TodoList variant="add" onAdd={handleAddTodo} />
+                <TodoList variant="add" onAdd={handleAddTodo} /> 
               </Lists>
 
               {/* 3. 위치 / URL / 메모 */}
