@@ -1,6 +1,6 @@
 import { Pressable, View, Text, StyleSheet } from 'react-native';
-
 import { Check } from 'lucide-react-native';
+
 import DotIcon from '@/components/Icon/Dot';
 import { colors } from '@/theme/colors';
 
@@ -13,7 +13,7 @@ import type {
 // # 상수 영역
 const ICON_SIZE = 22;
 
-// # 함수 영역
+// # Leading
 function Leading({
   selection,
   icon,
@@ -23,27 +23,37 @@ function Leading({
     <View style={styles.leading}>
       <Check
         size={ICON_SIZE}
-        color={iconColor}
+        color="#000000"
         style={!selection && styles.hidden}
       />
-      {icon && <DotIcon size={ICON_SIZE} color={iconColor} />}
+
+      {icon && (
+        <DotIcon
+          size={ICON_SIZE}
+          color={iconColor}
+        />
+      )}
     </View>
   );
 }
 
+// # Middle
 function Middle({ content }: MiddleProps) {
   return (
     <View style={styles.middle}>
       {/* 너비 영역을 넘어가면 말줄임표 사용 */}
       {/* TODO: TDS Label1 타이포그래피 적용 */}
-      <Text numberOfLines={1} style={styles.content}>
+      <Text
+        numberOfLines={1}
+        style={styles.content}
+      >
         {content}
       </Text>
     </View>
   );
 }
 
-// # main component
+// # Main component
 export default function OptionItem({
   selection,
   icon,
@@ -63,7 +73,12 @@ export default function OptionItem({
         pressed && styles.pressed,
       ]}
     >
-      <Leading selection={selection} icon={icon} iconColor={iconColor} />
+      <Leading
+        selection={selection}
+        icon={icon}
+        iconColor={iconColor}
+      />
+
       <Middle content={content} />
     </Pressable>
   );
