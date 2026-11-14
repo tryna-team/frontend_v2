@@ -1,21 +1,7 @@
 import { useRef, useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
-import {
-  Gesture,
-  GestureDetector,
-} from 'react-native-gesture-handler';
-import {
-  Bell,
-  FileText,
-  Link,
-  MapPin,
-  RotateCw,
-} from 'lucide-react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Bell, FileText, Link, MapPin, RotateCw } from 'lucide-react-native';
 
 import Option from '@/components/Option/Option';
 import type { SectionData } from '@/components/Option/OptionType';
@@ -29,14 +15,7 @@ import TodoList from './List/TodoList';
 // # 상수 영역
 const POPOVER_WIDTH = 219;
 
-const REPEAT_OPTIONS = [
-  '없음',
-  '매일',
-  '매주',
-  '2주마다',
-  '매월',
-  '매년',
-];
+const REPEAT_OPTIONS = ['없음', '매일', '매주', '2주마다', '매월', '매년'];
 
 const NOTIFICATION_OPTIONS = [
   '없음',
@@ -52,6 +31,48 @@ const NOTIFICATION_OPTIONS = [
   '1주 전',
 ];
 
+// TODO: 사용자 계정 및 캘린더 연동 후 동적 데이터로 교체
+const LABEL_GROUPS = [
+  {
+    title: 'Gmail',
+    items: [
+      {
+        id: 'gmail',
+        name: 'Gmail Cal',
+        color: '#E89A35',
+      },
+    ],
+  },
+  {
+    title: 'iCloud',
+    items: [
+      {
+        id: 'icloud',
+        name: 'iCloud Cal',
+        color: '#608BEA',
+      },
+      {
+        id: 'tryna',
+        name: 'tryna',
+        color: '#70C98B',
+      },
+      {
+        id: 'school',
+        name: 'School',
+        color: '#B58AF1',
+      },
+    ],
+  },
+];
+
+// TODO: 실제 라벨 색상과 Title 아이콘 배경색 매핑 확정
+const LABEL_ICON_COLORS: Record<string, string> = {
+  gmail: '#F8DEB7',
+  icloud: '#DDE8FF',
+  tryna: '#DDF4E4',
+  school: '#EBDDFF',
+};
+
 // # 타입 영역
 type EventCreateProps = {
   startDate: string;
@@ -65,18 +86,17 @@ type TodoItem = {
   value: string;
 };
 
-type ActiveModal = 'repeat' | 'notification' | null;
+type ActiveModal = 'label' | 'repeat' | 'notification' | null;
 
 // # Main component
-export default function EventCreate({
-  startDate,
-  startTime,
-  endDate,
-  endTime,
-}: EventCreateProps) {
+export default function EventCreate({ startDate, startTime, endDate, endTime }: EventCreateProps) {
   const nextIdRef = useRef(1);
 
   const [title, setTitle] = useState('');
+
+  // # Label 상태
+  const [selectedLabel, setSelectedLabel] = useState('gmail');
+  const [titleHeight, setTitleHeight] = useState(0);
 
   // # List 상태
   const [repeat, setRepeat] = useState('없음');
@@ -86,15 +106,14 @@ export default function EventCreate({
   const [memo, setMemo] = useState('');
 
   // # Modal 상태
-  const [activeModal, setActiveModal] =
-    useState<ActiveModal>(null);
+  const [activeModal, setActiveModal] = useState<ActiveModal>(null);
   const [listLayerTop, setListLayerTop] = useState(0);
 
   // # Todo 상태
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [openId, setOpenId] = useState<number | null>(null);
 
-  // # Todo 외부 탭 감지
+  // # 외부 탭 감지
   const outsideTap = Gesture.Tap()
     .maxDistance(10)
     .runOnJS(true)
@@ -105,14 +124,17 @@ export default function EventCreate({
     });
 
   // # Modal 함수
-  const handleOpenModal = (
-    modal: Exclude<ActiveModal, null>,
-  ) => {
+  const handleOpenModal = (modal: Exclude<ActiveModal, null>) => {
     setOpenId(null);
     setActiveModal(modal);
   };
 
   const handleCloseModal = () => {
+    setActiveModal(null);
+  };
+
+  const handleSelectLabel = (id: string) => {
+    setSelectedLabel(id);
     setActiveModal(null);
   };
 
@@ -127,6 +149,18 @@ export default function EventCreate({
   };
 
   // # Option 데이터
+  const labelSections: SectionData[] = LABEL_GROUPS.map((group) => ({
+    title: group.title,
+    items: group.items.map((item) => ({
+      id: item.id,
+      content: item.name,
+      selection: selectedLabel === item.id,
+      icon: true,
+      iconColor: item.color,
+      onPress: () => handleSelectLabel(item.id),
+    })),
+  }));
+
   const repeatSections: SectionData[] = [
     {
       items: REPEAT_OPTIONS.map((value) => ({
@@ -145,21 +179,17 @@ export default function EventCreate({
           id: 'none',
           content: '없음',
           selection: notification === '없음',
-          onPress: () =>
-            handleSelectNotification('없음'),
+          onPress: () => handleSelectNotification('없음'),
         },
       ],
     },
     {
-      items: NOTIFICATION_OPTIONS.slice(1).map(
-        (value) => ({
-          id: value,
-          content: value,
-          selection: notification === value,
-          onPress: () =>
-            handleSelectNotification(value),
-        }),
-      ),
+      items: NOTIFICATION_OPTIONS.slice(1).map((value) => ({
+        id: value,
+        content: value,
+        selection: notification === value,
+        onPress: () => handleSelectNotification(value),
+      })),
     },
   ];
 
@@ -167,31 +197,19 @@ export default function EventCreate({
   const handleAddTodo = () => {
     const id = nextIdRef.current++;
 
-    setTodos((previous) => [
-      ...previous,
-      { id, value: '' },
-    ]);
+    setTodos((previous) => [...previous, { id, value: '' }]);
 
     setOpenId(null);
   };
 
-  const handleChangeTodo = (
-    id: number,
-    text: string,
-  ) => {
+  const handleChangeTodo = (id: number, text: string) => {
     setTodos((previous) =>
-      previous.map((todo) =>
-        todo.id === id
-          ? { ...todo, value: text }
-          : todo,
-      ),
+      previous.map((todo) => (todo.id === id ? { ...todo, value: text } : todo)),
     );
   };
 
   const handleCopyTodo = (id: number) => {
-    const target = todos.find(
-      (todo) => todo.id === id,
-    );
+    const target = todos.find((todo) => todo.id === id);
 
     if (!target) return;
 
@@ -209,12 +227,18 @@ export default function EventCreate({
   };
 
   const handleDeleteTodo = (id: number) => {
-    setTodos((previous) =>
-      previous.filter((todo) => todo.id !== id),
-    );
+    setTodos((previous) => previous.filter((todo) => todo.id !== id));
 
     setOpenId(null);
   };
+
+  // # Option 선택
+  const currentSections =
+    activeModal === 'label'
+      ? labelSections
+      : activeModal === 'repeat'
+        ? repeatSections
+        : notificationSections;
 
   // # Main UI
   return (
@@ -229,10 +253,24 @@ export default function EventCreate({
           <View style={styles.contentInner}>
             {/* Title + Period */}
             <View style={styles.headerContent}>
-              <Title
-                value={title}
-                onChangeText={setTitle}
-              />
+              <View
+                onLayout={(event) => {
+                  const height = event.nativeEvent.layout.height;
+
+                  setTitleHeight((previous) => (previous === height ? previous : height));
+                }}
+              >
+                <Title
+                  value={title}
+                  onChangeText={setTitle}
+                  onIconPress={() => handleOpenModal('label')}
+                  iconBackgroundColor={LABEL_ICON_COLORS[selectedLabel]}
+                  onFocus={() => {
+                    setOpenId(null);
+                    setActiveModal(null);
+                  }}
+                />
+              </View>
 
               <Period
                 startDate={startDate}
@@ -248,11 +286,7 @@ export default function EventCreate({
               onLayout={(event) => {
                 const top = event.nativeEvent.layout.y;
 
-                setListLayerTop((previous) =>
-                  previous === top
-                    ? previous
-                    : top,
-                );
+                setListLayerTop((previous) => (previous === top ? previous : top));
               }}
             >
               {/* 1. 반복 / 알림 */}
@@ -261,76 +295,47 @@ export default function EventCreate({
                   variant="modal"
                   icon={RotateCw}
                   placeholder="반복 없음"
-                  value={
-                    repeat === '없음'
-                      ? ''
-                      : repeat
-                  }
-                  onPress={() =>
-                    handleOpenModal('repeat')
-                  }
+                  value={repeat === '없음' ? '' : repeat}
+                  onPress={() => handleOpenModal('repeat')}
                 />
 
                 <List
                   variant="modal"
                   icon={Bell}
                   placeholder="알림 없음"
-                  value={
-                    notification === '없음'
-                      ? ''
-                      : notification
-                  }
-                  onPress={() =>
-                    handleOpenModal('notification')
-                  }
+                  value={notification === '없음' ? '' : notification}
+                  onPress={() => handleOpenModal('notification')}
                 />
               </Lists>
 
               {/* 2. TodoList */}
-              <Lists
-                variant="background"
-                paddingVertical={0}
-              >
+              <Lists variant="background" paddingVertical={0}>
                 {todos.map((todo) => (
                   <TodoList
                     key={todo.id}
                     variant="default"
                     value={todo.value}
-                    onChangeText={(text) =>
-                      handleChangeTodo(
-                        todo.id,
-                        text,
-                      )
-                    }
+                    onChangeText={(text) => handleChangeTodo(todo.id, text)}
                     onFocus={() => {
                       if (openId !== todo.id) {
                         setOpenId(null);
                       }
+
+                      setActiveModal(null);
                     }}
                     onInteraction={() => {
                       if (openId !== todo.id) {
                         setOpenId(null);
                       }
                     }}
-                    onCopy={() =>
-                      handleCopyTodo(todo.id)
-                    }
-                    onDelete={() =>
-                      handleDeleteTodo(todo.id)
-                    }
+                    onCopy={() => handleCopyTodo(todo.id)}
+                    onDelete={() => handleDeleteTodo(todo.id)}
                     isOpen={openId === todo.id}
-                    onOpenChange={(open) =>
-                      setOpenId(
-                        open ? todo.id : null,
-                      )
-                    }
+                    onOpenChange={(open) => setOpenId(open ? todo.id : null)}
                   />
                 ))}
 
-                <TodoList
-                  variant="add"
-                  onAdd={handleAddTodo}
-                />
+                <TodoList variant="add" onAdd={handleAddTodo} />
               </Lists>
 
               {/* 3. 위치 / URL / 메모 */}
@@ -368,6 +373,7 @@ export default function EventCreate({
             {/* Option Layer */}
             {activeModal && (
               <View style={styles.optionLayer}>
+                {/* 외부 터치 시 닫기 */}
                 <Pressable
                   style={StyleSheet.absoluteFill}
                   onPress={handleCloseModal}
@@ -375,21 +381,24 @@ export default function EventCreate({
                   accessibilityLabel="선택 메뉴 닫기"
                 />
 
+                {/* Option Popover */}
                 <View
                   style={[
                     styles.optionPosition,
-                    { top: listLayerTop },
+                    activeModal === 'label'
+                      ? {
+                          top: titleHeight,
+                          alignItems: 'flex-start',
+                        }
+                      : {
+                          top: listLayerTop,
+                          alignItems: 'flex-end',
+                        },
                   ]}
                   pointerEvents="box-none"
                 >
                   <View style={styles.option}>
-                    <Option
-                      sections={
-                        activeModal === 'repeat'
-                          ? repeatSections
-                          : notificationSections
-                      }
-                    />
+                    <Option sections={currentSections} />
                   </View>
                 </View>
               </View>
@@ -450,7 +459,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    alignItems: 'flex-end',
   },
 
   option: {

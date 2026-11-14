@@ -10,6 +10,8 @@ type TitleProps = {
   value: string;
   onChangeText: (text: string) => void;
   onIconPress?: () => void;
+  iconBackgroundColor?: string;
+  onFocus?: () => void;
 };
 
 // # Main component
@@ -17,26 +19,38 @@ export default function Title({
   value,
   onChangeText,
   onIconPress,
+  iconBackgroundColor,
+  onFocus,
 }: TitleProps) {
   return (
     <View style={styles.container}>
       {/* Leading */}
-      <Button44
-        icon={CalendarDays}
-        appearance="bordered"
-        accessibilityLabel="일정 아이콘"
-        onPress={onIconPress}
-      />
+      <View
+        style={[
+          styles.iconContainer,
+          iconBackgroundColor
+            ? { backgroundColor: iconBackgroundColor }
+            : undefined,
+        ]}
+      >
+        <Button44
+          icon={CalendarDays}
+          appearance="bordered"
+          accessibilityLabel="일정 아이콘"
+          onPress={onIconPress}
+        />
+      </View>
 
       {/* Middle */}
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
+        onFocus={onFocus}
         placeholder="제목"
         placeholderTextColor={colors.text.disable}
-        // TODO: tds 컬러로 교체
-        selectionColor={'#0088FF'}
+        // TODO: TDS 컬러로 교체
+        selectionColor="#0088FF"
         autoCorrect={false}
         returnKeyType="done"
         accessibilityLabel="일정 제목"
@@ -53,6 +67,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 20,
   },
+
+  iconContainer: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+
   input: {
     flex: 1,
     minWidth: 0,
