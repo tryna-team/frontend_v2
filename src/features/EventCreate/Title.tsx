@@ -25,6 +25,8 @@ export default function Title({
   return (
     <View style={styles.container}>
       {/* Leading */}
+      {/* TODO: Button44의 배경색 변경 Props 구현 후,
+          부모 View 대신 Button44에 iconBackgroundColor를 직접 적용하도록 수정 */}
       <View
         style={[
           styles.iconContainer,
