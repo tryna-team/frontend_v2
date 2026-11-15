@@ -76,7 +76,7 @@ export type ButtonLook = {
 };
 
 // # 상태별 모양 (비활성: Figma Is Disable / 눌림: Figma _Button - 44pt Pressed)
-// 그림자: shadow prop을 켰을 때만 그린다 (Button44 Borderless는 Figma 44pt대로 눌렸을 때만). 비활성일 때는 항상 없다
+// 그림자: Bordered에서 shadow prop을 켰을 때만 그린다 (기본·눌림). 비활성일 때는 항상 없다
 // TODO: Prominent는 임시로 Bordered와 같은 눌림 모양 적용. Prominent 전용 디자인 확정 시 교체
 export function resolveLook(options: LookOptions, pressed = false): ButtonLook {
   const {
@@ -85,9 +85,11 @@ export function resolveLook(options: LookOptions, pressed = false): ButtonLook {
     destructive,
     bgColor,
     glass = false,
-    shadow: hasShadow = false,
+    shadow: shadowProp = false,
   } = options;
   const isBorderless = appearance === 'borderless';
+  // 그림자는 Bordered에서만 그린다 (타입에서도 Bordered에만 shadow를 넘길 수 있다)
+  const hasShadow = appearance === 'bordered' && shadowProp;
 
   if (disabled) {
     return {
@@ -107,10 +109,9 @@ export function resolveLook(options: LookOptions, pressed = false): ButtonLook {
     };
   }
 
-  // TODO: 아래 Button44(glass) 분기 2개와 Content Area 기본 분기를 한 경로로 합치는 것을 검토
+  // TODO: 아래 Button44(glass) 분기와 Content Area 기본 분기를 한 경로로 합치는 것을 검토
   //   두 버튼의 차이는 Bordered 기본 배경(흰색 40% / Grey 100)과 블러 여부뿐이라 분기 대신 값으로 고를 수 있다
-  //   합치면 bgColor·shadow를 한 곳에서 처리하므로, 새 옵션을 추가할 때 두 버튼에 함께 적용된다
-  //   이때 "배경이 없으면 기본 상태에 그림자 없음" 규칙을 Content Area Borderless에도 적용할지 함께 정한다 (아래 TODO)
+  //   합치면 bgColor 처리도 한 곳으로 모여, 새 옵션을 추가할 때 두 버튼에 함께 적용된다
 
   // Button44 Bordered: 유리 배경(블러 + 흰색 40%, bgColor가 있으면 그 색) (Figma _Button - 44pt)
   if (glass && appearance === 'bordered') {
@@ -122,19 +123,11 @@ export function resolveLook(options: LookOptions, pressed = false): ButtonLook {
     };
   }
 
-  // Button44 Borderless: 배경이 없어 기본 상태엔 그림자를 두지 않는다 (Figma _Button - 44pt)
-  if (glass && isBorderless) {
-    return { ...appearanceStyles.borderless, blur: false, shadow: false };
-  }
-
-  // Content Area 버튼에는 배경 블러가 없다
+  // Content Area 버튼과 Button44 Borderless에는 배경 블러가 없다
   const style =
     appearance === 'prominent' && destructive ? destructiveStyle : appearanceStyles[appearance];
   // Bordered는 bgColor prop이 있으면 그 색을 배경으로 쓴다 (없으면 Figma 기본 Grey 100)
   const backgroundColor = appearance === 'bordered' && bgColor ? bgColor : style.backgroundColor;
-  // TODO: Content Area Borderless의 shadow 삭제 여부 판단 필요
-  //   지금은 shadow를 켜면 기본·눌림 모두 그림자가 생기는데, 기본 상태엔 배경이 없어 투명한 버튼 둘레에 그림자만 보인다
-  //   (Button44 Borderless는 Figma 44pt대로 기본 상태에 그림자가 없다)
   return { ...style, backgroundColor, blur: false, shadow: hasShadow };
 }
 
@@ -148,7 +141,7 @@ export const glassStyle = {
 } as const;
 
 // # 그림자 (Figma Component/Default)
-// Content Area 버튼·Button44: shadow prop으로 켤 때만 쓴다 / CTA: 항상 쓴다
+// Content Area 버튼·Button44: Bordered에서 shadow prop으로 켤 때만 쓴다 / CTA: 항상 쓴다
 export const shadow = '0px 0px 20px 0px rgba(0, 0, 0, 0.08)';
 
 // # CTA (일정 추가 전용 "+" 버튼, v1 MainCTAButton)

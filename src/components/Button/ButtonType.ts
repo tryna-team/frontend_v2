@@ -22,6 +22,16 @@ export type ButtonContentProps =
   | { label: string; icon?: ButtonIcon; accessibilityLabel?: string }
   | { label?: never; icon: ButtonIcon; accessibilityLabel: string };
 
+// ## appearance: shadow는 Bordered에서만 넘길 수 있다 (다른 appearance에 넘기면 타입 에러)
+// A는 버튼이 받는 appearance 범위 (Button44는 prominent 제외)
+export type AppearanceProps<A extends ButtonAppearance = ButtonAppearance> =
+  | {
+      appearance: 'bordered';
+      /** 그림자 표시 여부. 기본 false. true면 기본·눌림 상태에 그림자를 그린다 (비활성일 때는 없음) */
+      shadow?: boolean;
+    }
+  | { appearance: Exclude<A, 'bordered'>; shadow?: never };
+
 // ## ButtonBase: contentArea·Button44가 함께 쓰는 본체. 크기 값과 유리 모양 여부를 받는다
 export type ButtonBaseProps = ButtonContentProps & {
   layout: ButtonLayout;
@@ -31,38 +41,36 @@ export type ButtonBaseProps = ButtonContentProps & {
   destructive?: boolean;
   bgColor?: PaletteColor;
   shadow?: boolean;
-  /** Button44 전용. Bordered는 유리 배경(블러 + 흰색 40%), Borderless는 기본 상태에 그림자 없음 (Figma 44pt) */
+  /** Button44 전용. Bordered를 유리 배경(블러 + 흰색 40%)으로 그린다 (Figma 44pt) */
   glass?: boolean;
   onPress?: () => void;
   hitSlop?: PressableProps['hitSlop'];
 };
 
 // ## contentArea (기본값): Figma Button - Content Area
-// TODO: bgColor·shadow는 Button44Props와 같은 prop이라 공통 타입(예: ButtonStyleOptions)으로 묶어 함께 관리하는 것을 검토
+// TODO: bgColor는 Button44Props와 같은 prop이라 shadow처럼 공통 타입으로 묶어 함께 관리하는 것을 검토
 //   (boxSize는 두 버튼의 아이콘 처리가 달라 따로 둔다)
-export type ContentAreaButtonProps = ButtonContentProps & {
-  variant?: 'contentArea';
-  size: ButtonSize;
-  /**
-   * 가로·세로를 직접 지정 (42 → 42×42, '60*28' → 가로 60 × 세로 28). 없으면 size 크기 그대로
-   * 여백·간격·아이콘 크기는 size 값을 쓰고, 터치 영역은 최소 44가 되도록 다시 계산한다
-   */
-  boxSize?: ButtonBoxSize;
-  appearance: ButtonAppearance;
-  disabled?: boolean;
-  /** Figma Destructive. 기본 false. true면 Prominent만 빨간색으로 바뀐다 (다른 appearance는 그대로) */
-  destructive?: boolean;
-  /**
-   * Bordered 배경색. 없으면 Figma 기본값 palette.grey[100]. palette 토큰 값만 받는다 (예: palette.blue[50])
-   * Bordered에서만 적용되고, 비활성·눌림일 때는 각 상태의 배경색을 쓴다
-   */
-  bgColor?: PaletteColor;
-  /** 그림자 표시 여부. 기본 false (true일 때만 그림자를 그린다, 비활성일 때는 항상 없음) */
-  shadow?: boolean;
-  onPress?: () => void;
-  /** 버튼 바깥으로 넓힐 터치 영역. 지정하지 않으면 size(boxSize가 있으면 boxSize) 크기에 맞춘 기본값(최소 44) */
-  hitSlop?: PressableProps['hitSlop'];
-};
+export type ContentAreaButtonProps = ButtonContentProps &
+  AppearanceProps & {
+    variant?: 'contentArea';
+    size: ButtonSize;
+    /**
+     * 가로·세로를 직접 지정 (42 → 42×42, '60*28' → 가로 60 × 세로 28). 없으면 size 크기 그대로
+     * 여백·간격·아이콘 크기는 size 값을 쓰고, 터치 영역은 최소 44가 되도록 다시 계산한다
+     */
+    boxSize?: ButtonBoxSize;
+    disabled?: boolean;
+    /** Figma Destructive. 기본 false. true면 Prominent만 빨간색으로 바뀐다 (다른 appearance는 그대로) */
+    destructive?: boolean;
+    /**
+     * Bordered 배경색. 없으면 Figma 기본값 palette.grey[100]. palette 토큰 값만 받는다 (예: palette.blue[50])
+     * Bordered에서만 적용되고, 비활성·눌림일 때는 각 상태의 배경색을 쓴다
+     */
+    bgColor?: PaletteColor;
+    onPress?: () => void;
+    /** 버튼 바깥으로 넓힐 터치 영역. 지정하지 않으면 size(boxSize가 있으면 boxSize) 크기에 맞춘 기본값(최소 44) */
+    hitSlop?: PressableProps['hitSlop'];
+  };
 
 // ## cta: 일정 추가 전용 "+" 버튼. 모양·아이콘·접근성 이름 고정 (크기만 boxSize로 바꿀 수 있다)
 // TODO: 중복 입력 방지가 필요해지면 disabled 추가 (비활성 디자인 확인 필요)
