@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import type { SectionData } from '@/components/Option/OptionType';
-
+import { palette } from '@/theme/colors';
 // # 상수 영역
 const REPEAT_OPTIONS = ['없음', '매일', '매주', '2주마다', '매월', '매년'];
 
@@ -37,10 +37,10 @@ const LABEL_GROUPS = [
 
 // TODO: 실제 라벨 색상과 Title 아이콘 배경색 매핑 확정
 const LABEL_ICON_COLORS: Record<string, string> = {
-  gmail: '#F8DEB7',
-  icloud: '#DDE8FF',
-  tryna: '#DDF4E4',
-  school: '#EBDDFF',
+  gmail: palette.apricot[200],
+  icloud: palette.blue[200],
+  tryna: palette.green[300],
+  school: palette.purple[100],
 };
 
 // # 타입 영역
@@ -142,7 +142,7 @@ export default function useEventOption() {
     activeModal,
 
     // 표시 데이터
-    iconBackgroundColor: LABEL_ICON_COLORS[selectedLabel],
+    TitleLabelColor: LABEL_ICON_COLORS[selectedLabel],
     currentSections,
 
     // 상태 변경

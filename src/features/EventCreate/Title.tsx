@@ -3,6 +3,7 @@ import { CalendarDays } from 'lucide-react-native';
 
 import Button44 from '@/components/Button/Button44/Button44';
 import { colors } from '@/theme/colors';
+import { PaletteColor } from '@/components/Button/ButtonType';
 import { typography } from '@/theme/typography';
 
 // # 타입 영역
@@ -10,7 +11,7 @@ type TitleProps = {
   value: string;
   onChangeText: (text: string) => void;
   onIconPress?: () => void;
-  iconBackgroundColor?: string;
+  TitleLabelColor?: PaletteColor;
   onFocus?: () => void;
 };
 
@@ -19,29 +20,19 @@ export default function Title({
   value,
   onChangeText,
   onIconPress,
-  iconBackgroundColor,
+  TitleLabelColor,
   onFocus,
 }: TitleProps) {
   return (
     <View style={styles.container}>
       {/* Leading */}
-      {/* TODO: Button44의 배경색 변경 Props 구현 후,
-          부모 View 대신 Button44에 iconBackgroundColor를 직접 적용하도록 수정 */}
-      <View
-        style={[
-          styles.iconContainer,
-          iconBackgroundColor
-            ? { backgroundColor: iconBackgroundColor }
-            : undefined,
-        ]}
-      >
-        <Button44
-          icon={CalendarDays}
-          appearance="bordered"
-          accessibilityLabel="일정 아이콘"
-          onPress={onIconPress}
-        />
-      </View>
+      <Button44
+        icon={CalendarDays}
+        appearance="bordered"
+        bgColor={TitleLabelColor}
+        accessibilityLabel="일정 아이콘"
+        onPress={onIconPress}
+      />
 
       {/* Middle */}
       <TextInput
@@ -69,12 +60,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 20,
   },
-
-  iconContainer: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-
   input: {
     flex: 1,
     minWidth: 0,

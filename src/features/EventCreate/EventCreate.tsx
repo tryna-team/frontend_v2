@@ -85,7 +85,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
     repeat,
     notification,
     activeModal,
-    iconBackgroundColor,
+    TitleLabelColor,
     currentSections,
     setActiveModal,
     handleOpenModal: handleOpenModalFromHook,
@@ -207,7 +207,7 @@ export default function EventCreate({ startDate, startTime, endDate, endTime }: 
                   value={title}
                   onChangeText={setTitle}
                   onIconPress={() => handleOpenModal('label')}
-                  iconBackgroundColor={iconBackgroundColor}
+                  TitleLabelColor={TitleLabelColor}
                   onFocus={handleTitleFocus}
                 />
               </View>
