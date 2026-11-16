@@ -189,6 +189,7 @@ function DefaultTodoList({
               <Button
                 size="medium"
                 appearance="bordered"
+                bgColor={palette.grey[100]}
                 label={trailingText}
                 accessibilityLabel={`할 일 날짜 ${trailingText}`}
                 onPress={() => {
