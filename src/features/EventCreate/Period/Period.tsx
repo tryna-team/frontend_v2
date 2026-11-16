@@ -4,6 +4,7 @@ import Button from '@/components/Button/Button';
 import ApproximatelyIcon from '@/components/Icon/Approximately';
 
 import Date from './Date';
+import { palette } from '@/theme/colors';
 
 // # 타입 영역
 export type SelectedPeriod = 'start' | 'end' | null;
@@ -95,6 +96,7 @@ export default function Period({
               size="small"
               appearance="bordered"
               label="하루종일"
+              bgColor={palette.greyOpacity[50]}
               disabled={!isAllDay}
             />
           </View>
