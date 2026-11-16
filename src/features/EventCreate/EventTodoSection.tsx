@@ -3,7 +3,7 @@ import { RefreshCcw } from 'lucide-react-native';
 
 import Button from '@/components/Button/Button';
 
-import { colors } from '@/theme/colors';
+import { colors, palette } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
 
 import Picker from './Picker/Picker';
@@ -113,6 +113,7 @@ export default function EventTodoSection({
           <Button
             size="medium"
             appearance="bordered"
+            bgColor={palette.grey[100]}
             icon={RefreshCcw}
             accessibilityLabel="할 일 다시 추천받기"
             // TODO: 추천 API 연동 후 재추천 함수 연결
