@@ -20,6 +20,7 @@ export default function Menu({ items }: MenuProps) {
             icon={item.icon}
             content={item.content}
             status={item.status}
+            isSelected={item.isSelected}
             onPress={item.onPress}
           />
         ))}

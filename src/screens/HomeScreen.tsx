@@ -14,6 +14,7 @@ import Toolbar from '@/components/Toolbar/Toolbar';
 import CalendarHeader from '@/features/Calendar/common/CalendarHeader';
 import { getMockEventDaysByMonth } from '@/features/Calendar/mockData';
 import MonthlyCalendar from '@/features/Calendar/monthly/MonthlyCalendar';
+import ViewModeMenu from '@/features/Calendar/monthly/ViewModeMenu';
 import { useCalendarPageState } from '@/features/Calendar/useCalendarPageState';
 import { tempDesignValues } from '@/theme/tempDesignValues';
 
@@ -36,53 +37,68 @@ export default function HomeScreen({ onPressCreate }: HomeScreenProps) {
     selectedDate,
     viewMode,
     visibleMonth,
+    isViewModeMenuOpen,
     monthListRef,
     selectDate,
     changeVisibleMonth,
+    openViewModeMenu,
+    closeViewModeMenu,
+    changeViewMode,
     goToToday,
   } = useCalendarPageState();
 
   return (
-    <Layout
-      // TODO: Toolbar 버튼은 아직 기능을 연결하지 않는다. 보기 방식 버튼에는 ViewModeMenu를 연결할 예정
-      toolbar={
-        <Toolbar
-          leadingIcon={ChevronLeft}
-          leadingLabel={String(visibleMonth.year)}
-          leadingAccessibilityLabel={`${visibleMonth.year}년 연간 캘린더`}
-          trailingButtons={[
-            {
-              // 보기 방식 메뉴 항목과 같은 아이콘이다 (컴팩트·상세형)
-              icon: viewMode === 'summary' ? StretchHorizontal : SquareText,
-              accessibilityLabel: '보기 방식 선택',
-            },
-            { icon: Search, accessibilityLabel: '검색' },
-            { icon: CalendarDays, accessibilityLabel: '캘린더' },
-            { icon: UserRound, accessibilityLabel: '마이페이지' },
-          ]}
-        />
-      }
-      headerAccessory={<CalendarHeader month={visibleMonth.month} />}
-      footer={
-        <View style={styles.footer}>
-          <Button size="large" appearance="bordered" label="오늘" onPress={goToToday} />
-          <Button variant="cta" onPress={onPressCreate} />
-        </View>
-      }
-    >
-      {(mainArea) => (
-        <MonthlyCalendar
-          ref={monthListRef}
-          mainArea={mainArea}
-          viewMode={viewMode}
-          today={today}
-          selectedDate={selectedDate}
-          eventDaysByMonth={MOCK_EVENT_DAYS_BY_MONTH}
-          onSelectDate={selectDate}
-          onVisibleMonthChange={changeVisibleMonth}
-        />
-      )}
-    </Layout>
+    <>
+      <Layout
+        // TODO: 보기 방식 외의 Toolbar 버튼(연도, 검색, 캘린더, 마이페이지)은 이동할 화면이 생기면 연결한다
+        toolbar={
+          <Toolbar
+            leadingIcon={ChevronLeft}
+            leadingLabel={String(visibleMonth.year)}
+            leadingAccessibilityLabel={`${visibleMonth.year}년 연간 캘린더`}
+            trailingButtons={[
+              {
+                // 보기 방식 메뉴 항목과 같은 아이콘이다 (컴팩트·상세형)
+                icon: viewMode === 'summary' ? StretchHorizontal : SquareText,
+                onPress: openViewModeMenu,
+                accessibilityLabel: '보기 방식 선택',
+              },
+              { icon: Search, accessibilityLabel: '검색' },
+              { icon: CalendarDays, accessibilityLabel: '캘린더' },
+              { icon: UserRound, accessibilityLabel: '마이페이지' },
+            ]}
+          />
+        }
+        headerAccessory={<CalendarHeader month={visibleMonth.month} />}
+        footer={
+          <View style={styles.footer}>
+            <Button size="large" appearance="bordered" label="오늘" onPress={goToToday} />
+            <Button variant="cta" onPress={onPressCreate} />
+          </View>
+        }
+      >
+        {(mainArea) => (
+          <MonthlyCalendar
+            ref={monthListRef}
+            mainArea={mainArea}
+            viewMode={viewMode}
+            today={today}
+            selectedDate={selectedDate}
+            eventDaysByMonth={MOCK_EVENT_DAYS_BY_MONTH}
+            onSelectDate={selectDate}
+            onVisibleMonthChange={changeVisibleMonth}
+          />
+        )}
+      </Layout>
+
+      {/* Toolbar 위에 겹쳐 띄우는 메뉴. RN Modal이라 Layout 밖에 둔다 */}
+      <ViewModeMenu
+        visible={isViewModeMenuOpen}
+        viewMode={viewMode}
+        onSelect={changeViewMode}
+        onClose={closeViewModeMenu}
+      />
+    </>
   );
 }
 

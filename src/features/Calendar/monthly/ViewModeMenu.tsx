@@ -13,7 +13,7 @@ const { viewModeMenu } = tempDesignValues;
 // # Main component
 // Figma Home/Montly Menu. Toolbar의 보기 버튼을 누르면 Toolbar 위에 겹쳐 띄우고, 바깥을 누르면 닫는다.
 // Header보다 위에 그려야 해서 Layout 밖(Modal)에 두고, Sheet처럼 safe area를 직접 읽는다
-export default function ViewModeMenu({ visible, onSelect, onClose }: ViewModeMenuProps) {
+export default function ViewModeMenu({ visible, viewMode, onSelect, onClose }: ViewModeMenuProps) {
   const safeArea = useSafeAreaInsets();
 
   const select = (mode: MonthlyViewMode) => {
@@ -21,12 +21,22 @@ export default function ViewModeMenu({ visible, onSelect, onClose }: ViewModeMen
     onClose();
   };
 
-  // TODO: Figma Home/Montly Menu에서 첫 항목이 Pressed(회색 배경)로 그려져 있다.
-  //       누르는 순간의 표시인지, 현재 보기 방식 표시인지 디자이너 확인 후 반영
-  //       (현재 보기 방식 표시라면 MenuItem에 선택 상태 추가 필요)
+  // Figma Home/Montly Menu에서 회색 배경으로 그린 첫 항목은 현재 보기 방식을 뜻한다
   const items: MenuItemData[] = [
-    { id: 'summary', icon: StretchHorizontal, content: '컴팩트', onPress: () => select('summary') },
-    { id: 'detail', icon: SquareText, content: '상세형', onPress: () => select('detail') },
+    {
+      id: 'summary',
+      icon: StretchHorizontal,
+      content: '컴팩트',
+      isSelected: viewMode === 'summary',
+      onPress: () => select('summary'),
+    },
+    {
+      id: 'detail',
+      icon: SquareText,
+      content: '상세형',
+      isSelected: viewMode === 'detail',
+      onPress: () => select('detail'),
+    },
   ];
 
   return (

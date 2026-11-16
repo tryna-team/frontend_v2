@@ -43,8 +43,9 @@ export type EventSlot = {
 };
 
 export type DayEventLayout = {
-  slots: EventSlot[];
+  slots: EventSlot[]; // 칸(일정 영역)에 들어가는 줄만 담는다
   eventCount: number; // 서버의 eventCount. 숨긴 일정도 포함한다
+  hiddenCount: number; // 칸에 다 못 그려 +N으로 표시할 일정 수. 0이면 표시하지 않는다
 };
 
 // # 일정 블록 타입
@@ -79,6 +80,7 @@ export type EventBlockProps = {
 
 export type EventsProps = {
   slots: EventSlot[];
+  hiddenCount: number; // 0보다 크면 마지막 줄에 +N을 표시한다
 };
 
 // Figma _Day의 Label Style. 'numOnly'는 날짜 숫자(월간 칸), 'weekOnly'는 요일 글자(요일 줄)
@@ -156,6 +158,7 @@ export type MonthlyCalendarProps = {
 
 export type ViewModeMenuProps = {
   visible: boolean;
+  viewMode: MonthlyViewMode; // 현재 보기 방식. 그 항목을 선택 배경으로 표시한다
   onSelect: (mode: MonthlyViewMode) => void; // 항목을 누르면 부르고, 이어서 onClose로 메뉴를 닫는다
   onClose: () => void; // 바깥을 누르거나 Android 뒤로가기를 누르면 부른다
 };

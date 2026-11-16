@@ -42,6 +42,7 @@ export default function MenuItem({
   icon,
   status = 'default',
   content,
+  isSelected = false,
   onPress,
 }: MenuItemProps) {
   const isDestructive = status === 'destructive';
@@ -56,8 +57,8 @@ export default function MenuItem({
         onPress={onPress}
         disabled={!onPress}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !onPress }}
-        style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+        accessibilityState={{ disabled: !onPress, selected: isSelected }}
+        style={({ pressed }) => [styles.container, (pressed || isSelected) && styles.pressed]}
       >
         <Leading icon={icon} color={iconColor} />
         <Middle content={content} color={textColor} />
@@ -82,6 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
   },
+  // Figma _Actions - interaction. 누르는 동안과 선택된 항목에 같은 배경을 쓴다
   pressed: {
     borderRadius: 999,
     backgroundColor: 'rgba(28, 22, 48, 0.05)',

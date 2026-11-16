@@ -55,7 +55,9 @@ function DayBlock({
           isToday={isToday}
           isSelected={isSelected}
         />
-        {eventLayout && <Events slots={eventLayout.slots} />}
+        {eventLayout && (
+          <Events slots={eventLayout.slots} hiddenCount={eventLayout.hiddenCount} />
+        )}
       </View>
     </Pressable>
   );

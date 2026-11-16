@@ -1,16 +1,34 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { colors } from '@/theme/colors';
 import { tempDesignValues } from '@/theme/tempDesignValues';
+import { typography } from '@/theme/typography';
 import EventBlock from './EventBlock';
 import type { EventsProps } from '../CalendarType';
 
+// # 상수 영역
+const { eventBlock, events } = tempDesignValues;
+
+// # 타입 영역
+type MoreEventsProps = {
+  count: number;
+};
+
+// # 함수 영역
+// ## 칸에 다 못 그린 일정 수
+// TODO: Figma에 초과 표시 디자인이 없어 v1처럼 "+N" 글자만 둔다. 디자이너 확인 후 교체
+function MoreEvents({ count }: MoreEventsProps) {
+  return (
+    <View style={styles.more}>
+      <Text style={styles.moreText}>+{count}</Text>
+    </View>
+  );
+}
+
 // # Main component
-// Figma Events. 칸 폭 전체를 쓰고, 블록과 칸 경계 사이 여백은 EventBlock이 둔다
-// TODO: 줄 높이의 합이 일정 영역(요약형 55, 상세형 145)보다 크면 칸 아래로 넘친다.
-//   요약형은 모두 한 줄(15·16)이라 4줄(최대 70)이어도 다음 주 구분선에 닿는 데서 멈추고,
-//   상세형은 Detail 4개(186)처럼 다음 주 영역을 침범한다
-//   초과 표시 디자인이 정해지면 getWeekEventLayout에서 표시 줄 수를 제한한다
-export default function Events({ slots }: EventsProps) {
+// Figma Events. 칸 폭 전체를 쓰고, 블록과 칸 경계 사이 여백은 EventBlock이 둔다.
+// 받은 줄은 모두 칸(일정 영역) 안에 들어간다. 넘치는 일정은 getWeekEventLayout이 +N으로 바꿔 둔다
+export default function Events({ slots, hiddenCount }: EventsProps) {
   return (
     <View style={styles.container}>
       {slots.map(({ key, height, block }) => (
@@ -18,6 +36,7 @@ export default function Events({ slots }: EventsProps) {
           {block && <EventBlock {...block} />}
         </View>
       ))}
+      {hiddenCount > 0 && <MoreEvents count={hiddenCount} />}
     </View>
   );
 }
@@ -26,6 +45,17 @@ export default function Events({ slots }: EventsProps) {
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'stretch',
-    gap: tempDesignValues.events.gap,
+    gap: events.gap,
+  },
+  // 한 줄 블록의 제목과 같은 위치에서 시작한다 (칸 경계 여백 + 블록 안쪽 여백)
+  more: {
+    height: events.moreHeight,
+    justifyContent: 'center',
+    paddingHorizontal: events.inset + eventBlock.paddingHorizontal,
+  },
+  // 일정 블록 제목과 같은 글자에 보조 글자색을 쓴다. 행간(15)이 줄 높이와 같아 잘리지 않는다
+  moreText: {
+    ...typography.default.caption.large,
+    color: colors.text.additional,
   },
 });

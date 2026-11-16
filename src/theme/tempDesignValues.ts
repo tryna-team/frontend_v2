@@ -72,6 +72,8 @@ export const tempDesignValues = {
     gap: 2,
     // 블록과 칸 경계 사이 여백. 402 폭에서 Figma 블록 폭(52)과 같아진다
     inset: 2.71,
+    // 칸에 다 못 그린 일정 수(+N) 줄의 높이. Figma에 없는 임시 값이라 한 줄 블록(Text only)과 같게 둔다
+    moreHeight: 15,
   },
 
   // ## _Event Block
