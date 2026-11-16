@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import type { SectionData } from '@/components/Option/OptionType';
 import { palette } from '@/theme/colors';
+import { PaletteColor } from '@/components/Button/ButtonType';
 // # 상수 영역
 const REPEAT_OPTIONS = ['없음', '매일', '매주', '2주마다', '매월', '매년'];
 
@@ -36,7 +37,7 @@ const LABEL_GROUPS = [
 ];
 
 // TODO: 실제 라벨 색상과 Title 아이콘 배경색 매핑 확정
-const LABEL_ICON_COLORS: Record<string, string> = {
+const LABEL_ICON_COLORS: Record<string, PaletteColor> = {
   gmail: palette.apricot[200],
   icloud: palette.blue[200],
   tryna: palette.green[300],

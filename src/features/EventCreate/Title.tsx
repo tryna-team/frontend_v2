@@ -11,7 +11,7 @@ type TitleProps = {
   value: string;
   onChangeText: (text: string) => void;
   onIconPress?: () => void;
-  TitleLabelColor?: PaletteColor;
+  TitleLabelColor: PaletteColor;
   onFocus?: () => void;
 };
 
