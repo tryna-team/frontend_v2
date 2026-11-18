@@ -11,7 +11,7 @@ import type { EventBlockColor, EventBlockEdge, EventBlockProps } from '../Calend
 
 // # 상수 영역
 const { eventBlock, events } = tempDesignValues;
-// onLayout 폭의 픽셀 반올림 오차. 제목 폭이 영역 폭과 이만큼 이내면 끝에 닿은 것으로 본다
+// onLayout 폭의 픽셀 반올림 오차. 제목 폭이 기준 폭을 이만큼 넘어야 넘친 것으로 본다
 const OVERFLOW_TOLERANCE = 0.5;
 
 // 라벨별 색이 정해지기 전까지 모든 일정에 쓰는 Figma 기본색
@@ -26,6 +26,7 @@ const DEFAULT_COLOR: EventBlockColor = {
 type FadingTitleProps = {
   title: string;
   color: EventBlockColor;
+  endPadding: number; // 칩 오른쪽 여백. 넘친 제목은 이 여백까지 이어 그려 칩 끝에서 사라지게 한다
 };
 
 type FadeEdgeProps = {
@@ -33,6 +34,11 @@ type FadeEdgeProps = {
 };
 
 // # 함수 영역
+// ## 오른쪽 여백. 오른쪽만 둥근 Edge 변형(edge='left')은 둥근 쪽 여백을 쓴다
+function getPaddingRight(edge: EventBlockEdge) {
+  return edge === 'left' ? eventBlock.edgePadding : eventBlock.paddingHorizontal;
+}
+
 // ## 이어지는 쪽 모서리는 직각으로 하고, Figma Edge 변형처럼 둥근 쪽 여백을 넓힌다
 // TODO: Figma Edge 변형은 둥근 쪽 여백이 4.71이라 제목 위치가 일반 블록과 2.71 어긋난다. 디자이너 확인 필요
 function getEdgeStyle(edge: EventBlockEdge, cornerRadius: number): ViewStyle {
@@ -45,20 +51,20 @@ function getEdgeStyle(edge: EventBlockEdge, cornerRadius: number): ViewStyle {
     borderTopRightRadius: isFlatRight ? 0 : cornerRadius,
     borderBottomRightRadius: isFlatRight ? 0 : cornerRadius,
     paddingLeft: edge === 'right' ? eventBlock.edgePadding : eventBlock.paddingHorizontal,
-    paddingRight: edge === 'left' ? eventBlock.edgePadding : eventBlock.paddingHorizontal,
+    paddingRight: getPaddingRight(edge),
   };
 }
 
-// ## 한 줄 제목이 제목 영역을 넘어 잘렸는지
-// 제목 글자는 영역 폭까지만 늘어나므로, 글자 폭이 영역 폭에 닿으면 잘린 것으로 본다
-function useTitleOverflow() {
+// ## 한 줄 제목이 Figma 제목 영역(칩 오른쪽 여백 앞까지)을 넘었는지
+// 제목 영역은 칩 끝까지 늘려 두므로, 글자 폭이 영역 폭에서 오른쪽 여백을 뺀 폭보다 크면 넘친 것으로 본다
+function useTitleOverflow(endPadding: number) {
   const widths = useRef({ area: 0, title: 0 });
   const [isOverflowing, setIsOverflowing] = useState(false);
 
   // 두 폭 중 하나가 바뀔 때마다 다시 비교한다
   const compare = () => {
     const { area, title } = widths.current;
-    setIsOverflowing(area > 0 && title >= area - OVERFLOW_TOLERANCE);
+    setIsOverflowing(area > 0 && title > area - endPadding + OVERFLOW_TOLERANCE);
   };
 
   return {
@@ -75,12 +81,13 @@ function useTitleOverflow() {
 }
 
 // ## 요약형 한 줄 제목. 넘치면 말줄임(…) 대신 잘라내고, 끝을 흐리게 덮어 뒤에 글자가 더 있음을 보여 준다
+// 넘친 제목은 오른쪽 여백까지 이어 그려, 흐림이 칩 안에서 끝나지 않고 칩 끝에서 끝나게 한다 (둥근 모서리는 따지지 않는다)
 // 잘리지 않은 제목은 덮지 않는다 (끝 글자가 흐려져 잘린 것처럼 보이지 않게)
-function FadingTitle({ title, color }: FadingTitleProps) {
-  const { isOverflowing, onAreaLayout, onTitleLayout } = useTitleOverflow();
+function FadingTitle({ title, color, endPadding }: FadingTitleProps) {
+  const { isOverflowing, onAreaLayout, onTitleLayout } = useTitleOverflow(endPadding);
 
   return (
-    <View style={styles.titleArea} onLayout={onAreaLayout}>
+    <View style={[styles.titleArea, { marginRight: -endPadding }]} onLayout={onAreaLayout}>
       <Text
         numberOfLines={1}
         ellipsizeMode="clip"
@@ -94,7 +101,7 @@ function FadingTitle({ title, color }: FadingTitleProps) {
   );
 }
 
-// ## 제목 영역 오른쪽 끝을 블록 배경색 그라데이션으로 덮는다
+// ## 칩 오른쪽 끝을 블록 배경색 그라데이션으로 덮는다. 단계는 tempDesignValues의 fadeStops를 따른다
 function FadeEdge({ color }: FadeEdgeProps) {
   // 웹은 그라데이션 id를 문서 전체에서 찾으므로, 블록마다 다른 id를 써야 다른 블록의 색을 가져오지 않는다
   const gradientId = useId();
@@ -104,8 +111,9 @@ function FadeEdge({ color }: FadeEdgeProps) {
       <Svg width="100%" height="100%">
         <Defs>
           <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor={color} stopOpacity={0} />
-            <Stop offset="1" stopColor={color} stopOpacity={1} />
+            {eventBlock.fadeStops.map(({ offset, opacity }) => (
+              <Stop key={offset} offset={offset} stopColor={color} stopOpacity={opacity} />
+            ))}
           </LinearGradient>
         </Defs>
         <Rect width="100%" height="100%" fill={`url(#${gradientId})`} />
@@ -159,7 +167,7 @@ export default function EventBlock({
           <>
             {hasIcon && <Number24Icon size={eventBlock.iconSize} color={color.icon} />}
             {fadeOverflow ? (
-              <FadingTitle title={title} color={color} />
+              <FadingTitle title={title} color={color} endPadding={getPaddingRight(edge)} />
             ) : (
               <Text numberOfLines={1} style={[styles.text, styles.lineText, { color: color.title }]}>
                 {title}
@@ -205,12 +213,12 @@ const styles = StyleSheet.create({
   fadeBlock: {
     overflow: 'hidden',
   },
-  // 아이콘 옆 남은 폭 전체. 이 폭에 제목이 닿으면 잘린 것이다
+  // 아이콘 옆 남은 폭 전체. FadingTitle이 오른쪽 여백만큼 더 늘려 칩 끝에 맞춘다
   titleArea: {
     flex: 1,
     flexDirection: 'row',
   },
-  // 제목 영역 오른쪽 끝에 겹친다. 터치는 아래 칸(Day Block)으로 넘긴다
+  // 제목 영역 오른쪽 끝(= 칩 끝)에 겹친다. 터치는 아래 칸(Day Block)으로 넘긴다
   fade: {
     position: 'absolute',
     top: 0,

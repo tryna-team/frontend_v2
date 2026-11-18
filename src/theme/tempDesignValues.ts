@@ -90,7 +90,16 @@ export const tempDesignValues = {
     paddingVertical: 1,
     edgePadding: 4.71, // Edge 변형에서 둥근 쪽 여백
     iconSize: 14,
-    // 요약형에서 넘친 제목의 오른쪽 끝을 흐리게 덮는 폭. Figma에 없는 임시 값이라 디자인이 정해지면 교체
-    fadeWidth: 12,
+    // 요약형에서 넘친 제목을 칩 오른쪽 끝에서 흐리게 덮는 폭. Figma에 없는 임시 값이라 디자인이 정해지면 교체
+    // 칩 오른쪽 여백까지 포함한 폭이다 (일반 칩은 여백 2 + 글자 부분 12)
+    fadeWidth: 14,
+    // 흐림 단계. offset은 덮개 시작(0)~칩 끝(1), opacity는 배경색으로 덮는 정도(1이면 글자가 완전히 가려진다)
+    // 앞쪽에서 빠르게 진해지고, 끝부분(마지막 20%)은 글자를 완전히 가린다. Figma에 없는 임시 값
+    fadeStops: [
+      { offset: 0, opacity: 0 },
+      { offset: 0.5, opacity: 0.8 },
+      { offset: 0.8, opacity: 1 },
+      { offset: 1, opacity: 1 },
+    ],
   },
 } as const;

@@ -20,6 +20,8 @@ import { tempDesignValues } from '@/theme/tempDesignValues';
 
 // # 타입 영역
 type HomeScreenProps = {
+  // 날짜 칸. 누른 날짜를 선택한 뒤 부른다. 데일리 화면으로 이동할 때 넘긴다
+  onPressDate?: (date: string) => void;
   // Footer "+". 일정 생성 시트를 연결할 때 넘긴다. 넘기지 않으면 눌러도 아무 일도 없다
   onPressCreate?: () => void;
 };
@@ -31,7 +33,7 @@ const MOCK_EVENT_DAYS_BY_MONTH = getMockEventDaysByMonth();
 
 // # Main component
 // Figma Home/Montly (Compact·Scrolling·Menu·Detail). 월간 캘린더 화면
-export default function HomeScreen({ onPressCreate }: HomeScreenProps) {
+export default function HomeScreen({ onPressDate, onPressCreate }: HomeScreenProps) {
   const {
     today,
     selectedDate,
@@ -46,6 +48,12 @@ export default function HomeScreen({ onPressCreate }: HomeScreenProps) {
     changeViewMode,
     goToToday,
   } = useCalendarPageState();
+
+  // 날짜 칸을 누르면 그 날짜를 선택하고, 넘겨받은 동작(데일리 화면 이동)을 이어서 한다
+  const pressDate = (date: string) => {
+    selectDate(date);
+    onPressDate?.(date);
+  };
 
   return (
     <>
@@ -85,7 +93,7 @@ export default function HomeScreen({ onPressCreate }: HomeScreenProps) {
             today={today}
             selectedDate={selectedDate}
             eventDaysByMonth={MOCK_EVENT_DAYS_BY_MONTH}
-            onSelectDate={selectDate}
+            onSelectDate={pressDate}
             onVisibleMonthChange={changeVisibleMonth}
           />
         )}
