@@ -3,6 +3,7 @@ import type { LucideProps } from 'lucide-react-native';
 import { Text, StyleSheet, Pressable, View } from 'react-native';
 
 import { colors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
 import type { MenuItemProps } from './MenuType';
 
 // # 상수 영역
@@ -41,6 +42,7 @@ export default function MenuItem({
   icon,
   status = 'default',
   content,
+  isSelected = false,
   onPress,
 }: MenuItemProps) {
   const isDestructive = status === 'destructive';
@@ -55,8 +57,8 @@ export default function MenuItem({
         onPress={onPress}
         disabled={!onPress}
         accessibilityRole="button"
-        accessibilityState={{ disabled: !onPress }}
-        style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+        accessibilityState={{ disabled: !onPress, selected: isSelected }}
+        style={({ pressed }) => [styles.container, (pressed || isSelected) && styles.pressed]}
       >
         <Leading icon={icon} color={iconColor} />
         <Middle content={content} color={textColor} />
@@ -81,14 +83,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
   },
+  // Figma _Actions - interaction. 누르는 동안과 선택된 항목에 같은 배경을 쓴다
   pressed: {
     borderRadius: 999,
     backgroundColor: 'rgba(28, 22, 48, 0.05)',
   },
+  // Figma TDS/Label/Label1 (Wanted Sans 17/500/20/-0.2). 같은 값의 토큰이 없어
+  // Button의 labelTextStyle처럼 폰트만 기본값으로 두고 나머지는 Figma 값을 쓴다
   // TODO: TDS Typo로 교체
   text: {
+    fontFamily: fontFamily.default,
     fontSize: 17,
     fontWeight: '500',
+    lineHeight: 20,
+    letterSpacing: -0.2,
   },
   middle: {
     flex: 1,

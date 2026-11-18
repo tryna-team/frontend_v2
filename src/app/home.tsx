@@ -1,38 +1,9 @@
-import { Text, View, Button, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 
-export default function HomeScreen() {
-  const handleEventPress = () => {
-    router.push({
-      pathname: '/event/[eventId]',
-      // 테스트용 임시 값 설정
-      params: { eventId: '20261101' }
-    });
-  };
+import HomeScreen from '@/screens/HomeScreen';
 
-  return (
-    <View style={styles.container}>
-      <Text>Home Screen</Text>
-
-      <Button 
-        title="Daily" 
-        onPress={() => router.push('/daily')} 
-      />
-
-      <Button 
-        title="Event" 
-        onPress={handleEventPress} 
-      />
-    </View>
-  );
+// 월간 캘린더 화면. 날짜를 누르면 데일리 화면으로 이동한다
+// 데일리 화면은 누른 날짜를 store의 선택 날짜(selectedDate)로 읽는다
+export default function HomeRoute() {
+  return <HomeScreen onPressDate={() => router.push('/daily')} />;
 }
-
-// # style 영역
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-  },
-});

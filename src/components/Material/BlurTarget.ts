@@ -1,15 +1,18 @@
-import { createContext, useContext, type RefObject } from 'react';
+import { createContext, useContext, type ComponentRef, type RefObject } from 'react';
 import type { View } from 'react-native';
 import type { BlurMethod } from 'expo-blur';
+
+// 화면에 그려진 View 객체. RN 0.88부터 View가 함수 컴포넌트라 `View` 타입은 함수 자체를 뜻한다
+export type ViewRef = ComponentRef<typeof View>;
 
 // Android 블러 대상 공유
 // Android의 BlurView는 BlurTargetView로 감싼 영역만 블러할 수 있다.
 // Layout이 Main을 BlurTargetView로 감싸고 그 ref를 내려주면, Header·Footer 안의 BlurView가 함께 쓴다.
 // (iOS·웹에서는 blurTarget·blurMethod가 무시된다)
-export const BlurTargetContext = createContext<RefObject<View | null> | null>(null);
+export const BlurTargetContext = createContext<RefObject<ViewRef | null> | null>(null);
 
 type BlurTargetProps = {
-  blurTarget?: RefObject<View | null>;
+  blurTarget?: RefObject<ViewRef | null>;
   blurMethod: BlurMethod;
 };
 
