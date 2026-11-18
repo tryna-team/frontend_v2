@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { useAppReady } from '@/hooks/useAppReady';
 import { useTodaySync } from '@/hooks/useTodaySync';
@@ -14,17 +15,23 @@ export default function RootLayout() {
   useTodaySync();
 
   return (
-    <>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       {isReady && (
-        <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        >
           <Stack.Screen name="index" />
           <Stack.Screen name="home" />
           <Stack.Screen name="daily" />
           <Stack.Screen name="event/[eventId]" />
         </Stack>
       )}
+
       {/* 앱 화면 위에 겹쳐 그린다. 디자인된 스플래시가 생기면 앱 화면 위에서 사라지는 연출을 할 수 있다 */}
       <Splash isAppReady={isReady} />
-    </>
+    </GestureHandlerRootView>
   );
 }
