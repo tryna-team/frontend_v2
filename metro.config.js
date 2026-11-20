@@ -1,8 +1,7 @@
-const { withStorybook } = require('@storybook/react-native/withStorybook');
-const { getDefaultConfig } = require('expo/metro-config');
+const {
+  withStorybook,
+} = require('@storybook/react-native/withStorybook');
 
-const config = getDefaultConfig(__dirname);
+const { getDefaultConfig } = require("expo/metro-config");
 
-module.exports = withStorybook(config, {
-  enabled: true,
-});
+module.exports = withStorybook(getDefaultConfig(__dirname));

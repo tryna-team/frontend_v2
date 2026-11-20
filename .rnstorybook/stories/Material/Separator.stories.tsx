@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
-import Separator from '@/components/Material/Separator';
+import Separator from '../../../src/components/Material/Separator';
 
 // # 상수 영역
 const meta = {

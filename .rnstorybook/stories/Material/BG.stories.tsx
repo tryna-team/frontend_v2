@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
-import BG from '@/components/Material/BG';
+import BG from '../../../src/components/Material/BG';
 
 // # 상수 영역
 const meta = {
