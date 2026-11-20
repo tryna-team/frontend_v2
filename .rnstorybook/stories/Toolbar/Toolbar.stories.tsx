@@ -37,18 +37,13 @@ type ToolbarStoryProps = {
 
 // # 함수 영역
 function ToolbarPreview(args: ToolbarStoryProps) {
-  const [, updateArgs] = useArgs<ToolbarStoryProps>();
-
   if (args.variant === 'search') {
     return (
       <Toolbar
         variant="search"
         searchValue={args.searchValue ?? ''}
         searchPlaceholder={args.searchPlaceholder}
-        onSearchChangeText={(text: string) => {
-          updateArgs({ searchValue: text });
-          args.onSearchChangeText?.(text);
-        }}
+        onSearchChangeText={args.onSearchChangeText ?? (() => {})}
         onSearchSubmit={args.onSearchSubmit}
         searchButtonOnPress={args.searchButtonOnPress ?? (() => {})}
       />
@@ -96,6 +91,20 @@ function ToolbarPreview(args: ToolbarStoryProps) {
     <Toolbar
       variant="default"
       trailingButtons={args.trailingButtons}
+    />
+  );
+}
+
+function RenderToolbar(args: ToolbarStoryProps) {
+  const [, updateArgs] = useArgs<ToolbarStoryProps>();
+
+  return (
+    <ToolbarPreview
+      {...args}
+      onSearchChangeText={(text: string) => {
+        updateArgs({ searchValue: text });
+        args.onSearchChangeText?.(text);
+      }}
     />
   );
 }
@@ -150,6 +159,8 @@ const meta = {
       </View>
     ),
   ],
+
+  render: RenderToolbar,
 } satisfies Meta<typeof ToolbarPreview>;
 
 export default meta;

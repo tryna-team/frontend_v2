@@ -9,7 +9,7 @@ import SearchField from '../../../src/components/Toolbar/SearchField';
 type SearchFieldProps = ComponentProps<typeof SearchField>;
 
 // # 함수 영역
-function SearchFieldPreview(args: SearchFieldProps) {
+function RenderSearchField(args: SearchFieldProps) {
   const [, updateArgs] = useArgs();
 
   const handleChangeText = (text: string) => {
@@ -57,7 +57,7 @@ const meta = {
     ),
   ],
 
-  render: (args) => <SearchFieldPreview {...args} />,
+  render: RenderSearchField,
 } satisfies Meta<typeof SearchField>;
 
 export default meta;
