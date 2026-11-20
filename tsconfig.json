@@ -3,8 +3,8 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [ "./src/*" ],
-      "@/assets/*": [ "./assets/*" ],
+      "@/*": ["./src/*"],
+      "@/assets/*": ["./assets/*"],
       "@features/*": ["./src/features/*"],
       "@components/*": ["./src/components/*"],
       "@screens/*": ["./src/screens/*"],
@@ -15,6 +15,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+    "expo-env.d.ts",
+    ".rnstorybook/stories/Material/Separator.stories.tsx",, ".rnstorybook/stories/Icon/Approximately.stories.tsx", ".rnstorybook/stories/Icon/Chevron.stories.tsx"
+    ".rnstorybook/stories/Material/BG.stories.tsx",
+    ".rnstorybook/stories/Icon/24hour.stories.tsx"
+, ".rnstorybook/stories/Icon/Circle.stories.tsx", ".rnstorybook/stories/Icon/Dot.stories.tsx", ".rnstorybook/stories/Toolbar/SearchField.stories.tsx", ".rnstorybook/stories/Toolbar/Toolbar.stories.tsx"  ]
 }
