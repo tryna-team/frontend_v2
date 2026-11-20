@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-native';
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 
 import Sheet from '../../../src/components/Sheet/Sheet';
 
@@ -33,6 +28,7 @@ function SheetPreview({
       return (
         <View style={styles.content}>
           <Text style={styles.title}>Sheet 콘텐츠</Text>
+
           <Text style={styles.description}>
             Sheet 내부에 여러 콘텐츠가 배치되는 경우를 확인합니다.
           </Text>
@@ -51,6 +47,7 @@ function SheetPreview({
     return (
       <View style={styles.content}>
         <Text style={styles.title}>Sheet</Text>
+
         <Text style={styles.description}>
           기본 Sheet 컴포넌트입니다.
         </Text>
@@ -66,16 +63,15 @@ function SheetPreview({
         accessibilityRole="button"
         accessibilityLabel="시트 열기"
       >
-        <Text style={styles.openButtonText}>Sheet 열기</Text>
+        <Text style={styles.openButtonText}>
+          Sheet 열기
+        </Text>
       </Pressable>
 
       {isOpen && (
         <Sheet
-          onClose={
-            showCloseButton
-              ? () => setIsOpen(false)
-              : undefined
-          }
+          showCloseButton={showCloseButton}
+          onClose={() => setIsOpen(false)}
         >
           {renderContent()}
         </Sheet>
