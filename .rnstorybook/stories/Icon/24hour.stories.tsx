@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+import type { Meta, StoryObj } from '@storybook/react-native';
 
-import { colors } from '@/theme/colors';
+import { colors } from '../../../src/theme/colors';
 import Number24Icon from '../../../src/components/Icon/24hour';
 
 // # Meta

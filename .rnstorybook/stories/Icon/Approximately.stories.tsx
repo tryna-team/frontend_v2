@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+import type { Meta, StoryObj } from '@storybook/react-native';
 
-import { colors } from '@/theme/colors';
+import { colors } from '../../../src/theme/colors';
 import ApproximatelyIcon from '../../../src/components/Icon/Approximately';
 
 // # Meta
