@@ -1,19 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { View, Text } from 'react-native';
 
-import Separator from './Separator';
+import type { Meta, StoryObj } from '@storybook/react-native';
+import { View, Text, StyleSheet } from 'react-native';
+
+import Separator from '@/components/Material/Separator';
 
 // # 상수 영역
 const meta = {
   title: 'Components/Material/Separator',
   component: Separator,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'centered',
-  },
   decorators: [
     (Story) => (
-      <View style={{ width: 320, paddingVertical: 16 }}>
+      <View style={styles.preview}>
         <Story />
       </View>
     ),
@@ -31,21 +28,32 @@ export const Default: Story = {};
 export const BetweenItems: Story = {
   render: () => (
     <View>
-      <View style={{ padding: 16 }}>
+      <View style={styles.item}>
         <Text>첫 번째 항목</Text>
       </View>
 
       <Separator />
 
-      <View style={{ padding: 16 }}>
+      <View style={styles.item}>
         <Text>두 번째 항목</Text>
       </View>
 
       <Separator />
 
-      <View style={{ padding: 16 }}>
+      <View style={styles.item}>
         <Text>세 번째 항목</Text>
       </View>
     </View>
   ),
 };
+
+// # 스타일 영역
+const styles = StyleSheet.create({
+  preview: {
+    width: '100%',
+    paddingVertical: 16,
+  },
+  item: {
+    padding: 16,
+  },
+});

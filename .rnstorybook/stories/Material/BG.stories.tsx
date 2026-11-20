@@ -1,16 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+
+import type { Meta, StoryObj } from '@storybook/react-native';
 import { View, Text, StyleSheet } from 'react-native';
 
-import BG from './BG';
+import BG from '@/components/Material/BG';
 
 // # 상수 영역
 const meta = {
   title: 'Components/Material/BG',
   component: BG,
-  tags: ['autodocs'],
-  parameters: {
-    layout: 'centered',
-  },
   argTypes: {
     borderRadius: {
       control: {
@@ -57,14 +54,9 @@ type Story = StoryObj<typeof meta>;
 // # Story 영역
 export const Default: Story = {
   render: (args) => (
-    <BG
-      {...args}
-      style={styles.content}
-    >
+    <BG {...args} style={styles.content}>
       <Text style={styles.title}>BG Component</Text>
-      <Text style={styles.description}>
-        기본 배경 및 그림자 스타일
-      </Text>
+      <Text style={styles.description}>기본 배경 및 그림자 스타일</Text>
     </BG>
   ),
 };
@@ -74,14 +66,9 @@ export const Rounded: Story = {
     borderRadius: 50,
   },
   render: (args) => (
-    <BG
-      {...args}
-      style={styles.content}
-    >
+    <BG {...args} style={styles.content}>
       <Text style={styles.title}>Rounded BG</Text>
-      <Text style={styles.description}>
-        borderRadius: 50
-      </Text>
+      <Text style={styles.description}>borderRadius: 50</Text>
     </BG>
   ),
 };
@@ -91,14 +78,9 @@ export const Blur: Story = {
     blur: 30,
   },
   render: (args) => (
-    <BG
-      {...args}
-      style={styles.content}
-    >
+    <BG {...args} style={styles.content}>
       <Text style={styles.title}>Blur BG</Text>
-      <Text style={styles.description}>
-        blur: 30
-      </Text>
+      <Text style={styles.description}>blur: 30</Text>
     </BG>
   ),
 };
@@ -106,7 +88,7 @@ export const Blur: Story = {
 // # 스타일 영역
 const styles = StyleSheet.create({
   preview: {
-    width: 360,
+    width: '100%',
     padding: 24,
     backgroundColor: '#E8E8ED',
   },

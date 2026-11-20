@@ -64,6 +64,7 @@
     "lint": "expo lint",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json}\"",
+    "storybook": "cross-env STORYBOOK_ENABLED=true expo start --go",
     "storybook:ios": "cross-env STORYBOOK_ENABLED=true expo run:ios",
     "storybook:android": "cross-env STORYBOOK_ENABLED=true expo run:android"
   },
