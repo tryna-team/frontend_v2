@@ -1,3 +1,4 @@
+
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { View, StyleSheet } from 'react-native';
 import {
@@ -44,6 +45,39 @@ const BG_COLOR_MAP = {
 };
 
 // # 함수 영역
+function parseStoryBoxSize(value: string): ButtonBoxSize | undefined {
+  const input = value.trim();
+
+  if (!input) {
+    return undefined;
+  }
+
+  if (/^\d+(?:\.\d+)?$/.test(input)) {
+    const size = Number(input);
+
+    return Number.isFinite(size) && size > 0
+      ? size
+      : undefined;
+  }
+
+  if (!/^\d+(?:\.\d+)?\*\d+(?:\.\d+)?$/.test(input)) {
+    return undefined;
+  }
+
+  const [width, height] = input.split('*').map(Number);
+
+  if (
+    !Number.isFinite(width) ||
+    !Number.isFinite(height) ||
+    width <= 0 ||
+    height <= 0
+  ) {
+    return undefined;
+  }
+
+  return `${width}*${height}`;
+}
+
 function Button44Preview({
   appearance,
   label,
@@ -54,14 +88,8 @@ function Button44Preview({
 }: Button44StoryProps) {
   const Icon = ICON_MAP[iconName];
 
-  const parsedBoxSize = boxSize
-    ? (boxSize.includes('*')
-        ? boxSize
-        : Number(boxSize)) as ButtonBoxSize
-    : undefined;
-
   const commonProps = {
-    boxSize: parsedBoxSize,
+    boxSize: parseStoryBoxSize(boxSize),
     onPress: () => console.log('Button44 Pressed'),
   };
 
@@ -112,7 +140,7 @@ function Button44Preview({
   );
 }
 
-// # 상수 영역
+// # Meta
 const meta = {
   title: 'Components/Button/Button44',
   component: Button44Preview,
@@ -167,15 +195,13 @@ const meta = {
 
 export default meta;
 
-// # Story 영역
 type Story = StoryObj<typeof meta>;
 
+// # Story 영역
 export const Default: Story = {};
 
 export const Borderless: Story = {
-  args: {
-    appearance: 'borderless',
-  },
+  args: { appearance: 'borderless' },
 };
 
 export const WithLabel: Story = {
@@ -193,21 +219,15 @@ export const LabelAndIcon: Story = {
 };
 
 export const WithShadow: Story = {
-  args: {
-    shadow: true,
-  },
+  args: { shadow: true },
 };
 
 export const CustomBackground: Story = {
-  args: {
-    bgColor: 'blue',
-  },
+  args: { bgColor: 'blue' },
 };
 
 export const CustomBoxSize: Story = {
-  args: {
-    boxSize: '60*44',
-  },
+  args: { boxSize: '60*44' },
 };
 
 // # 스타일 영역
