@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { View, StyleSheet } from 'react-native';
 
@@ -13,17 +13,13 @@ type OptionItemStoryProps = {
 };
 
 // # 함수 영역
-function OptionItemPreview({
+function InteractiveOptionItem({
   content,
   selection,
   icon,
   iconColor,
 }: OptionItemStoryProps) {
   const [isSelected, setIsSelected] = useState(selection);
-
-  useEffect(() => {
-    setIsSelected(selection);
-  }, [selection]);
 
   return (
     <OptionItem
@@ -32,6 +28,15 @@ function OptionItemPreview({
       icon={icon}
       iconColor={iconColor}
       onPress={() => setIsSelected((prev) => !prev)}
+    />
+  );
+}
+
+function OptionItemPreview(props: OptionItemStoryProps) {
+  return (
+    <InteractiveOptionItem
+      key={String(props.selection)}
+      {...props}
     />
   );
 }
@@ -48,7 +53,7 @@ const meta = {
     },
     selection: {
       control: 'boolean',
-      description: '선택 여부',
+      description: '초기 선택 여부',
     },
     icon: {
       control: 'boolean',
