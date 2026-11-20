@@ -1,3 +1,4 @@
+
 import type { ReactNode } from 'react';
 import {
   View,
@@ -92,14 +93,15 @@ export default function Sheet({
 
       translateY.set(Math.max(0, event.translationY));
     })
-    .onEnd((event) => {
+    .onEnd((event, success) => {
       if (isClosing.get()) {
         return;
       }
 
       const shouldClose =
-        event.translationY > CLOSE_THRESHOLD ||
-        event.velocityY > CLOSE_VELOCITY;
+        success &&
+        (event.translationY > CLOSE_THRESHOLD ||
+          event.velocityY > CLOSE_VELOCITY);
 
       if (shouldClose && onClose) {
         isClosing.set(true);
