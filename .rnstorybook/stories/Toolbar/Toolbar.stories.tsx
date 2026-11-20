@@ -1,3 +1,4 @@
+
 import type { Meta, StoryObj } from '@storybook/react-native';
 import { useArgs } from 'storybook/preview-api';
 import { View, StyleSheet } from 'react-native';
@@ -56,6 +57,7 @@ function ToolbarPreview(args: ToolbarStoryProps) {
         variant="default"
         leadingIcon={args.leadingIcon}
         leadingLabel={args.leadingLabel}
+        leadingAccessibilityLabel={args.leadingAccessibilityLabel}
         leadingOnPress={args.leadingOnPress}
         trailingButtons={args.trailingButtons}
       />
@@ -81,6 +83,7 @@ function ToolbarPreview(args: ToolbarStoryProps) {
       <Toolbar
         variant="default"
         leadingLabel={args.leadingLabel}
+        leadingAccessibilityLabel={args.leadingAccessibilityLabel}
         leadingOnPress={args.leadingOnPress}
         trailingButtons={args.trailingButtons}
       />
@@ -109,7 +112,7 @@ function RenderToolbar(args: ToolbarStoryProps) {
   );
 }
 
-// # 상수 영역
+// # Meta
 const meta = {
   title: 'Components/Toolbar/Toolbar',
   component: ToolbarPreview,
@@ -120,36 +123,16 @@ const meta = {
       options: ['default', 'search'],
       description: 'Toolbar 레이아웃 유형',
     },
-    leadingIcon: {
-      control: false,
-    },
-    leadingLabel: {
-      control: 'text',
-    },
-    leadingAccessibilityLabel: {
-      control: 'text',
-    },
-    trailingButtons: {
-      control: false,
-    },
-    leadingOnPress: {
-      control: false,
-    },
-    searchValue: {
-      control: 'text',
-    },
-    searchPlaceholder: {
-      control: 'text',
-    },
-    onSearchChangeText: {
-      control: false,
-    },
-    onSearchSubmit: {
-      control: false,
-    },
-    searchButtonOnPress: {
-      control: false,
-    },
+    leadingIcon: { control: false },
+    leadingLabel: { control: 'text' },
+    leadingAccessibilityLabel: { control: 'text' },
+    trailingButtons: { control: false },
+    leadingOnPress: { control: false },
+    searchValue: { control: 'text' },
+    searchPlaceholder: { control: 'text' },
+    onSearchChangeText: { control: false },
+    onSearchSubmit: { control: false },
+    searchButtonOnPress: { control: false },
   },
 
   decorators: [
@@ -165,9 +148,9 @@ const meta = {
 
 export default meta;
 
-// # Story 영역
 type Story = StoryObj<typeof meta>;
 
+// # Story 영역
 export const Default: Story = {
   args: {
     variant: 'default',
