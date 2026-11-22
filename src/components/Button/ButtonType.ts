@@ -1,19 +1,12 @@
 import type { ComponentType } from 'react';
 import type { PressableProps } from 'react-native';
 
-import type { palette } from '@/theme/colors';
+import type { PaletteColor } from '@/theme/colors';
 import type { ButtonAppearance, ButtonBoxSize, ButtonLayout, ButtonSize } from './ButtonVariants';
 
 // # 타입 영역
 // Button은 아이콘에 size·color만 넘기므로 그 두 값만 요구한다 (lucide 아이콘, components/Icon 모두 사용 가능)
 export type ButtonIcon = ComponentType<{ size?: number; color?: string }>;
-
-// palette 토큰의 색 값 중 하나 (예: palette.grey[100]). colors의 시맨틱 색도 palette 값이라 함께 받는다
-// 토큰에 없는 색(직접 적은 hex 등)은 타입 에러가 나므로, 색을 바꿀 때 토큰만 고치면 된다
-type Palette = typeof palette;
-export type PaletteColor = {
-  [K in keyof Palette]: Palette[K] extends string ? Palette[K] : Palette[K][keyof Palette[K]];
-}[keyof Palette];
 
 // ## 내용: label·icon을 넘겼는지로 Figma Label Style이 정해진다
 // - label만 / label + icon → 텍스트만 / 텍스트+아이콘

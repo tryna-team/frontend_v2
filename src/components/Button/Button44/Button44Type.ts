@@ -1,9 +1,6 @@
-import type {
-  AppearanceProps,
-  ButtonContentProps,
-  PaletteColor,
-} from '@/components/Button/ButtonType';
+import type { AppearanceProps, ButtonContentProps } from '@/components/Button/ButtonType';
 import type { ButtonAppearance, ButtonBoxSize } from '@/components/Button/ButtonVariants';
+import type { PaletteColor } from '@/theme/colors';
 
 // # 타입 영역
 // Figma _Button - 44pt: 기본 크기 44 (boxSize로 변경 가능), prominent·비활성 없음
