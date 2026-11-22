@@ -4,6 +4,8 @@ import type {
   EventCreateRequest,
   EventCreateResponse,
   EventDetailResponse,
+  EventUpdateRequest,
+  EventUpdateResponse,
 } from './eventType';
 
 // # 일정 생성 (C104)
@@ -32,6 +34,23 @@ export async function getEventDetail(
 
   if (!response.data.success || !response.data.data) {
     throw new Error(response.data.message || '일정 조회에 실패했습니다.');
+  }
+
+  return response.data.data;
+}
+
+// # 일정 수정 (C107)
+export async function updateEvent(
+  eventId: number,
+  request: EventUpdateRequest
+): Promise<EventUpdateResponse> {
+  const response = await apiClient.patch<ApiResponse<EventUpdateResponse>>(
+    `/api/v1/events/${eventId}`,
+    request
+  );
+
+  if (!response.data.success || !response.data.data) {
+    throw new Error(response.data.message || '일정 수정에 실패했습니다.');
   }
 
   return response.data.data;
