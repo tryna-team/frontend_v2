@@ -121,6 +121,14 @@ export const palette = {
   },
 } as const;
 
+// palette 토큰의 색 값 중 하나 (예: palette.grey[100]). colors의 시맨틱 색도 palette 값이라 함께 받는다
+// 토큰에 없는 색(직접 적은 hex 등)은 타입 에러가 나므로, 색을 바꿀 때 토큰만 고치면 된다
+// 색을 props로 받는 컴포넌트에서 쓴다 (예: Button·Button44의 bgColor)
+type Palette = typeof palette;
+export type PaletteColor = {
+  [K in keyof Palette]: Palette[K] extends string ? Palette[K] : Palette[K][keyof Palette[K]];
+}[keyof Palette];
+
 // TDS Semantic Colors
 export const colors = {
   divider: {

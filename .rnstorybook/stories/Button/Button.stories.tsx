@@ -10,16 +10,13 @@ import {
 } from 'lucide-react-native';
 
 import Button from '../../../src/components/Button/Button';
-import type {
-  ButtonIcon,
-  PaletteColor,
-} from '../../../src/components/Button/ButtonType';
+import type { ButtonIcon } from '../../../src/components/Button/ButtonType';
 import type {
   ButtonAppearance,
   ButtonBoxSize,
   ButtonSize,
 } from '../../../src/components/Button/ButtonVariants';
-import { palette } from '../../../src/theme/colors';
+import { palette, type PaletteColor } from '../../../src/theme/colors';
 
 // # 타입 영역
 type IconName = 'none' | 'calendar' | 'plus' | 'trash' | 'check' | 'search';
