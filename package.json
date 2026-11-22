@@ -14,6 +14,7 @@
     "@storybook/addon-ondevice-controls": "latest",
     "@storybook/react-native": "latest",
     "@storybook/react-native-ui-lite": "latest",
+    "@tanstack/react-query": "^5.108.2",
     "axios": "^1.21.0",
     "cross-env": "latest",
     "expo": "~58.0.26",
