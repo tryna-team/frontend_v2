@@ -15,6 +15,7 @@ import {
   getDateScrollOffset,
   getMonthList,
   getMonthListLayout,
+  getMonthScrollOffset,
   getMostVisibleMonthIndex,
 } from '../utils/monthList';
 import type { CalendarMonth, MonthlyCalendarProps } from '../CalendarType';
@@ -55,27 +56,11 @@ export default function MonthlyCalendar({
   const layout = getMonthListLayout(months, viewMode);
   const gapStyle = { paddingBottom: monthList.gap[viewMode] };
 
-  useImperativeHandle(ref, () => ({
-    scrollToDate: (date) => {
-      // Header 아래 ~ Footer 위. 이 영역 안에 날짜의 주가 들어오게 한다
-      const regionHeight = listHeightRef.current - insets.top - insets.bottom;
-      const offset = getDateScrollOffset(months, layout, date, viewMode, regionHeight);
+  // Header 아래 ~ Footer 위 영역의 높이
+  const getRegionHeight = () => listHeightRef.current - insets.top - insets.bottom;
 
-      if (offset !== null) {
-        listRef.current?.scrollToOffset({ offset, animated: true });
-      }
-    },
-  }));
-
-  const handleLayout = (event: LayoutChangeEvent) => {
-    listHeightRef.current = event.nativeEvent.layout.height;
-  };
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, layoutMeasurement } = event.nativeEvent;
-    // 목록 좌표로 본 Header 아래 ~ Footer 위 영역
-    const regionTop = contentOffset.y;
-    const regionBottom = contentOffset.y + layoutMeasurement.height - insets.top - insets.bottom;
+  // 목록 좌표로 본 보이는 영역 [위, 아래]에서 가장 많이 보이는 달을 다시 구하고, 바뀌었으면 알린다
+  const updateVisibleMonth = (regionTop: number, regionBottom: number) => {
     const index = getMostVisibleMonthIndex(
       layout,
       regionTop,
@@ -88,6 +73,39 @@ export default function MonthlyCalendar({
     visibleIndexRef.current = index;
     setVisibleIndex(index);
     onVisibleMonthChange?.(months[index].year, months[index].month);
+  };
+
+  useImperativeHandle(ref, () => ({
+    scrollToDate: (date) => {
+      // 이 영역 안에 날짜의 주가 들어오게 한다
+      const regionHeight = getRegionHeight();
+      const offset = getDateScrollOffset(months, layout, date, viewMode, regionHeight);
+
+      if (offset !== null) {
+        listRef.current?.scrollToOffset({ offset, animated: true });
+      }
+    },
+    // 연간 화면에서 돌아오는 동안 옮기므로 애니메이션 없이 바로 옮기고,
+    // 스크롤 이벤트를 기다리지 않고 헤더의 월 제목과 Toolbar의 연도도 바로 맞춘다
+    scrollToMonth: (year, month) => {
+      const regionHeight = getRegionHeight();
+      const offset = getMonthScrollOffset(months, layout, year, month, regionHeight);
+
+      listRef.current?.scrollToOffset({ offset, animated: false });
+      updateVisibleMonth(offset, offset + regionHeight);
+    },
+  }));
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    listHeightRef.current = event.nativeEvent.layout.height;
+  };
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, layoutMeasurement } = event.nativeEvent;
+    const regionTop = contentOffset.y;
+    const regionBottom = contentOffset.y + layoutMeasurement.height - insets.top - insets.bottom;
+
+    updateVisibleMonth(regionTop, regionBottom);
   };
 
   const getItemLayout = (_data: unknown, index: number) => ({

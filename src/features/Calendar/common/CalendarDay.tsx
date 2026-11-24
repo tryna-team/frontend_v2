@@ -15,6 +15,11 @@ type DayState = {
 };
 
 // # 함수 영역
+// ## 일요일(0)과 토요일(6)
+function isWeekendDay(dayOfWeek: number) {
+  return dayOfWeek === 0 || dayOfWeek === 6;
+}
+
 // ## 숫자의 상태별 색: 선택 → 오늘 → 주말 → 평일 순으로 정한다
 function getDayColors({ isWeekend, isToday, isSelected }: DayState) {
   if (isSelected) {
@@ -30,11 +35,9 @@ function getDayColors({ isWeekend, isToday, isSelected }: DayState) {
 }
 
 // # Main component
-// Figma _Day (Calender=Montly). Label Style=Num only(날짜 숫자)와 Week only(요일 글자)를 그린다
-// 연간·주간 변형은 해당 화면 작업 때 추가
+// Figma _Day. Calender=Montly의 Label Style=Num only(날짜 숫자)·Week only(요일 글자)와
+// Calender=Yearly의 Num only(연간 캘린더의 작은 날짜 숫자)를 그린다. 주간 변형은 해당 화면 작업 때 추가
 export default function CalendarDay(props: CalendarDayProps) {
-  const isWeekend = props.dayOfWeek === 0 || props.dayOfWeek === 6; // 일요일, 토요일
-
   // 요일 글자는 오늘·선택과 관계없이 주말만 구분한다 (Figma Week only 변형이 모두 같은 색)
   if (props.labelStyle === 'weekOnly') {
     return (
@@ -42,7 +45,7 @@ export default function CalendarDay(props: CalendarDayProps) {
         <Text
           style={[
             styles.weekText,
-            { color: isWeekend ? colors.text.additional : colors.text.default },
+            { color: isWeekendDay(props.dayOfWeek) ? colors.text.additional : colors.text.default },
           ]}
         >
           {WEEKDAY_NAMES[props.dayOfWeek]}
@@ -51,8 +54,28 @@ export default function CalendarDay(props: CalendarDayProps) {
     );
   }
 
-  const { day, isToday, isSelected } = props;
-  const { background, text } = getDayColors({ isWeekend, isToday, isSelected });
+  // 연간 칸은 오늘만 원을 채워 표시한다.
+  // Figma _Day에는 연간 주말(Day=Weekend)·선택(Select=True) 변형도 있지만 Home/Yearly에서 쓰지 않아 그리지 않는다
+  if (props.calendar === 'yearly') {
+    const { day, isToday } = props;
+
+    return (
+      <View style={[styles.yearlyNumLabel, isToday && styles.yearlyToday]}>
+        <Text
+          style={[styles.yearlyText, { color: isToday ? colors.text.white : colors.text.default }]}
+        >
+          {day}
+        </Text>
+      </View>
+    );
+  }
+
+  const { day, dayOfWeek, isToday, isSelected } = props;
+  const { background, text } = getDayColors({
+    isWeekend: isWeekendDay(dayOfWeek),
+    isToday,
+    isSelected,
+  });
 
   return (
     <View style={[styles.numLabel, background && { backgroundColor: background }]}>
@@ -86,5 +109,21 @@ const styles = StyleSheet.create({
   // Figma TDS/Caption/Caption1 (12/14, 500)
   weekText: {
     ...typography.default.label.medium,
+  },
+  // Figma _Day (Calender=Yearly)
+  yearlyNumLabel: {
+    width: tempDesignValues.calendarDay.yearlySize,
+    height: tempDesignValues.calendarDay.yearlySize,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.full,
+  },
+  // Figma Today=True: apricot-300 원에 흰 글자
+  yearlyToday: {
+    backgroundColor: palette.apricot[300],
+  },
+  // Figma TDS/Caption/Caption2 (11/13, 500)
+  yearlyText: {
+    ...typography.default.caption.large,
   },
 });

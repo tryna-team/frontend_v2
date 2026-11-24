@@ -1,4 +1,5 @@
 import { tempDesignValues } from '@/theme/tempDesignValues';
+import { toMonthKey } from '@/utils/date';
 import { getCalendarBodyHeight, getWeekBottom } from './monthGrid';
 import type { CalendarMonth, MonthlyViewMode } from '../CalendarType';
 
@@ -32,7 +33,7 @@ export function getMonthList(baseDate: string): CalendarMonth[] {
     const year = Math.floor((first + index) / MONTHS_IN_YEAR);
     const month = ((first + index) % MONTHS_IN_YEAR) + 1;
 
-    return { key: `${year}-${String(month).padStart(2, '0')}`, year, month };
+    return { key: toMonthKey(year, month), year, month };
   });
 }
 
@@ -116,9 +117,30 @@ export function getMostVisibleMonthIndex(
   return bestIndex;
 }
 
+// ## 스크롤 위치를 목록 끝에서 멈춘다. 마지막 달 아래로 넘어가지 않게 한다
+function clampScrollOffset(layout: MonthListLayout, offset: number, regionHeight: number): number {
+  return Math.min(offset, Math.max(0, layout.totalLength - regionHeight));
+}
+
+// ## 달로 이동할 스크롤 위치. 달 맨 위를 보이는 영역의 위 끝에 맞춘다
+// 목록 밖의 달이면 가장 가까운 끝 달로 간다. 연간 화면은 앞뒤 5년을 1~12월까지 모두 보여 줘서 월 목록보다 조금 넓다
+export function getMonthScrollOffset(
+  months: CalendarMonth[],
+  layout: MonthListLayout,
+  year: number,
+  month: number,
+  regionHeight: number,
+): number {
+  const index = Math.min(
+    Math.max(toMonthNumber(year, month) - toMonthNumber(months[0].year, months[0].month), 0),
+    months.length - 1,
+  );
+
+  return clampScrollOffset(layout, layout.offsets[index], regionHeight);
+}
+
 // ## 날짜로 이동할 스크롤 위치. 목록 밖의 날짜면 null
-// 달 맨 위를 보이는 영역의 위 끝에 맞추고, 그 날짜의 주가 영역 아래로 잘리면 주의 아래 끝까지 보이도록 더 내린다.
-// 마지막 달 아래로 넘어가지 않게 목록 끝에서 멈춘다
+// 달 맨 위를 보이는 영역의 위 끝에 맞추고, 그 날짜의 주가 영역 아래로 잘리면 주의 아래 끝까지 보이도록 더 내린다
 export function getDateScrollOffset(
   months: CalendarMonth[],
   layout: MonthListLayout,
@@ -135,5 +157,5 @@ export function getDateScrollOffset(
   const weekBottom = monthTop + getWeekBottom(year, month, day, viewMode);
   const offset = Math.max(monthTop, weekBottom - regionHeight);
 
-  return Math.min(offset, Math.max(0, layout.totalLength - regionHeight));
+  return clampScrollOffset(layout, offset, regionHeight);
 }

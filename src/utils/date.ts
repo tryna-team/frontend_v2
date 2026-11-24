@@ -1,7 +1,6 @@
 // 날짜 키 문자열은 기기 로컬 시간 기준으로 만든다.
 // toISOString()은 UTC라 자정~오전 9시(KST)에 하루 밀리고, toLocaleDateString은 로케일 데이터에 의존한다.
 
-// 추가 예정: toMonthKey('YYYY-MM')는 viewMonth 정책이 정해지면 월간 화면 작업 때 추가
 // 추가 예정: 'YYYY-MM-DD' → Date 변환. new Date(key)는 UTC로 해석되므로 new Date(year, month - 1, day)로 만든다
 
 const pad2 = (value: number) => String(value).padStart(2, '0');
@@ -9,6 +8,11 @@ const pad2 = (value: number) => String(value).padStart(2, '0');
 /** Date → 'YYYY-MM-DD' */
 export function toDateKey(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+/** 연·월(1~12) → 'YYYY-MM'. 월 목록의 키와 화면 사이에 달을 넘기는 라우트 파라미터에 쓴다 */
+export function toMonthKey(year: number, month: number): string {
+  return `${year}-${pad2(month)}`;
 }
 
 /** 호출한 시점의 오늘 'YYYY-MM-DD'. 모듈 상수로 고정하면 날짜가 지나도 바뀌지 않으므로 매번 계산한다 */

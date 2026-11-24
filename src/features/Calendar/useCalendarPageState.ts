@@ -51,5 +51,9 @@ export function useCalendarPageState() {
       goToTodayInStore();
       monthListRef.current?.scrollToDate(useCalendarStore.getState().today);
     },
+    // 연간 화면에서 고른 달로 옮긴다. 선택 날짜는 바꾸지 않는다
+    showMonth: (year: number, month: number) => {
+      monthListRef.current?.scrollToMonth(year, month);
+    },
   };
 }

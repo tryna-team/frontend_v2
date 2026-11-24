@@ -6,8 +6,9 @@ import { typography } from '@/theme/typography';
 import type { DateTitleProps } from '../CalendarType';
 
 // # Main component
-// Figma _Title (Date=Month). Small은 Day Block의 1일 칸, Large는 Calender Header의 월 제목이다
-// Week·Year, Is Disable 변형은 해당 화면 작업 때 추가
+// Figma _Title. Small은 Day Block의 1일 칸과 연간 캘린더의 월 제목, Large는 Calender Header의 월 제목과
+// 연간 캘린더의 연도 제목이다. Date=Year는 글자만 다르고 모양이 같아 title로 구분한다
+// Week, Is Disable 변형은 해당 화면 작업 때 추가
 export default function DateTitle({ title, size = 'small', isToday = false }: DateTitleProps) {
   const isLarge = size === 'large';
 
