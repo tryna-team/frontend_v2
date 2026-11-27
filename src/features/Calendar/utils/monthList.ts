@@ -1,11 +1,10 @@
 import { tempDesignValues } from '@/theme/tempDesignValues';
 import { toMonthKey } from '@/utils/date';
+import { MAX_YEAR, MIN_YEAR, MONTH_WINDOW, isSupportedYear } from './listWindow';
 import { getCalendarBodyHeight, getWeekBottom } from './monthGrid';
 import type { CalendarMonth, MonthlyViewMode } from '../CalendarType';
 
 // # 상수 영역
-// 화면을 연 달 기준으로 앞뒤에 둘 개월 수 (앞뒤 각 5년)
-export const MONTH_RANGE = 60;
 const MONTHS_IN_YEAR = 12;
 const { monthList } = tempDesignValues;
 
@@ -24,12 +23,16 @@ export type MonthListLayout = {
 // 연·월을 하나의 수로 바꿔서, 달끼리 몇 개월 차이인지 바로 계산한다
 const toMonthNumber = (year: number, month: number) => year * MONTHS_IN_YEAR + (month - 1);
 
-// ## 월 목록: 기준 날짜가 속한 달의 앞뒤 MONTH_RANGE개월
-export function getMonthList(baseDate: string): CalendarMonth[] {
-  const [baseYear, baseMonth] = baseDate.split('-').map(Number);
-  const first = toMonthNumber(baseYear, baseMonth) - MONTH_RANGE;
+// 다룰 수 있는 첫 달과 마지막 달
+const FIRST_MONTH_NUMBER = toMonthNumber(MIN_YEAR, 1);
+const LAST_MONTH_NUMBER = toMonthNumber(MAX_YEAR, MONTHS_IN_YEAR);
 
-  return Array.from({ length: MONTH_RANGE * 2 + 1 }, (_, index) => {
+// ## 월 번호 from~to의 연속한 달. 다룰 수 있는 연도 밖의 달은 뺀다
+function createMonths(from: number, to: number): CalendarMonth[] {
+  const first = Math.max(from, FIRST_MONTH_NUMBER);
+  const last = Math.min(to, LAST_MONTH_NUMBER);
+
+  return Array.from({ length: Math.max(0, last - first + 1) }, (_, index) => {
     const year = Math.floor((first + index) / MONTHS_IN_YEAR);
     const month = ((first + index) % MONTHS_IN_YEAR) + 1;
 
@@ -37,10 +40,66 @@ export function getMonthList(baseDate: string): CalendarMonth[] {
   });
 }
 
+// ## 월 목록 범위 (당겨오는 개월 수는 utils/listWindow의 MONTH_WINDOW)
+// ### 처음 목록: 기준 날짜가 속한 달의 앞뒤 MONTH_WINDOW.initialRange개월
+export function createMonthWindow(baseDate: string): CalendarMonth[] {
+  const [baseYear, baseMonth] = baseDate.split('-').map(Number);
+  const base = toMonthNumber(baseYear, baseMonth);
+
+  return createMonths(base - MONTH_WINDOW.initialRange, base + MONTH_WINDOW.initialRange);
+}
+
+// ### 첫 달 바로 앞의 count개월. 목록 앞에 붙일 달이다
+export function getMonthsBefore(months: CalendarMonth[], count: number): CalendarMonth[] {
+  const first = toMonthNumber(months[0].year, months[0].month);
+  return createMonths(first - count, first - 1);
+}
+
+// ### 마지막 달 바로 뒤의 count개월. 목록 뒤에 붙일 달이다
+export function getMonthsAfter(months: CalendarMonth[], count: number): CalendarMonth[] {
+  const lastMonth = months[months.length - 1];
+  const last = toMonthNumber(lastMonth.year, lastMonth.month);
+  return createMonths(last + 1, last + count);
+}
+
+// ### 목록 밖의 달까지 늘린 목록. 옮긴 뒤 바로 끝에 닿지 않게 그 달 너머로 MONTH_WINDOW.loadCount개월을 더 붙인다
+// 목록 안의 달이면 같은 목록을 그대로 돌려준다
+export function extendMonthsToInclude(
+  months: CalendarMonth[],
+  year: number,
+  month: number,
+): CalendarMonth[] {
+  const target = toMonthNumber(year, month);
+  const first = toMonthNumber(months[0].year, months[0].month);
+  const lastMonth = months[months.length - 1];
+  const last = toMonthNumber(lastMonth.year, lastMonth.month);
+
+  if (target < first) {
+    return [...createMonths(target - MONTH_WINDOW.loadCount, first - 1), ...months];
+  }
+
+  if (target > last) {
+    return [...months, ...createMonths(last + 1, target + MONTH_WINDOW.loadCount)];
+  }
+
+  return months;
+}
+
+// ## 목록을 그 달까지 늘릴 수 있는지
+export function isSupportedMonth(year: number, month: number): boolean {
+  return isSupportedYear(year) && Number.isInteger(month) && month >= 1 && month <= 12;
+}
+
 // ## 연·월이 목록의 몇 번째인지. 목록 밖이면 -1
 export function getMonthIndex(months: CalendarMonth[], year: number, month: number): number {
   const index = toMonthNumber(year, month) - toMonthNumber(months[0].year, months[0].month);
   return index >= 0 && index < months.length ? index : -1;
+}
+
+// ## 'YYYY-MM' 키가 목록의 몇 번째인지. 목록 밖이면 -1
+export function getMonthKeyIndex(months: CalendarMonth[], key: string): number {
+  const [year, month] = key.split('-').map(Number);
+  return getMonthIndex(months, year, month);
 }
 
 // ## 달마다 차지하는 높이와 위치
@@ -123,7 +182,7 @@ function clampScrollOffset(layout: MonthListLayout, offset: number, regionHeight
 }
 
 // ## 달로 이동할 스크롤 위치. 달 맨 위를 보이는 영역의 위 끝에 맞춘다
-// 목록 밖의 달이면 가장 가까운 끝 달로 간다. 연간 화면은 앞뒤 5년을 1~12월까지 모두 보여 줘서 월 목록보다 조금 넓다
+// 목록 밖의 달(다룰 수 있는 연도 밖)이면 가장 가까운 끝 달로 간다
 export function getMonthScrollOffset(
   months: CalendarMonth[],
   layout: MonthListLayout,

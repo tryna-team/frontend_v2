@@ -151,18 +151,18 @@ export type CalendarBodyProps = {
   onSelectDate?: (date: string) => void;
 };
 
-// 월 목록에서 화면이 직접 부르는 동작
+// 월 목록에서 화면이 직접 부르는 동작. 목록 밖의 달이면 목록을 그 달까지 늘린 뒤 옮긴다
 export type MonthlyCalendarHandle = {
   // 날짜가 있는 달로 스크롤한다. 달 맨 위를 Header 바로 아래에 맞추고, 그 날짜의 주가 가려지면 보일 만큼 더 내린다
   scrollToDate: (date: string) => void;
-  // 달 맨 위를 Header 바로 아래에 맞춘다 (애니메이션 없음). 목록 밖의 달이면 가장 가까운 끝 달로 간다
+  // 달 맨 위를 Header 바로 아래에 맞춘다 (애니메이션 없음)
   scrollToMonth: (year: number, month: number) => void;
 };
 
 export type MonthlyCalendarProps = {
   mainArea: MainArea; // Layout이 넘겨주는 메인 영역. 스크롤 여백과 Header·Footer 높이를 쓴다
   viewMode: MonthlyViewMode;
-  // 처음 보여 줄 달과 월 목록 범위의 기준. 화면을 연 뒤 날짜가 바뀌어도 범위는 그대로 둔다
+  // 처음 보여 줄 달이자 처음 월 목록 범위의 기준. 화면을 연 뒤 날짜가 바뀌어도 목록은 그대로 둔다
   today: string;
   selectedDate?: string;
   // 'YYYY-MM' → 그 달의 날짜별 일정 요약 (B101 monthlyEventDays). 없는 달은 날짜만 그린다
@@ -203,15 +203,15 @@ export type YearSectionProps = {
 
 // 연도 목록에서 화면이 직접 부르는 동작
 export type YearlyCalendarHandle = {
-  // 해의 맨 위를 Header 바로 아래에 맞춘다. 목록 밖의 해면 아무 일도 하지 않는다
+  // 해의 맨 위를 Header 바로 아래에 맞춘다. 목록 밖의 해면 목록을 그 해까지 늘린 뒤 옮긴다
   scrollToYear: (year: number) => void;
 };
 
 export type YearlyCalendarProps = {
   mainArea: MainArea; // Layout이 넘겨주는 메인 영역. 스크롤 여백(Header·Footer 높이)을 쓴다
-  // 연도 목록 범위의 기준. 화면을 연 뒤 날짜가 바뀌어도 범위는 그대로 둔다
+  // 오늘. 오늘 강조와, initialYear가 없을 때 처음 보여 줄 해에 쓴다
   today: string;
-  // 처음 맨 위에 보여 줄 해. 없거나 목록 밖이면 오늘이 속한 해다
+  // 처음 맨 위에 보여 줄 해이자 처음 연도 목록 범위의 기준. 없거나 다룰 수 없는 해면 오늘이 속한 해다
   initialYear?: number;
   onPressMonth?: (year: number, month: number) => void;
   ref?: Ref<YearlyCalendarHandle>;
