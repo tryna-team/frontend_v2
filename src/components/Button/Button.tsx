@@ -1,8 +1,15 @@
 import { Pressable, StyleSheet } from 'react-native';
-import { Plus } from 'lucide-react-native';
 
 import ButtonBase from './ButtonBase';
-import { ctaStyle, parseBoxSize, scaleToBox, sizeLayouts, touchHitSlop } from './ButtonVariants';
+import {
+  ctaIcons,
+  ctaStyle,
+  parseBoxSize,
+  scaleToBox,
+  shadow,
+  sizeLayouts,
+  touchHitSlop,
+} from './ButtonVariants';
 import type { ButtonProps, CTAButtonProps, ContentAreaButtonProps } from './ButtonType';
 
 // # 함수 영역
@@ -12,24 +19,30 @@ function renderContentAreaButton(props: ContentAreaButtonProps) {
 }
 
 // ## cta
-// boxSize를 주면 아이콘·모서리를 기본 크기(52) 대비 비율로 키우거나 줄이고, 터치 영역도 다시 계산한다
+// icon(plus·check)으로 아이콘·기본 크기·그림자·접근성 이름이 정해진다
+// boxSize를 주면 아이콘·모서리를 아이콘별 기본 크기 대비 비율로 키우거나 줄이고, 터치 영역도 다시 계산한다
 function renderCTAButton(props: CTAButtonProps) {
-  const box = parseBoxSize(props.boxSize);
-  const boxStyle = box && {
-    ...box,
-    borderRadius: scaleToBox(ctaStyle.borderRadius, box, ctaStyle.size),
-  };
-  const iconSize = box ? scaleToBox(ctaStyle.iconSize, box, ctaStyle.size) : ctaStyle.iconSize;
+  const {
+    icon: Icon,
+    size,
+    shadow: hasShadow,
+    accessibilityLabel,
+  } = ctaIcons[props.icon ?? 'plus'];
+  const box = parseBoxSize(props.boxSize) ?? { width: size, height: size };
 
   return (
     <Pressable
       onPress={props.onPress}
-      hitSlop={box ? touchHitSlop(box, ctaStyle.touchSize) : ctaStyle.hitSlop}
+      hitSlop={touchHitSlop(box, ctaStyle.touchSize)}
       accessibilityRole="button"
-      accessibilityLabel={ctaStyle.accessibilityLabel}
-      style={[styles.cta, boxStyle]}
+      accessibilityLabel={accessibilityLabel}
+      style={[
+        styles.cta,
+        { ...box, borderRadius: scaleToBox(ctaStyle.borderRadius, box, size) },
+        hasShadow && styles.ctaShadow,
+      ]}
     >
-      <Plus size={iconSize} color={ctaStyle.iconColor} />
+      <Icon size={scaleToBox(ctaStyle.iconSize, box, size)} color={ctaStyle.iconColor} />
     </Pressable>
   );
 }
@@ -44,12 +57,12 @@ export default function Button(props: ButtonProps) {
 // # 스타일 영역
 const styles = StyleSheet.create({
   cta: {
-    width: ctaStyle.size,
-    height: ctaStyle.size,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: ctaStyle.borderRadius,
     backgroundColor: ctaStyle.backgroundColor,
-    boxShadow: ctaStyle.boxShadow,
+  },
+  // Figma Component/Default (Content Area 버튼과 같은 그림자)
+  ctaShadow: {
+    boxShadow: shadow,
   },
 });

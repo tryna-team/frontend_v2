@@ -1,4 +1,5 @@
 import { Platform, type TextStyle } from 'react-native';
+import { Check, Plus } from 'lucide-react-native';
 
 import { colors, palette } from '@/theme/colors';
 import { fontFamily } from '@/theme/typography';
@@ -141,22 +142,30 @@ export const glassStyle = {
 } as const;
 
 // # 그림자 (Figma Component/Default)
-// Content Area 버튼·Button44: Bordered에서 shadow prop으로 켤 때만 쓴다 / CTA: 항상 쓴다
+// Content Area 버튼·Button44: Bordered에서 shadow prop으로 켤 때만 쓴다 / CTA: + 버튼만 쓴다 (ctaIcons)
 export const shadow = '0px 0px 20px 0px rgba(0, 0, 0, 0.08)';
 
-// # CTA (일정 추가 전용 "+" 버튼, v1 MainCTAButton)
+// # CTA (화면 오른쪽 아래에 두는 아이콘 버튼, v1 MainCTAButton)
+// 배경·모서리·아이콘 크기는 공통이고, 기본 크기·그림자·접근성 이름은 아이콘마다 다르다 (아래 ctaIcons)
 export const ctaStyle = {
-  size: 52,
   iconSize: 22,
-  hitSlop: 6, // v1과 같은 64 터치 영역
-  touchSize: 64, // boxSize로 크기를 바꾸면 이 터치 영역에 맞춰 hitSlop을 다시 계산한다
-  accessibilityLabel: '일정 추가',
+  touchSize: 64, // v1과 같은 64 터치 영역. 버튼 크기에 맞춰 hitSlop을 계산한다
   backgroundColor: palette.grey[900],
   iconColor: colors.icon.white,
   // TODO: Figma radius/semantic/large(24) ↔ 코드 radius.medium(24) 이름 정리 후 교체
   borderRadius: radius.medium,
-  boxShadow: shadow, // Figma Component/Default (Content Area 버튼과 같은 그림자)
 } as const;
+
+// ## CTA 아이콘별 값 (Figma Button - Content Area의 CTA 인스턴스)
+// - plus: 홈의 일정 추가 버튼. 52×52, 그림자 Component/Default
+// - check: 일정 생성 시트 Footer의 완료 버튼 (Figma Generate 화면). 50×50, 그림자 없음
+export const ctaIcons = {
+  plus: { icon: Plus, size: 52, shadow: true, accessibilityLabel: '일정 추가' },
+  // TODO: 체크 버튼 동작 확정 후 accessibilityLabel 수정 (현재는 Figma 일정 생성 화면 기준으로 추측한 임시 값)
+  check: { icon: Check, size: 50, shadow: false, accessibilityLabel: '일정 저장' },
+} as const;
+
+export type CTAIcon = keyof typeof ctaIcons;
 
 // # 글자 (Figma TDS/Label/Label1)
 // ⚠️ Figma는 Wanted Sans 17/500/20/-0.2. 프로젝트에 Wanted Sans와 같은 값의 토큰이 없어

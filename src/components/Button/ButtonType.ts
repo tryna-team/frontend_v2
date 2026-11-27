@@ -2,7 +2,13 @@ import type { ComponentType } from 'react';
 import type { PressableProps } from 'react-native';
 
 import type { PaletteColor } from '@/theme/colors';
-import type { ButtonAppearance, ButtonBoxSize, ButtonLayout, ButtonSize } from './ButtonVariants';
+import type {
+  ButtonAppearance,
+  ButtonBoxSize,
+  ButtonLayout,
+  ButtonSize,
+  CTAIcon,
+} from './ButtonVariants';
 
 // # 타입 영역
 // Button은 아이콘에 size·color만 넘기므로 그 두 값만 요구한다 (lucide 아이콘, components/Icon 모두 사용 가능)
@@ -65,13 +71,19 @@ export type ContentAreaButtonProps = ButtonContentProps &
     hitSlop?: PressableProps['hitSlop'];
   };
 
-// ## cta: 일정 추가 전용 "+" 버튼. 모양·아이콘·접근성 이름 고정 (크기만 boxSize로 바꿀 수 있다)
+// ## cta: 화면 오른쪽 아래에 두는 아이콘 버튼 (+ / 체크). 모양·접근성 이름은 아이콘별로 고정 (크기만 boxSize로 바꿀 수 있다)
 // TODO: 중복 입력 방지가 필요해지면 disabled 추가 (비활성 디자인 확인 필요)
 export type CTAButtonProps = {
   variant: 'cta';
   /**
-   * 가로·세로를 직접 지정 (48 → 48×48, '60*52' → 가로 60 × 세로 52). 없으면 52×52
-   * 아이콘(22)·모서리(24)는 52 대비 짧은 변의 비율로 함께 바뀌고, 터치 영역은 최소 64가 되도록 다시 계산한다
+   * 아이콘 종류. 기본 'plus'
+   * - 'plus': 일정 추가 (52×52, 그림자 있음)
+   * - 'check': 일정 생성 완료 (50×50, 그림자 없음)
+   */
+  icon?: CTAIcon;
+  /**
+   * 가로·세로를 직접 지정 (48 → 48×48, '60*52' → 가로 60 × 세로 52). 없으면 아이콘별 기본 크기 (plus 52, check 50)
+   * 아이콘(22)·모서리(24)는 기본 크기 대비 짧은 변의 비율로 함께 바뀌고, 터치 영역은 최소 64가 되도록 다시 계산한다
    */
   boxSize?: ButtonBoxSize;
   onPress?: () => void;
