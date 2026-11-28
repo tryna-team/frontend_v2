@@ -15,6 +15,7 @@ import type {
   ButtonAppearance,
   ButtonBoxSize,
   ButtonSize,
+  CTAIcon,
 } from '../../../src/components/Button/ButtonVariants';
 import { palette, type PaletteColor } from '../../../src/theme/colors';
 
@@ -43,6 +44,7 @@ type BackgroundColor = keyof typeof BG_COLOR_MAP;
 
 type ButtonStoryProps = {
   variant: 'contentArea' | 'cta';
+  ctaIcon: CTAIcon;
   appearance: ButtonAppearance;
   size: ButtonSize;
   label: string;
@@ -78,6 +80,7 @@ function parseStoryBoxSize(value: string): ButtonBoxSize | undefined {
 
 function ButtonPreview({
   variant,
+  ctaIcon,
   appearance,
   size,
   label,
@@ -95,6 +98,7 @@ function ButtonPreview({
     return (
       <Button
         variant="cta"
+        icon={ctaIcon}
         boxSize={parsedBoxSize}
         onPress={() => console.log('CTA 버튼')}
       />
@@ -147,6 +151,11 @@ const meta = {
       options: ['contentArea', 'cta'],
       description: '버튼 Variant',
     },
+    ctaIcon: {
+      control: 'select',
+      options: ['plus', 'check'],
+      description: 'CTA 아이콘 (CTA에만 적용)',
+    },
     appearance: {
       control: 'select',
       options: ['prominent', 'bordered', 'borderless'],
@@ -191,6 +200,7 @@ const meta = {
 
   args: {
     variant: 'contentArea',
+    ctaIcon: 'plus',
     appearance: 'prominent',
     size: 'medium',
     label: '버튼',
@@ -301,6 +311,13 @@ export const CustomBoxSize: Story = {
 export const CTA: Story = {
   args: {
     variant: 'cta',
+  },
+};
+
+export const CTACheck: Story = {
+  args: {
+    variant: 'cta',
+    ctaIcon: 'check',
   },
 };
 
