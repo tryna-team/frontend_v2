@@ -84,13 +84,22 @@ export type EventsProps = {
 };
 
 // Figma _Day의 Label Style. 'numOnly'는 날짜 숫자(월간 칸), 'weekOnly'는 요일 글자(요일 줄)
+// Calender는 'monthly'(월간 칸, 기본값)와 'yearly'(연간 캘린더의 작은 칸)다
 export type CalendarDayProps =
   | {
       labelStyle?: 'numOnly';
+      calendar?: 'monthly';
       day: number;
       dayOfWeek: number; // 0(일)~6(토). 주말 색을 정한다
       isToday: boolean;
       isSelected: boolean;
+    }
+  | {
+      // Figma Home/Yearly처럼 오늘만 표시한다 (주말 색, 선택 표시 없음)
+      labelStyle?: 'numOnly';
+      calendar: 'yearly';
+      day: number;
+      isToday: boolean;
     }
   | {
       labelStyle: 'weekOnly';
@@ -100,12 +109,18 @@ export type CalendarDayProps =
 export type DateTitleProps = {
   title: string;
   size?: 'small' | 'large'; // Figma Size. 기본은 Day Block의 'small'
-  isToday?: boolean; // 오늘이 속한 기간(월)이면 강조색으로 표시한다
+  isToday?: boolean; // 오늘이 속한 기간(월·연도)이면 강조색으로 표시한다
 };
 
-export type CalendarHeaderProps = {
-  month: number; // 1~12. 화면에 보이는 달
-};
+// Figma Calender Header의 Calender. 'monthly'(기본값)는 월 제목과 요일 줄, 'yearly'는 여백만 있다
+export type CalendarHeaderProps =
+  | {
+      calendar?: 'monthly';
+      month: number; // 1~12. 화면에 보이는 달
+    }
+  | {
+      calendar: 'yearly';
+    };
 
 export type DayBlockProps = {
   day: CalendarDate;
@@ -136,16 +151,18 @@ export type CalendarBodyProps = {
   onSelectDate?: (date: string) => void;
 };
 
-// 월 목록에서 화면이 직접 부르는 동작
+// 월 목록에서 화면이 직접 부르는 동작. 목록 밖의 달이면 목록을 그 달까지 늘린 뒤 옮긴다
 export type MonthlyCalendarHandle = {
   // 날짜가 있는 달로 스크롤한다. 달 맨 위를 Header 바로 아래에 맞추고, 그 날짜의 주가 가려지면 보일 만큼 더 내린다
   scrollToDate: (date: string) => void;
+  // 달 맨 위를 Header 바로 아래에 맞춘다 (애니메이션 없음)
+  scrollToMonth: (year: number, month: number) => void;
 };
 
 export type MonthlyCalendarProps = {
   mainArea: MainArea; // Layout이 넘겨주는 메인 영역. 스크롤 여백과 Header·Footer 높이를 쓴다
   viewMode: MonthlyViewMode;
-  // 처음 보여 줄 달과 월 목록 범위의 기준. 화면을 연 뒤 날짜가 바뀌어도 범위는 그대로 둔다
+  // 처음 보여 줄 달이자 처음 월 목록 범위의 기준. 화면을 연 뒤 날짜가 바뀌어도 목록은 그대로 둔다
   today: string;
   selectedDate?: string;
   // 'YYYY-MM' → 그 달의 날짜별 일정 요약 (B101 monthlyEventDays). 없는 달은 날짜만 그린다
@@ -161,4 +178,41 @@ export type ViewModeMenuProps = {
   viewMode: MonthlyViewMode; // 현재 보기 방식. 그 항목을 선택 배경으로 표시한다
   onSelect: (mode: MonthlyViewMode) => void; // 항목을 누르면 부르고, 이어서 onClose로 메뉴를 닫는다
   onClose: () => void; // 바깥을 누르거나 Android 뒤로가기를 누르면 부른다
+};
+
+// 월간·연간 화면 Footer의 버튼 줄
+export type CalendarFooterProps = {
+  onPressToday?: () => void; // "오늘"
+  onPressCreate?: () => void; // "+". 넘기지 않으면 눌러도 아무 일도 없다
+};
+
+// # 연간 캘린더 Props 타입
+// 날짜는 모두 'YYYY-MM-DD'이고, 누르는 동작(onPress, onPressMonth)을 넘기지 않으면 달을 누를 수 없다
+export type YearMonthProps = {
+  year: number;
+  month: number; // 1~12
+  today: string; // 오늘이 속한 달이면 월 제목과 그 날짜를 강조한다
+  onPress?: (year: number, month: number) => void;
+};
+
+export type YearSectionProps = {
+  year: number;
+  today: string; // 오늘이 속한 해면 연도 제목을 강조한다
+  onPressMonth?: (year: number, month: number) => void;
+};
+
+// 연도 목록에서 화면이 직접 부르는 동작
+export type YearlyCalendarHandle = {
+  // 해의 맨 위를 Header 바로 아래에 맞춘다. 목록 밖의 해면 목록을 그 해까지 늘린 뒤 옮긴다
+  scrollToYear: (year: number) => void;
+};
+
+export type YearlyCalendarProps = {
+  mainArea: MainArea; // Layout이 넘겨주는 메인 영역. 스크롤 여백(Header·Footer 높이)을 쓴다
+  // 오늘. 오늘 강조와, initialYear가 없을 때 처음 보여 줄 해에 쓴다
+  today: string;
+  // 처음 맨 위에 보여 줄 해이자 처음 연도 목록 범위의 기준. 없거나 다룰 수 없는 해면 오늘이 속한 해다
+  initialYear?: number;
+  onPressMonth?: (year: number, month: number) => void;
+  ref?: Ref<YearlyCalendarHandle>;
 };

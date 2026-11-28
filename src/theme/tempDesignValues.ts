@@ -9,18 +9,23 @@ export const tempDesignValues = {
     largeHeight: 32,
   },
 
-  // ## _Day (Calender=Montly)
+  // ## _Day
   calendarDay: {
-    size: 34,
-    weekLabelHeight: 14, // Label Style=Week only
+    size: 34, // Calender=Montly
+    weekLabelHeight: 14, // Calender=Montly, Label Style=Week only
+    yearlySize: 15, // Calender=Yearly
   },
 
-  // ## Calender Header (Calender=Monthly)
+  // ## Calender Header
   // Toolbar 아래 내용의 수치. 상태바·Toolbar 영역과 배경은 Layout의 Header가 맡는다
   calendarHeader: {
+    // Calender=Monthly
     paddingTop: 20, // Toolbar 아래 ~ 월 제목
     titlePaddingHorizontal: 16,
     gap: 16, // 월 제목 ~ 요일 줄
+    // Calender=Yearly는 Toolbar 아래에 내용 없이 여백만 있다.
+    // Figma Home/Yearly의 Header 높이(116)에서 상태바(62)와 Toolbar(44)를 뺀 값이다 (컴포넌트는 114라 8)
+    yearlyHeight: 10,
   },
 
   // ## 월 목록 (Home/Montly의 Calender Body 프레임)
@@ -32,7 +37,45 @@ export const tempDesignValues = {
     },
   },
 
-  // ## 화면 Footer의 버튼 줄 (Home/Montly의 Footer)
+  // ## 연간 캘린더 (Home/Yearly)
+  // ### YearCalender - Monthly: 연간 캘린더의 월 캘린더
+  yearMonth: {
+    // TODO: 디자이너 확인 이후 수정 필요
+    // Figma 월 제목 높이가 22(9·11월)와 18(10월, _Title Small 기본값)로 섞여 가운데 열만 4 낮다. 모두 22로 맞춘다
+    titleHeight: 22,
+    titleGap: 8, // 월 제목 ~ 날짜
+    dayGap: 1, // 같은 주의 날짜 칸 사이. 칸 크기는 calendarDay.yearlySize
+    weekGap: 2, // 주 사이
+    // TODO: 디자이너 확인 이후 수정 필요
+    // Figma 예시 달은 모두 5주다. 6주인 달도 들어가도록 모든 달의 날짜 영역을 6주 높이로 고정해
+    // 한 줄의 세 달과 모든 해의 높이를 같게 한다
+    weekCount: 6,
+  },
+
+  // ### Calender Layer: 한 해 (연도 제목 + 월 캘린더 12개)
+  yearSection: {
+    headerPaddingVertical: 4, // 연도 제목 위아래. 제목 높이는 dateTitle.largeHeight
+    headerPaddingHorizontal: 16,
+    dividerWidth: 1, // 연도 제목 아래 구분선
+    bodyPaddingTop: 16, // 구분선 ~ 첫 줄
+    rowGap: 24, // 월 줄 사이
+    rowPaddingHorizontal: 24,
+    // 한 줄의 달 사이 최소 간격. 402 폭에서 Figma 간격과 같고, 더 넓은 화면에서는 남는 폭만큼 넓어진다
+    monthGap: 10.5,
+    monthsPerRow: 3,
+  },
+
+  // ### 연도 목록 (Home/Yearly의 Calender Body 프레임)
+  yearList: {
+    gap: 56, // 해 사이 간격
+  },
+
+  // ### 월간 ↔ 연간 화면 전환. Figma 프로토타입(연간에서 달 누르기)의 Dissolve 0.3초. 시간은 iOS만 바꿀 수 있다
+  yearlyTransition: {
+    duration: 300,
+  },
+
+  // ## 화면 Footer의 버튼 줄 (Home/Montly·Home/Yearly의 Footer)
   // 버튼은 아래 끝을 맞춘다("+" 52, "오늘" 50). Figma Footer의 아래 여백이 28이라
   // 버튼 아래 끝이 홈 인디케이터 영역(34) 안으로 6 들어간다
   homeFooter: {

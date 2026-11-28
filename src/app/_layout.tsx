@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useAppReady } from '@/hooks/useAppReady';
 import { useTodaySync } from '@/hooks/useTodaySync';
 import Splash from '@/screens/Splash';
+import { tempDesignValues } from '@/theme/tempDesignValues';
 
 // 앱 시작 준비가 끝날 때까지 네이티브 스플래시를 유지한다. 첫 렌더보다 먼저 실행되도록 모듈 최상단에 둔다.
 // 숨기는 시점은 Splash가 정한다.
@@ -25,6 +26,14 @@ export default function RootLayout() {
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="home" />
+          {/* 월간 ↔ 연간은 Figma 프로토타입처럼 디졸브로 전환한다. 돌아갈 때도 같은 전환을 쓴다 */}
+          <Stack.Screen
+            name="yearly"
+            options={{
+              animation: 'fade',
+              animationDuration: tempDesignValues.yearlyTransition.duration,
+            }}
+          />
           <Stack.Screen name="daily" />
           <Stack.Screen name="event/[eventId]" />
         </Stack>

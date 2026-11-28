@@ -1,4 +1,4 @@
-import { useImperativeHandle, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useImperativeHandle, useRef, useState } from 'react';
 import {
   FlatList,
   View,
@@ -10,12 +10,17 @@ import {
 
 import { tempDesignValues } from '@/theme/tempDesignValues';
 import CalendarBody from './CalendarBody';
+import { useMonthWindow } from './useMonthWindow';
+import { useKeepPositionOnPrepend } from '../common/useKeepPositionOnPrepend';
+import { KEEP_VISIBLE_POSITION, LOAD_THRESHOLD } from '../utils/listWindow';
 import {
-  MONTH_RANGE,
   getDateScrollOffset,
-  getMonthList,
+  getMonthIndex,
+  getMonthKeyIndex,
   getMonthListLayout,
+  getMonthScrollOffset,
   getMostVisibleMonthIndex,
+  isSupportedMonth,
 } from '../utils/monthList';
 import type { CalendarMonth, MonthlyCalendarProps } from '../CalendarType';
 
@@ -28,8 +33,15 @@ const WINDOW_SIZE = 5;
 // 스크롤 이벤트 간격(ms). 프레임마다 가장 많이 보이는 달을 다시 계산한다
 const SCROLL_EVENT_THROTTLE = 16;
 
+// # 타입 영역
+// 스크롤할 곳. 목록 밖의 달이면 목록을 늘리고, 다시 그린 뒤 옮긴다
+type ScrollRequest =
+  | { type: 'date'; date: string } // scrollToDate ("오늘" 버튼)
+  | { type: 'month'; year: number; month: number }; // scrollToMonth (연간 화면에서 고른 달)
+
 // # Main component
 // Figma Home/Montly의 Calender Body 프레임. 달마다 Calendar Body를 세로로 이어 붙인 목록이다.
+// 화면을 열 때 오늘 주변 달만 담고, 목록 끝에 가까워지면 앞뒤로 달을 더 붙인다 (범위는 utils/listWindow).
 // 달 높이가 정해져 있어 위치를 미리 계산하고(getItemLayout), 그 값으로 원하는 달로 이동하거나 보이는 달을 구한다.
 // 본문 여백(MAIN_CONTENT_PADDING)이 0이라 스크롤 콘텐츠의 상단 여백은 Header 높이(insets.top)와 같다
 export default function MonthlyCalendar({
@@ -42,12 +54,15 @@ export default function MonthlyCalendar({
   onVisibleMonthChange,
   ref,
 }: MonthlyCalendarProps) {
-  // 범위는 화면을 열 때 한 번만 정한다. 날짜가 바뀌었다고 다시 만들면 보던 위치가 밀린다
-  const [months] = useState(() => getMonthList(today));
-  // 가장 많이 보이는 달. 처음에는 오늘이 속한 달(목록 가운데)이다.
+  // 목록에 담은 달. 오늘 주변에서 시작해 목록 끝에 가까워지면 앞뒤로 늘어난다
+  const { months, loadPrevious, loadNext, includeMonth } = useMonthWindow(today);
+  // 가장 많이 보이는 달('YYYY-MM'). 처음에는 오늘이 속한 달이다.
+  // 앞에 달이 붙으면 같은 달의 인덱스가 밀리므로 인덱스가 아니라 키로 기억한다.
   // state는 보기 방식을 바꿔 목록을 다시 만들 때의 시작 위치로, ref는 스크롤 중 비교에 쓴다
-  const [visibleIndex, setVisibleIndex] = useState(MONTH_RANGE);
-  const visibleIndexRef = useRef(MONTH_RANGE);
+  const [visibleMonthKey, setVisibleMonthKey] = useState(() => today.slice(0, 7));
+  const visibleMonthKeyRef = useRef(visibleMonthKey);
+  // 목록 밖의 달로 옮기려고 목록을 늘렸을 때, 다시 그린 뒤 옮길 곳
+  const pendingScrollRef = useRef<ScrollRequest | null>(null);
   const listRef = useRef<FlatList<CalendarMonth>>(null);
   const listHeightRef = useRef(0);
 
@@ -55,15 +70,89 @@ export default function MonthlyCalendar({
   const layout = getMonthListLayout(months, viewMode);
   const gapStyle = { paddingBottom: monthList.gap[viewMode] };
 
-  useImperativeHandle(ref, () => ({
-    scrollToDate: (date) => {
-      // Header 아래 ~ Footer 위. 이 영역 안에 날짜의 주가 들어오게 한다
-      const regionHeight = listHeightRef.current - insets.top - insets.bottom;
-      const offset = getDateScrollOffset(months, layout, date, viewMode, regionHeight);
+  // 웹은 앞에 달을 붙이면 보던 화면이 밀려서, 붙인 달의 높이만큼 직접 내린다
+  useKeepPositionOnPrepend(
+    listRef,
+    months,
+    (item) => item.key,
+    (index) => layout.offsets[index],
+  );
+
+  // Header 아래 ~ Footer 위 영역의 높이
+  const getRegionHeight = () => listHeightRef.current - insets.top - insets.bottom;
+
+  // 목록 좌표로 본 보이는 영역 [위, 아래]에서 가장 많이 보이는 달을 다시 구하고, 바뀌었으면 알린다
+  const updateVisibleMonth = (regionTop: number, regionBottom: number) => {
+    const currentIndex = Math.max(0, getMonthKeyIndex(months, visibleMonthKeyRef.current));
+    const index = getMostVisibleMonthIndex(layout, regionTop, regionBottom, currentIndex);
+    const { key, year, month } = months[index];
+
+    if (key === visibleMonthKeyRef.current) return;
+
+    visibleMonthKeyRef.current = key;
+    setVisibleMonthKey(key);
+    onVisibleMonthChange?.(year, month);
+  };
+
+  // 목록 안의 달로 옮긴다
+  const scrollWithinList = (request: ScrollRequest) => {
+    const regionHeight = getRegionHeight();
+
+    // "오늘" 버튼. 이 영역 안에 날짜의 주가 들어오게 한다
+    if (request.type === 'date') {
+      const offset = getDateScrollOffset(months, layout, request.date, viewMode, regionHeight);
 
       if (offset !== null) {
         listRef.current?.scrollToOffset({ offset, animated: true });
       }
+      return;
+    }
+
+    // 연간 화면에서 돌아오는 동안 옮기므로 애니메이션 없이 바로 옮기고,
+    // 스크롤 이벤트를 기다리지 않고 헤더의 월 제목과 Toolbar의 연도도 바로 맞춘다
+    const offset = getMonthScrollOffset(months, layout, request.year, request.month, regionHeight);
+
+    listRef.current?.scrollToOffset({ offset, animated: false });
+    updateVisibleMonth(offset, offset + regionHeight);
+  };
+
+  // 목록 안의 달이면 바로 옮기고, 목록 밖이면 그 달까지 목록을 늘린 뒤 다시 그려지면 옮긴다
+  const requestScroll = (request: ScrollRequest, year: number, month: number) => {
+    // 주소로 잘못된 달이 들어오면(NaN 등) 옮기지 않는다
+    if (!Number.isInteger(year) || !Number.isInteger(month)) return;
+
+    if (getMonthIndex(months, year, month) >= 0 || !isSupportedMonth(year, month)) {
+      // 나중 요청이 앞선 요청을 대신한다. 남겨 두면 목록이 다시 그려질 때 예전 달로 돌아간다
+      pendingScrollRef.current = null;
+      scrollWithinList(request);
+      return;
+    }
+
+    pendingScrollRef.current = request;
+    includeMonth(year, month);
+  };
+
+  // 미뤄 둔 이동. 늘린 목록이 그려진 뒤에 부른다
+  const runPendingScroll = useEffectEvent(() => {
+    const request = pendingScrollRef.current;
+
+    if (!request) return;
+
+    pendingScrollRef.current = null;
+    scrollWithinList(request);
+  });
+
+  useEffect(() => {
+    runPendingScroll();
+  }, [months]);
+
+  useImperativeHandle(ref, () => ({
+    scrollToDate: (date) => {
+      const [year, month] = date.split('-').map(Number);
+      requestScroll({ type: 'date', date }, year, month);
+    },
+    scrollToMonth: (year, month) => {
+      requestScroll({ type: 'month', year, month }, year, month);
     },
   }));
 
@@ -73,21 +162,10 @@ export default function MonthlyCalendar({
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, layoutMeasurement } = event.nativeEvent;
-    // 목록 좌표로 본 Header 아래 ~ Footer 위 영역
     const regionTop = contentOffset.y;
     const regionBottom = contentOffset.y + layoutMeasurement.height - insets.top - insets.bottom;
-    const index = getMostVisibleMonthIndex(
-      layout,
-      regionTop,
-      regionBottom,
-      visibleIndexRef.current,
-    );
 
-    if (index === visibleIndexRef.current) return;
-
-    visibleIndexRef.current = index;
-    setVisibleIndex(index);
-    onVisibleMonthChange?.(months[index].year, months[index].month);
+    updateVisibleMonth(regionTop, regionBottom);
   };
 
   const getItemLayout = (_data: unknown, index: number) => ({
@@ -127,10 +205,17 @@ export default function MonthlyCalendar({
       keyExtractor={(item) => item.key}
       renderItem={renderItem}
       getItemLayout={getItemLayout}
-      initialScrollIndex={visibleIndex}
+      initialScrollIndex={Math.max(0, getMonthKeyIndex(months, visibleMonthKey))}
       initialNumToRender={MONTHS_PER_RENDER}
       maxToRenderPerBatch={MONTHS_PER_RENDER}
       windowSize={WINDOW_SIZE}
+      // 목록 끝에 가까워지면 앞뒤로 달을 더 붙인다
+      onStartReached={loadPrevious}
+      onEndReached={loadNext}
+      onStartReachedThreshold={LOAD_THRESHOLD}
+      onEndReachedThreshold={LOAD_THRESHOLD}
+      // 앞에 달을 붙여도 보던 달이 제자리에 있게 한다
+      maintainVisibleContentPosition={KEEP_VISIBLE_POSITION}
       onLayout={handleLayout}
       onScroll={handleScroll}
       scrollEventThrottle={SCROLL_EVENT_THROTTLE}
