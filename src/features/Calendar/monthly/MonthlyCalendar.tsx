@@ -118,7 +118,12 @@ export default function MonthlyCalendar({
 
   // 목록 안의 달이면 바로 옮기고, 목록 밖이면 그 달까지 목록을 늘린 뒤 다시 그려지면 옮긴다
   const requestScroll = (request: ScrollRequest, year: number, month: number) => {
+    // 주소로 잘못된 달이 들어오면(NaN 등) 옮기지 않는다
+    if (!Number.isInteger(year) || !Number.isInteger(month)) return;
+
     if (getMonthIndex(months, year, month) >= 0 || !isSupportedMonth(year, month)) {
+      // 나중 요청이 앞선 요청을 대신한다. 남겨 두면 목록이 다시 그려질 때 예전 달로 돌아간다
+      pendingScrollRef.current = null;
       scrollWithinList(request);
       return;
     }

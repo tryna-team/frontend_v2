@@ -76,7 +76,12 @@ export default function YearlyCalendar({
   useImperativeHandle(ref, () => ({
     // 목록 안의 해면 바로 옮기고, 목록 밖이면 그 해까지 목록을 늘린 뒤 다시 그려지면 옮긴다
     scrollToYear: (year) => {
+      // 잘못된 해가 들어오면(NaN 등) 옮기지 않는다
+      if (!Number.isInteger(year)) return;
+
       if (getYearIndex(years, year) >= 0 || !isSupportedYear(year)) {
+        // 나중 요청이 앞선 요청을 대신한다. 남겨 두면 목록이 다시 그려질 때 예전 해로 돌아간다
+        pendingYearRef.current = null;
         scrollWithinList(year);
         return;
       }
